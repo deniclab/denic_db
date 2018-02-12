@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block app_content %}
+    <h1 style="text-align: center;">Page Not Found</h1>
+    <div style="text-align: center;">
+        <img src="/static/404.jpg" alt="Sad Vlad" style="width:250px;"><br>
+        <p>
+            Sorry, the page you're looking for doesn't exist.
+        </p>
+    </div>
+    <p><a href="{{ url_for('index') }}" style="text-align: center;">Back</a></p>
+{% endblock %}
