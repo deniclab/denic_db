@@ -3,12 +3,24 @@
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, EditProfileForm
 from app.forms import ResetPasswordRequestForm, ResetPasswordForm
+from app.forms import AdminValidateAccountForm
 from app.email import send_password_reset_email
 from app.models import User
 from flask import redirect, url_for, flash, render_template, request
+from flask import abort
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from datetime import datetime
+from functools import wraps
+
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_admin:
+            return abort(401)
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 @app.route('/')
@@ -58,6 +70,7 @@ def register():
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data)
         user.set_password(form.password.data)
+        user.validated = False
         db.session.add(user)
         db.session.commit()
         flash('You have successfully registered. The administrators have been contacted to approve.')
@@ -92,6 +105,26 @@ def edit_profile():
     return render_template('edit_profile.html', title='Edit Profile',
                            form=form)
 
+
+@app.route('/admin/validate', methods=['GET', 'POST'])
+@admin_required
+def validate_user(request):
+    form = AdminValidateAccountForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if form.approve.data == 'valid':
+            user.validated = True
+            db.session.commit()
+            flash('User {} has been verified'.format(user.username))
+        elif form.approve.data == 'invalid':
+            db.session.delete(user)
+            db.session.commit()
+            flash('User {} has been deleted'.format(user.username))
+        return redirect(url_for('admin/validate'))
+    return render_template('admin/validate_user.html', title='Validate User',
+                           form=form)
+
+
 @app.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
     if current_user.is_authenticated:
@@ -124,7 +157,7 @@ def reset_password(token):
 
 
 @app.before_request
-def before_reqest():
+def before_request():
     if current_user.is_authenticated:
         current_user.last_seen = datetime.utcnow()
         db.session.commit()

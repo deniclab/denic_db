@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from hashlib import md5
 
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
@@ -14,6 +15,8 @@ class User(UserMixin, db.Model):
     oligos = db.relationship('Oligos', backref='Creator', lazy='dynamic')
     about_me = db.Column(db.String(140))  # TRM
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+    is_admin = db.Column(db.Boolean)
+    validated = db.Column(db.Boolean)
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -34,7 +37,6 @@ class User(UserMixin, db.Model):
         return jwt.encode(
             {'reset_password': self.id, 'exp': time() + expires_in},
             app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
-
 
     @staticmethod
     def verify_reset_password_token(token):

@@ -1,15 +1,17 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
-from wtforms import TextAreaField
+from wtforms import TextAreaField, DateField, SelectField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
 from wtforms.validators import Length
 from app.models import User
+
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
     submit = SubmitField('Sign In')
+
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -32,10 +34,33 @@ class RegistrationForm(FlaskForm):
                 'An account is already registered to this email. Contact the admin.'
             )
 
+
+class AdminValidateAccountForm(FlaskForm):
+    """Form for administrators to validate new user accounts."""
+    def __init__(self):
+        """Populate list of users in need of validation."""
+        super(AdminValidateAccountForm, self).__init__()
+        # next line queries User db for non-validated users and
+        # adds them to validate.
+        user_list = [(q.username, q.username) for q in
+                     User.query.filter_by(validated=False)]
+        self.username.choices = user_list
+    username = SelectField('New accounts')
+    approve = SelectField('Action',
+                           choices=[('no_selection', 'Choose one'),
+                                    ('valid', 'Validate User'),
+                                    ('invalid', 'Invalid - Delete User')])
+    submit = SubmitField('Submit')
+
+
+class AdminPrivilegesForm(FlaskForm):
+    """Form to give or remove admin privileges from a user."""
+    pass  # TODO: Implement.
+
+
 class EditProfileForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     # TRM NEXT LINE
-    about_me = TextAreaField('About me', validators=[Length(min=0, max=140)])
     submit = SubmitField('Submit')
 
     def __init__(self, original_username, *args, **kwargs):
@@ -59,4 +84,29 @@ class ResetPasswordForm(FlaskForm):
     password2 = PasswordField(
         'Repeat Password', validators=[DataRequired(), EqualTo('password')]
     )
-    submit = SubmitField('Set new password')
+    submit = SubmitField('Complete password reset')
+
+
+class SearchOligosForm(FlaskForm):
+    oligo_tube = StringField('Oligo Tube')
+    oligo_name = StringField('Oligo Name')
+    start_date = DateField('Date range start, format YYYY-MM-DD')
+    end_date = DateField('Date range end, format YYYY-MM-DD')
+    sequence = StringField('Sequence')
+    creator = StringField('Creator')
+    restrixn_site = StringField('Restriction Site')
+    notes = StringField('Notes')
+    submit = SubmitField('Search')
+    show_all = SubmitField('Show all oligos')
+    all_by_me = SubmitField('Show all of my oligos')
+
+
+class AddNewOligosForm(FlaskForm):
+    oligo_name = StringField('Oligo Name',
+                             validators=[DataRequired(), Length(max=150)])
+    creator = SelectField('Creator')  # TODO: NEED TO IMPLEMENT CHOICES IN VIEWS
+    date_added = DateField('Date added, format YYYY-MM-DD')
+    sequence = StringField('Sequence', validators=[Length(max=2000)])
+    restrixn_site = StringField('Restriction Site',
+                                validators=[Length(max=20)])
+    notes = TextAreaField('Notes', validators=[Length(max=500)])
