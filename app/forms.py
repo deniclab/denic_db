@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
-from wtforms import TextAreaField, DateField, SelectField
+from wtforms import TextAreaField, DateField, SelectField, FieldList, FormField
+from wtforms import IntegerField, RadioField, FileField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
 from wtforms.validators import Length
 from app.models import User
@@ -101,7 +102,20 @@ class SearchOligosForm(FlaskForm):
     all_by_me = SubmitField('Show all of my oligos')
 
 
-class AddNewOligosForm(FlaskForm):
+class InitializeNewOligosForm(FlaskForm):
+    input_type = RadioField('Choose input type',
+                            choices=[('table_input', 'Tabular form'),
+                                     ('file_input', 'Upload file'),
+                                     ('paste_input', 'Copy-paste table')])
+    number_oligos = IntegerField('Number of new oligos')
+    upload_file = FileField('Upload .csv or .xlsx-format file')
+    paste_field = TextAreaField('Paste comma- or tab-separated values here')
+    paste_format = RadioField('Delimiter', choices=[('tab', 'Tab'),
+                                                    ('comma', 'Comma')])
+    submit = SubmitField('Submit')
+
+
+class AddNewOligoRecord(FlaskForm):
     oligo_name = StringField('Oligo Name',
                              validators=[DataRequired(), Length(max=150)])
     creator = SelectField('Creator')  # TODO: NEED TO IMPLEMENT CHOICES IN VIEWS
@@ -110,3 +124,8 @@ class AddNewOligosForm(FlaskForm):
     restrixn_site = StringField('Restriction Site',
                                 validators=[Length(max=20)])
     notes = TextAreaField('Notes', validators=[Length(max=500)])
+
+
+class AddNewOligoTable(FlaskForm):
+    grid_oligo_records = FieldList(FormField(AddNewOligoRecord), min_entries=1)
+    submit = SubmitField('Create')

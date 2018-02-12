@@ -12,12 +12,24 @@ from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from datetime import datetime
 from functools import wraps
+import pandas as pd
 
 
 def admin_required(f):
+    """Decorator to prevent non-administrators from accessing admin content."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_admin:
+            return abort(401)
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+def verify_required(f):
+    """Decorator to prevent unverified users from accessing databases."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.validated:
             return abort(401)
         return f(*args, **kwargs)
     return decorated_function
@@ -108,7 +120,7 @@ def edit_profile():
 
 @app.route('/admin/validate', methods=['GET', 'POST'])
 @admin_required
-def validate_user(request):
+def validate_user():
     form = AdminValidateAccountForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
@@ -154,6 +166,18 @@ def reset_password(token):
         flash('Your password has been reset.')
         return redirect(url_for('login'))
     return render_template('reset_password.html', form=form)
+
+
+@app.route('/oligos', methods=['GET', 'POST'])
+@app.route('/oligos/begin', methods=['GET', 'POST'])
+@verify_required
+def oligo_search_or_add():
+    search_form = SearchOligosForm()
+    add_init_form = InitializeNewOligosForm()
+    if search_form.validate_on_submit():
+        pass  # TODO: IMPLEMENT THIS!
+    if add_init_form.validate_on_submit():
+        pass  # TODO: IMPLEMENT THIS!
 
 
 @app.before_request
