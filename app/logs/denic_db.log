@@ -1,0 +1,276 @@
+2018-02-11 19:46:11,531 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:42]
+2018-02-11 19:46:21,363 ERROR: Exception on /edit_profile [GET] [in /Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py:1560]
+Traceback (most recent call last):
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1982, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1614, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1517, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/_compat.py", line 33, in reraise
+    raise value
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1612, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1598, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask_login/utils.py", line 261, in decorated_view
+    return func(*args, **kwargs)
+  File "/Users/nweir/Dropbox/code/denic_db/app/views.py", line 80, in edit_profile
+    form = EditProfileForm(current_user.username)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/wtforms/form.py", line 212, in __call__
+    return type.__call__(cls, *args, **kwargs)
+  File "/Users/nweir/Dropbox/code/denic_db/app/forms.py", line 42, in __init__
+    super(EditProfileForm, self).init(*args, **kwargs)
+AttributeError: 'super' object has no attribute 'init'
+2018-02-11 19:47:17,004 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:42]
+2018-02-11 19:48:32,276 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:42]
+2018-02-11 19:54:53,420 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:42]
+2018-02-11 19:56:14,051 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:44]
+2018-02-11 20:57:47,749 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:44]
+2018-02-11 20:58:07,710 ERROR: Exception on /reset_password_request [POST] [in /Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py:1560]
+Traceback (most recent call last):
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1982, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1614, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1517, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/_compat.py", line 33, in reraise
+    raise value
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1612, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1598, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/nweir/Dropbox/code/denic_db/app/views.py", line 103, in reset_password_request
+    send_password_reset_email(user)
+  File "/Users/nweir/Dropbox/code/denic_db/app/email.py", line 14, in send_password_reset_email
+    token = user.get_reset_password_token()
+  File "/Users/nweir/Dropbox/code/denic_db/app/models.py", line 36, in get_reset_password_token
+    app.config['SECRET_KEY'], algorithm='HS256'.decode('utf-8')
+AttributeError: 'str' object has no attribute 'decode'
+2018-02-11 20:59:34,706 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:44]
+2018-02-11 21:00:02,428 ERROR: Exception on /reset_password/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXNldC5wYXNzd29yZCI6NCwiZXhwIjoxNTE4NDAxMzg2LjQ5MDAzMjJ9.8qbl1flAS3yM8Gf5HWuBwk-i3YvDepwzSWAeejT46QU [GET] [in /Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py:1560]
+Traceback (most recent call last):
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1982, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1614, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1517, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/_compat.py", line 33, in reraise
+    raise value
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1612, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1598, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/nweir/Dropbox/code/denic_db/app/views.py", line 114, in reset_password
+    user = user.verify_reset_password_token(token)
+UnboundLocalError: local variable 'user' referenced before assignment
+2018-02-11 21:01:23,696 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:44]
+2018-02-11 21:04:59,062 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:44]
+2018-02-11 21:14:07,075 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:44]
+2018-02-11 21:15:55,229 ERROR: Exception on /reset_password/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXNldF9wYXNzd29yZCI6NCwiZXhwIjoxNTE4NDAyMzQwLjc5NDA3Nn0.xRPLjNkUvruehEWCt-ddWAS1F0ljQwQwq_TZWUM7VhM [GET] [in /Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py:1560]
+Traceback (most recent call last):
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1982, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1614, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1517, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/_compat.py", line 33, in reraise
+    raise value
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1612, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1598, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/nweir/Dropbox/code/denic_db/app/views.py", line 123, in reset_password
+    return render_template('reset_password.html', form=form)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/templating.py", line 134, in render_template
+    context, ctx.app)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/templating.py", line 116, in _render
+    rv = template.render(context)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/asyncsupport.py", line 76, in render
+    return original_render(self, *args, **kwargs)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/environment.py", line 1008, in render
+    return self.environment.handle_exception(exc_info, True)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/environment.py", line 780, in handle_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/_compat.py", line 37, in reraise
+    raise value.with_traceback(tb)
+  File "/Users/nweir/Dropbox/code/denic_db/app/templates/reset_password.html", line 1, in top-level template code
+    {% extends layout.html %}
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/environment.py", line 430, in getattr
+    return getattr(obj, attribute)
+jinja2.exceptions.UndefinedError: 'layout' is undefined
+2018-02-11 21:17:22,434 ERROR: Exception on /reset_password/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXNldF9wYXNzd29yZCI6NCwiZXhwIjoxNTE4NDAyMzQwLjc5NDA3Nn0.xRPLjNkUvruehEWCt-ddWAS1F0ljQwQwq_TZWUM7VhM [GET] [in /Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py:1560]
+Traceback (most recent call last):
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1982, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1614, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1517, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/_compat.py", line 33, in reraise
+    raise value
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1612, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1598, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/nweir/Dropbox/code/denic_db/app/views.py", line 123, in reset_password
+    return render_template('reset_password.html', form=form)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/templating.py", line 134, in render_template
+    context, ctx.app)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/templating.py", line 116, in _render
+    rv = template.render(context)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/asyncsupport.py", line 76, in render
+    return original_render(self, *args, **kwargs)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/environment.py", line 1008, in render
+    return self.environment.handle_exception(exc_info, True)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/environment.py", line 780, in handle_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/_compat.py", line 37, in reraise
+    raise value.with_traceback(tb)
+  File "/Users/nweir/Dropbox/code/denic_db/app/templates/reset_password.html", line 1, in top-level template code
+    {% extends "layout.html" %}
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/environment.py", line 430, in getattr
+    return getattr(obj, attribute)
+jinja2.exceptions.UndefinedError: 'layout' is undefined
+2018-02-11 21:17:32,332 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:44]
+2018-02-11 22:51:40,407 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-11 22:51:45,803 ERROR: Exception on /login [GET] [in /Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py:1560]
+Traceback (most recent call last):
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1982, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1614, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1517, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/_compat.py", line 33, in reraise
+    raise value
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1612, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1598, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/nweir/Dropbox/code/denic_db/app/views.py", line 44, in login
+    return render_template('login.html', title='Sign In', form=form)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/templating.py", line 134, in render_template
+    context, ctx.app)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/templating.py", line 116, in _render
+    rv = template.render(context)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/asyncsupport.py", line 76, in render
+    return original_render(self, *args, **kwargs)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/environment.py", line 1008, in render
+    return self.environment.handle_exception(exc_info, True)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/environment.py", line 780, in handle_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/_compat.py", line 37, in reraise
+    raise value.with_traceback(tb)
+  File "/Users/nweir/Dropbox/code/denic_db/app/templates/layout.html", line 25, in template
+    {% endblock %}
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/environment.py", line 1005, in render
+    return concat(self.root_render_func(self.new_context(vars)))
+  File "/Users/nweir/Dropbox/code/denic_db/app/templates/login.html", line 1, in top-level template code
+    {% extends "layout.html" %}
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/environment.py", line 780, in handle_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/_compat.py", line 37, in reraise
+    raise value.with_traceback(tb)
+  File "/Users/nweir/Dropbox/code/denic_db/app/templates/layout.html", line 25, in template
+    {% endblock %}
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/environment.py", line 497, in _parse
+    return Parser(self, source, name, encode_filename(filename)).parse()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/parser.py", line 901, in parse
+    result = nodes.Template(self.subparse(), lineno=1)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/parser.py", line 883, in subparse
+    rv = self.parse_statement()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/parser.py", line 130, in parse_statement
+    return getattr(self, 'parse_' + self.stream.current.value)()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/parser.py", line 268, in parse_block
+    node.body = self.parse_statements(('name:endblock',), drop_needle=True)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/parser.py", line 165, in parse_statements
+    result = self.subparse(end_tokens)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/parser.py", line 883, in subparse
+    rv = self.parse_statement()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/parser.py", line 130, in parse_statement
+    return getattr(self, 'parse_' + self.stream.current.value)()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/parser.py", line 223, in parse_if
+    drop_needle=True)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/parser.py", line 165, in parse_statements
+    result = self.subparse(end_tokens)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/parser.py", line 883, in subparse
+    rv = self.parse_statement()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/parser.py", line 144, in parse_statement
+    self.fail_unknown_tag(token.value, token.lineno)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/parser.py", line 97, in fail_unknown_tag
+    return self._fail_ut_eof(name, self._end_token_stack, lineno)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/parser.py", line 90, in _fail_ut_eof
+    self.fail(' '.join(message), lineno)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/parser.py", line 59, in fail
+    raise exc(msg, lineno, self.name, self.filename)
+jinja2.exceptions.TemplateSyntaxError: Encountered unknown tag 'endblock'. You probably made a nesting mistake. Jinja is expecting this tag, but currently looking for 'endif'. The innermost block that needs to be closed is 'if'.
+2018-02-11 22:52:34,384 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-11 22:53:10,394 ERROR: Exception on /login [GET] [in /Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py:1560]
+Traceback (most recent call last):
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1982, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1614, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1517, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/_compat.py", line 33, in reraise
+    raise value
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1612, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1598, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/nweir/Dropbox/code/denic_db/app/views.py", line 44, in login
+    return render_template('login.html', title='Sign In', form=form)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/templating.py", line 134, in render_template
+    context, ctx.app)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/templating.py", line 116, in _render
+    rv = template.render(context)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/asyncsupport.py", line 76, in render
+    return original_render(self, *args, **kwargs)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/environment.py", line 1008, in render
+    return self.environment.handle_exception(exc_info, True)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/environment.py", line 780, in handle_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jinja2/_compat.py", line 37, in reraise
+    raise value.with_traceback(tb)
+  File "/Users/nweir/Dropbox/code/denic_db/app/templates/login.html", line 1, in top-level template code
+    {% extends "layout.html" %}
+  File "/Users/nweir/Dropbox/code/denic_db/app/templates/layout.html", line 1, in top-level template code
+    {% extends "bootstrap/base.html" %}
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask_bootstrap/templates/bootstrap/base.html", line 1, in top-level template code
+    {% block doc -%}
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask_bootstrap/templates/bootstrap/base.html", line 4, in block "doc"
+    {%- block html %}
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask_bootstrap/templates/bootstrap/base.html", line 20, in block "html"
+    {% block body -%}
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask_bootstrap/templates/bootstrap/base.html", line 21, in block "body"
+    {% block navbar %}
+  File "/Users/nweir/Dropbox/code/denic_db/app/templates/layout.html", line 12, in block "navbar"
+    <li class="nav-item"><a class="nav-item" href="{{ url_for('oligos') }}">Oligos</a></li>
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/helpers.py", line 333, in url_for
+    return appctx.app.handle_url_build_error(error, endpoint, values)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1805, in handle_url_build_error
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/_compat.py", line 33, in reraise
+    raise value
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/helpers.py", line 323, in url_for
+    force_external=external)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/werkzeug/routing.py", line 1776, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.BuildError: Could not build url for endpoint 'oligos'. Did you mean 'logout' instead?
+2018-02-11 22:53:51,718 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-11 23:03:50,935 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-11 23:04:47,486 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-11 23:05:25,164 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-11 23:09:20,812 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-11 23:11:09,226 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-11 23:11:53,677 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-11 23:15:07,976 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-12 09:51:42,355 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-12 09:52:57,169 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-12 09:53:23,130 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-12 09:54:43,023 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
