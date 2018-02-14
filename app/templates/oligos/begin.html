@@ -1,0 +1,149 @@
+{% extends "layout.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    <h1 style="text-align: center; color:#236ca1">oVD Oligo Database</h1>
+    <div class="container">
+        <h2 style="color: #b40000">Search the Database</h2>
+        <div class="row">
+            <p><strong style="color: #b40000">Search instructions:</strong><br>
+                Fill any or all of the fields to search for oligos. "*" and other
+                wildcard characters are not accepted. To show all oligos created
+                under your username, click
+                <span style="color: #236ca1; font-weight: bold;"> Show All of My Oligos</span>.
+                To view the entire database, click
+                <span style="color: #236ca1; font-weight: bold;">Show All Oligos</span>.
+            </p>
+        </div>
+        <form action="" method="post">
+            {{ search_form.hidden_tag() }}
+            <div class="form-group col-sm-12">
+                <div class="row">
+                    <div class="form-group col-sm-6">
+                        {{ search_form.oligo_tube(size=18, class="form-control", placeholder="Oligo Tube") }}
+                    </div>
+                    <div class="form-group col-sm-6">
+                        {{ search_form.creator(size=18, class="form-control", placeholder="Creator") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-6">
+                        {{ search_form.oligo_name(size=18, class="form-control", placeholder="Oligo Name") }}
+                    </div>
+                    <div class="form-group col-sm-6">
+                        {{ search_form.sequence(size=18, class="form-control", placeholder="Sequence") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-4">
+                        {{ search_form.start_date(size=18, class="form-control", placeholder="Start date (YYYY-MM-DD)") }}
+                    </div>
+                    <div class="form-group col-sm-4">
+                        {{ search_form.end_date(size=18, class="form-control", placeholder="End date (YYYY-MM-DD)") }}
+                    </div>
+                    <div class="form-group col-sm-4">
+                        {{ search_form.restrixn_site(size=18, class="form-control", placeholder="Restriction Site") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-12">
+                        {{ search_form.notes(size=18, class="form-control", placeholder="Notes") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-2">
+                        {{ search_form.submit(size=32, class="form-control", style="font-weight: bold; color: #236ca1") }}
+                    </div>
+                    <div class="form-group col-sm-4">
+                        {{ search_form.show_all(size=32, class="form-control", style="font-weight: bold; color: #236ca1") }}
+                    </div>
+                    <div class="form-group col-sm-4">
+                        {{ search_form.all_by_me(size=32, class="form-control", style="font-weight: bold; color: #236ca1") }}
+                    </div>
+                </div>
+            </div>
+        </form>
+        <br>
+        <br>
+        <h2 style="color: #b40000">Add New Oligos</h2>
+        <div class="row">
+            <p><strong style="color: #b40000">Instructions for adding new oligos:</strong><br>
+                <ul>
+                    <li><strong>Manual entry:</strong>
+                        Select the number of oligos you would like to add to the database and click <span style="color: #6b1313;">Submit</span>. You will be taken to a table to input your data.</li>
+                    <li><strong>File Upload:</strong>
+                        You may upload a csv, txt, xls, or xlsx-formatted file using the file upload link. See important instructions below about formatting. Use the radio button to indicate whether the file is comma- or tab-delimited.</li>
+                    <li><strong>Copy-Paste:</strong>
+                        Copy and paste tabular data into the space provided. See important instructions below about formatting. Use the radio button to indicate whether it is comma- or tab-delimited.</li>
+                </ul>
+            </p>
+        </div>
+        <div class="row">
+            <p><strong style="color: #b40000">File or Copy-Paste import format:</strong><br>
+                <ul>
+                    <li><strong>A header row is required</strong> to ensure data is imported correctly.</li>
+                    <li><strong>Do not include an oligo tube column.</strong>This will be assigned by the database.</li>
+                    <li>The following column names can be interpreted by the system (<em>caps-insensitive</em>):
+                        <ul>
+                            <li>Oligo Name (Required)</li>
+                            <li>Creator</li>
+                            <li>Sequence</li>
+                            <li>Restriction Site</li>
+                            <li>Notes</li>
+                        </ul>
+                    </li>
+                    <li>The only required column is Oligo Name.</li>
+                </ul>
+            </p>
+        </div>
+        <br>
+        <form action="" method="post">
+            {{ add_init_form.hidden_tag() }}
+            <div class="form-group col-sm-12">
+                <div class="row">
+                    {% for subfield in add_init_form.input_type %}
+                        <tr>
+                            <td>{{ subfield(style="margin: 0 0 0 10px;") }}</td>
+                            <td>{{ subfield.label}}</td>
+                        </tr>
+                    {% endfor %}
+                </div>
+                <br>
+                <div class="row">
+                    <div class="form-group col-sm-4">
+                        {{ add_init_form.number_oligos(size=18, class="form-control") }}
+                        {{ add_init_form.number_oligos.label }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-4">
+                        {{add_init_form.upload_file()}}
+                        {{add_init_form.upload_file.label}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-10">
+                        {{add_init_form.paste_field(placeholder="Copy-paste tabular oligo records with column labels", class="form-control", style="height: 250px;")}}
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="form-group col-sm-8">
+                        {% for subfield in add_init_form.paste_format %}
+                            <tr>
+                                <td>{{ subfield(style="margin: 0 0 0 10px;") }}</td>
+                                <td>{{ subfield.label(style="font-weight: normal;")}}</td>
+                            </tr>
+                        {% endfor %}
+                        <br>
+                        <span style="font-weight: bold;">Delimiters for data from files or copy-paste</span>
+                    </div>
+                    <div class="form-group col-sm-2">
+                        {{ add_init_form.submit(size=32, class="form-control", style="font-weight: bold; color: #236ca1") }}
+                    </div>
+                </div>
+            </div>
+        </form>
+
+
+{% endblock %}

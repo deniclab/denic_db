@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms import TextAreaField, DateField, SelectField, FieldList, FormField
-from wtforms import IntegerField, RadioField, FileField
+from wtforms import IntegerField, RadioField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
 from wtforms.validators import Length
 from app.models import User
@@ -96,22 +97,26 @@ class SearchOligosForm(FlaskForm):
     sequence = StringField('Sequence')
     creator = StringField('Creator')
     restrixn_site = StringField('Restriction Site')
-    notes = StringField('Notes')
+    notes = TextAreaField('Notes')
     submit = SubmitField('Search')
-    show_all = SubmitField('Show all oligos')
-    all_by_me = SubmitField('Show all of my oligos')
+    show_all = SubmitField('Show All Oligos')
+    all_by_me = SubmitField('Show All of My Oligos')
 
 
 class InitializeNewOligosForm(FlaskForm):
     input_type = RadioField('Choose input type',
-                            choices=[('table_input', 'Tabular form'),
+                            choices=[('table_input', 'Form'),
                                      ('file_input', 'Upload file'),
                                      ('paste_input', 'Copy-paste table')])
-    number_oligos = IntegerField('Number of new oligos')
-    upload_file = FileField('Upload .csv or .xlsx-format file')
+    number_oligos = IntegerField('Number of new oligos (form entry only)')
+    upload_file = FileField('Upload .csv or .xlsx-format file',
+                            validators=[FileAllowed(
+                                ['csv', 'txt', 'xls', 'xlsx'],
+                                'Only csv, txt, and Excel files allowed.')])
+
     paste_field = TextAreaField('Paste comma- or tab-separated values here')
-    paste_format = RadioField('Delimiter', choices=[('tab', 'Tab'),
-                                                    ('comma', 'Comma')])
+    paste_format = RadioField('Delimiter', choices=[('\t', 'Tab'),
+                                                    (',', 'Comma')])
     submit = SubmitField('Submit')
 
 

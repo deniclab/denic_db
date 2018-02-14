@@ -3,16 +3,22 @@
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, EditProfileForm
 from app.forms import ResetPasswordRequestForm, ResetPasswordForm
-from app.forms import AdminValidateAccountForm
+from app.forms import AdminValidateAccountForm, SearchOligosForm
+from app.forms import InitializeNewOligosForm
 from app.email import send_password_reset_email
-from app.models import User
+from app.models import User, Oligos
 from flask import redirect, url_for, flash, render_template, request
 from flask import abort
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
+from werkzeug.utils import secure_filename
 from datetime import datetime
 from functools import wraps
 import pandas as pd
+import os
+from io import StringIO
+import random
+import string
 
 
 def admin_required(f):
@@ -168,16 +174,76 @@ def reset_password(token):
     return render_template('reset_password.html', form=form)
 
 
-@app.route('/oligos', methods=['GET', 'POST'])
 @app.route('/oligos/begin', methods=['GET', 'POST'])
+@login_required
 @verify_required
 def oligo_search_or_add():
     search_form = SearchOligosForm()
     add_init_form = InitializeNewOligosForm()
     if search_form.validate_on_submit():
-        pass  # TODO: IMPLEMENT THIS!
+        if search_form.show_all:
+            return redirect(url_for('search_results', filter_by={}))
+        if search_form.all_by_me:
+            return redirect(url_for('search_results',
+                                    filter_by={'creator_id': current_user.id}))
+        if search_form.submit:
+            return redirect(url_for('search_results', filter_by=mk_query(
+                oligo_tube=search_form.oligo_tube.data,
+                oligo_name=search_form.oligo_name.data,
+                start_date=search_form.start_date.data,
+                end_date=search_form.end_date.data,
+                sequence=search_form.sequence.data,
+                creator_str=search_form.creator.data,
+                restrixn_site=search_form.restrixn_site.data,
+                notes=search_form.notes.data
+            )))
     if add_init_form.validate_on_submit():
-        pass  # TODO: IMPLEMENT THIS!
+        # first make sure there weren't multiple options used
+        if add_init_form.upload_file.data is not None and \
+                add_init_form.paste_field.data is not None:
+            flash('You must use either upload or paste, not both.')
+            return redirect(url_for('oligo_search_or_add'))
+        if add_init_form.upload_file.data is not None:
+            f = add_init_form.upload_file.data
+            # TODO: IMPLEMENT FILE TYPE READING/CONVERSION HERE AS NEEDED
+            filename = secure_filename(f.filename)
+            f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('check_oligos', filename=filename))
+        if add_init_form.paste_field.data is not None:
+            # parse comma-separated or tab-separated data.
+            delimiter = add_init_form.paste_format.data
+            temp_fname = random.choices(string.ascii_uppercase, k=6) + '.csv'
+            io_obj = StringIO(add_init_form.paste_field.data)
+            pd_df = pd.read_csv(io_obj, delimiter=delimiter, header=0)
+            pd_df.to_csv(os.path.join(app.config['UPLOAD_FOLDER'], temp_fname),
+                         index=False)
+            return redirect(url_for('check_oligos', filename=temp_fname))
+        if add_init_form.number_oligos.data is not None:
+            return redirect(url_for('oligo_add_form',
+                                    n_oligos=add_init_form.number_oligos.data))
+    return render_template('oligos/begin.html', search_form=search_form,
+                           add_init_form=add_init_form)
+
+
+@app.route('/oligos/search_results', methods=['GET'])
+@login_required
+@verify_required
+def search_results():
+    search_terms = request.args.get('filter_by')
+    output_records = Oligos.query.filter(
+        *(getattr(Oligos, key).ilike(value) for (key, value) in
+          search_terms.items())).all()
+    if len(output_records == 0):  # if the search didn't return any items
+        flash("Your search found no oligos. Please try again.")
+        return url_for('oligo_search_or_add')
+    record_list = []
+    for r in output_records:
+        r_dict = r.__dict__
+        r_dict.pop('_sa_instance_state', None)
+        record_list.append(r_dict)
+    return render_template('oligos/search_results.html',
+                           title='Oligo search results',
+                           record_list=record_list)
 
 
 @app.before_request
@@ -185,3 +251,8 @@ def before_request():
     if current_user.is_authenticated:
         current_user.last_seen = datetime.utcnow()
         db.session.commit()
+
+
+def mk_query(**kwargs):
+    """Generate the SQLAlchemy filter_by argument to search oligo db."""
+    return {key:"%"+value+"%" for key, value in kwargs.items() if value is not None}

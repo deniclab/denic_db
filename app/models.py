@@ -15,8 +15,8 @@ class User(UserMixin, db.Model):
     oligos = db.relationship('Oligos', backref='Creator', lazy='dynamic')
     about_me = db.Column(db.String(140))  # TRM
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
-    is_admin = db.Column(db.Boolean)
-    validated = db.Column(db.Boolean)
+    is_admin = db.Column(db.Boolean, default=False)
+    validated = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -53,12 +53,13 @@ class Oligos(db.Model):
     oligo_name = db.Column(db.String(150), index=True)
     date_added = db.Column(db.Date(), index=True)
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    creator_str = db.Column(db.String(50))
     sequence = db.Column(db.String(2000))
     restrixn_site = db.Column(db.String(20))
     notes = db.Column(db.String(500))
 
     def __repr__(self):
-        return '<Oligo {}>'.format(self.sequence)
+        return '<Oligo {}>'.format(self.oligo_tube)
 
 
 @login.user_loader
