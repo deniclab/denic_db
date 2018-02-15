@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+<h1 style="text-align: center; color: #236ca1">Edit Oligo</h1>
+<div class="row">
+    <p><strong style="color: #b40000">Edit instructions:</strong><br>
+        Change values in the fields below to edit an oligo record. Note that you cannot change the Oligo Tube number or the date it was added to the database. If you are permanently removing an oligo, you can clear all values and click submit. This oVD number will remain empty after that.
+    </p>
+</div>
+
+<div class="container" style="padding-top: 25px;">
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <div class="form-group col-sm-10">
+            <div class="row">
+                <div class="form-group col-sm-2">
+                    <label for="oligo_tube">Oligo Tube</label>
+                </div>
+                <div class="form-group col-sm-3">
+                    <input class="form-control" id="oligo_tube" type="text" size=18 disabled value="{{ record_dict['oligo_tube'] }}">
+                </div>
+            </div>
+            <div class="row">
+                <div class='form-group col-sm-2'>
+                    {{ form.oligo_name.label }}
+                </div>
+                <div class='form-group col-sm-6'>
+                    {{ form.oligo_name(size=18, class="form-control", value=record_dict['oligo_name']) }}
+                </div>
+            </div>
+            <div class="row">
+                <div class='form-group col-sm-2'>
+                    {{ form.sequence.label }}
+                </div>
+                <div class="form-group col-sm-6">
+                    {{ form.sequence(size=18, class="form-control", value=record_dict['sequence']) }}
+                </div>
+            </div>
+            <div class="row">
+                <div class='form-group col-sm-2'>
+                    {{ form.creator_str.label }}
+                </div>
+                <div class="form-group col-sm-6">
+                    {{ form.creator_str(size=18, class="form-control", value=record_dict['creator_str']) }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-sm-2">
+                    <label for="date_added">Date Added</label>
+                </div>
+                <div class="form-group col-sm-3">
+                    <input class="form-control" id="date_added" type="text" size=18 disabled value="{{ record_dict['date_added'] or '' }}">
+                </div>
+            </div>
+            <div class="row">
+                <div class='form-group col-sm-2'>
+                    {{ form.restrixn_site.label }}
+                </div>
+                <div class="form-group col-sm-6">
+                    {{ form.restrixn_site(size=18, class="form-control", value=record_dict['restrixn_site']) }}
+                </div>
+            </div>
+            <div class="row">
+                <div class='form-group col-sm-2'>
+                    {{ form.notes.label }}
+                </div>
+                <div class="form-group col-sm-6">
+                    {{ form.notes(class="form-control", value=record_dict['notes']) }}
+                </div>
+            </div>
+            <div class="row">
+                <div class='form-group col-xs-5'><strong>Note: the database is not changed until confirming on the next page.</strong>
+                </div>
+                <div class='form-group col-xs-3'>
+                        {{ form.submit(size=32, class="form-control",style="font-weight: bold; color: #236ca1;") }}
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -38,7 +38,7 @@
             <tbody>
                 {% for record in record_list %}
                     <tr>
-                        <td class="col-sm-1"><a href="#">Edit</a></td>
+                        <td class="col-sm-1"><a href="{{ url_for('edit_oligo', oligo_tube=record['oligo_tube']) }}">Edit</a></td>
                         <td class="col-sm-1">{{ record['oligo_tube'] }}</td>
                         <td class="col-sm-2" style="word-break: break-all; word-wrap:break-word;">{% if record['oligo_name'] is not none %}
                                 {{ record['oligo_name'] }}

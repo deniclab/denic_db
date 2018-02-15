@@ -103,6 +103,21 @@ class SearchOligosForm(FlaskForm):
     all_by_me = SubmitField('Show All of My Oligos')
 
 
+class EditOligoForm(FlaskForm):
+    oligo_name = StringField('Oligo Name', validators=[DataRequired(),
+                                                       Length(max=150)])
+    sequence = StringField('Sequence', validators=[Length(max=2000)])
+    creator_str = StringField('Creator', validators=[Length(max=50)])
+    restrixn_site = StringField('Restriction Site',
+                                validators=[Length(max=20)])
+    notes = TextAreaField('Notes', validators=[Length(max=500)])
+    submit = SubmitField('Submit changes')
+
+
+class ConfirmOligoEditsForm(FlaskForm):
+    submit = SubmitField('Confirm changes')
+
+
 class InitializeNewOligosForm(FlaskForm):
     input_type = RadioField('Choose input type',
                             choices=[('table_input', 'Form'),

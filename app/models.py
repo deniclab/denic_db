@@ -61,6 +61,37 @@ class Oligos(db.Model):
     def __repr__(self):
         return '<Oligo {}>'.format(self.oligo_tube)
 
+    def update_record(self, record_dict):
+        for (key, value) in record_dict:
+            if key is not 'oligo_tube':
+                if getattr(self, key) != value:
+                    setattr(self, key, value)
+        db.session.commit()
+
+    @staticmethod
+    def filter_dict_to_records(filter_dict):
+        """Take a dictionary of column:search_term pairs and get records."""
+        return Oligos.query.filter(
+            *(getattr(Oligos, key).ilike(value) for (key, value)
+              in filter_dict.items())).all()
+
+    @staticmethod
+    def record_to_dict(record):
+        """Convert a SQLAlchemy record output object to a dict of values."""
+        r_dict = record.__dict__
+        r_dict.pop('_sa_instance_state', None)
+        return r_dict
+
+    @staticmethod
+    def encode_oligo_dict(oligo_dict):
+        """jwt-encode an oligo dict to send thru URL."""
+        return jwt.encode(oligo_dict, app.config['SECRET_KEY'],
+                          algorithm=['HS256'])
+
+    @staticmethod
+    def decode_oligo_dict(oligo_dict):
+        """decode jwt-encoded dictionary of oligo record."""
+
 
 @login.user_loader
 def load_user(id):

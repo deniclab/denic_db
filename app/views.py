@@ -4,7 +4,8 @@ from app import app, db
 from app.forms import LoginForm, RegistrationForm, EditProfileForm
 from app.forms import ResetPasswordRequestForm, ResetPasswordForm
 from app.forms import AdminValidateAccountForm, SearchOligosForm
-from app.forms import InitializeNewOligosForm, DownloadRecords
+from app.forms import InitializeNewOligosForm, DownloadRecords, EditOligoForm
+from app.forms import ConfirmOligoEditsForm
 from app.email import send_password_reset_email
 from app.models import User, Oligos
 from app.output import csv_response
@@ -240,23 +241,61 @@ def search_results():
     search_terms = request.args.get('filter_by')
     search_terms = jwt.decode(search_terms, app.config['SECRET_KEY'],
                               algorithms=['HS256'])
-    output_records = Oligos.query.filter(
-        *(getattr(Oligos, key).ilike(value) for (key, value) in
-          search_terms.items())).all()
+    output_records = Oligos.filter_dict_to_records(search_terms)
     if len(output_records) == 0:  # if the search didn't return any items
         flash("Your search did not return any results.")
         return redirect(url_for('oligo_search_or_add'))
     record_list = []
     for r in output_records:
-        r_dict = r.__dict__
-        r_dict.pop('_sa_instance_state', None)
-        record_list.append(r_dict)
+        record_list.append(Oligos.record_to_dict(r))
     if form.validate_on_submit():
         return csv_response(record_list)
     return render_template('oligos/search_results.html',
                            title='Oligo search results',
                            record_list=record_list,
                            form=form)
+
+
+@app.route('/oligos/edit', methods=['GET', 'POST'])
+@login_required
+@verify_required
+def edit_oligo():
+    record_id = request.args.get('oligo_tube')
+    record_dict = Oligos.record_to_dict(
+        Oligos.query.filter_by(oligo_tube=record_id).first())
+    form = EditOligoForm()
+    if form.validate_on_submit():
+        new_record = Oligos.encode_oligo_dict(
+            {'oligo_tube': record_dict['oligo_tube'],
+             'oligo_name': form.oligo_name.data,
+             'creator_str': form.creator_str.data,
+             'sequence': form.sequence.data,
+             'restrixn_site': form.restrixn_site.data,
+             'notes': form.notes.data}
+            )
+        return redirect(url_for('confirm_oligo_edits', new_record=new_record))
+    return render_template('oligos/edit_oligo.html', form=form,
+                           record_dict=record_dict)
+
+
+@app.route('/oligos/confirm_edit', methods=['GET', 'POST'])
+@login_required
+@verify_required
+def confirm_oligo_edits():
+    new_record = Oligos.decode_oligo_dict(request.args.get('new_record'))
+    form = ConfirmOligoEditsForm()
+    oligo = Oligos.query.filter_by(oligo_tube=new_record['oligo_tube'])
+    if form.validate_on_submit():
+        oligo.update_record(new_record)
+        flash('Your changes to oVD# %s were saved.'
+              % new_record['oligo_tube'])
+        return redirect(url_for('oligo_search_or_add'))
+    for_template = Oligos.record_to_dict(oligo)
+    # update the record dict to include the new values from edits
+    for (key, value) in new_record:
+        for_template[key] = value
+    return render_template('oligos/confirm_edits.html', form=form,
+                           record_dict=for_template)
 
 
 @app.before_request
