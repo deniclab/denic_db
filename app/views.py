@@ -4,11 +4,11 @@ from app import app, db
 from app.forms import LoginForm, RegistrationForm, EditProfileForm
 from app.forms import ResetPasswordRequestForm, ResetPasswordForm
 from app.forms import AdminValidateAccountForm, SearchOligosForm
-from app.forms import InitializeNewOligosForm
+from app.forms import InitializeNewOligosForm, DownloadRecords
 from app.email import send_password_reset_email
 from app.models import User, Oligos
-from flask import redirect, url_for, flash, render_template, request
-from flask import abort
+from app.output import csv_response
+from flask import redirect, url_for, flash, render_template, request, abort
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
@@ -19,6 +19,7 @@ import os
 from io import StringIO
 import random
 import string
+import jwt
 
 
 def admin_required(f):
@@ -180,13 +181,19 @@ def reset_password(token):
 def oligo_search_or_add():
     search_form = SearchOligosForm()
     add_init_form = InitializeNewOligosForm()
-    if search_form.validate_on_submit():
-        if search_form.show_all:
-            return redirect(url_for('search_results', filter_by={}))
-        if search_form.all_by_me:
-            return redirect(url_for('search_results',
-                                    filter_by={'creator_id': current_user.id}))
-        if search_form.submit:
+    if search_form.show_all or search_form.all_by_me or search_form.submit:
+        if search_form.show_all.data:
+            return redirect(url_for(
+                'search_results',
+                filter_by=jwt.encode({}, app.config['SECRET_KEY'],
+                                     algorithm='HS256').decode('utf-8')))
+        if search_form.all_by_me.data:
+            return redirect(url_for(
+                'search_results',
+                filter_by=jwt.encode({'creator_id': current_user.id},
+                                     app.config['SECRET_KEY'],
+                                     algorithm='HS256').decode('utf-8')))
+        if search_form.submit.data:
             return redirect(url_for('search_results', filter_by=mk_query(
                 oligo_tube=search_form.oligo_tube.data,
                 oligo_name=search_form.oligo_name.data,
@@ -225,25 +232,31 @@ def oligo_search_or_add():
                            add_init_form=add_init_form)
 
 
-@app.route('/oligos/search_results', methods=['GET'])
+@app.route('/oligos/search_results', methods=['GET', 'POST'])
 @login_required
 @verify_required
 def search_results():
+    form = DownloadRecords()
     search_terms = request.args.get('filter_by')
+    search_terms = jwt.decode(search_terms, app.config['SECRET_KEY'],
+                              algorithms=['HS256'])
     output_records = Oligos.query.filter(
         *(getattr(Oligos, key).ilike(value) for (key, value) in
           search_terms.items())).all()
-    if len(output_records == 0):  # if the search didn't return any items
-        flash("Your search found no oligos. Please try again.")
-        return url_for('oligo_search_or_add')
+    if len(output_records) == 0:  # if the search didn't return any items
+        flash("Your search did not return any results.")
+        return redirect(url_for('oligo_search_or_add'))
     record_list = []
     for r in output_records:
         r_dict = r.__dict__
         r_dict.pop('_sa_instance_state', None)
         record_list.append(r_dict)
+    if form.validate_on_submit():
+        return csv_response(record_list)
     return render_template('oligos/search_results.html',
                            title='Oligo search results',
-                           record_list=record_list)
+                           record_list=record_list,
+                           form=form)
 
 
 @app.before_request
@@ -255,4 +268,6 @@ def before_request():
 
 def mk_query(**kwargs):
     """Generate the SQLAlchemy filter_by argument to search oligo db."""
-    return {key:"%"+value+"%" for key, value in kwargs.items() if value is not None}
+    return jwt.encode({key: "%"+value+"%" for key, value in kwargs.items()
+                       if value is not None}, app.config['SECRET_KEY'],
+                      algorithm='HS256').decode('utf-8')

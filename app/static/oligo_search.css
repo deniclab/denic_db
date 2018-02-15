@@ -1,0 +1,12 @@
+.table-fixed{
+    width: 100%;
+    background-color: #f3f3f3;
+}
+.table-fixed tbody{
+    height:100%;
+    overflow-x:scroll;
+    width: 600px;
+}
+.table-fixed thead,tbody,tr,td,th{
+    display:block;
+}

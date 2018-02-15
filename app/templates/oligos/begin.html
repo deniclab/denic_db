@@ -3,7 +3,7 @@
 
 {% block app_content %}
     <h1 style="text-align: center; color:#236ca1">oVD Oligo Database</h1>
-    <div class="container">
+    <div class="container-fluid">
         <h2 style="color: #b40000">Search the Database</h2>
         <div class="row">
             <p><strong style="color: #b40000">Search instructions:</strong><br>
@@ -82,7 +82,7 @@
             <p><strong style="color: #b40000">File or Copy-Paste import format:</strong><br>
                 <ul>
                     <li><strong>A header row is required</strong> to ensure data is imported correctly.</li>
-                    <li><strong>Do not include an oligo tube column.</strong>This will be assigned by the database.</li>
+                    <li><strong>Do not include an oligo tube column.</strong>This will be assigned by the database. If one is included, it will be ignored.</li>
                     <li>The following column names can be interpreted by the system (<em>caps-insensitive</em>):
                         <ul>
                             <li>Oligo Name (Required)</li>
@@ -92,6 +92,7 @@
                             <li>Notes</li>
                         </ul>
                     </li>
+                    <li>Do not use commas anywhere in the input. They will be replaced by grammatically incorrect semicolons.
                     <li>The only required column is Oligo Name.</li>
                 </ul>
             </p>

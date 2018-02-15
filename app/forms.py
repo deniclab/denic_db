@@ -134,3 +134,7 @@ class AddNewOligoRecord(FlaskForm):
 class AddNewOligoTable(FlaskForm):
     grid_oligo_records = FieldList(FormField(AddNewOligoRecord), min_entries=1)
     submit = SubmitField('Create')
+
+
+class DownloadRecords(FlaskForm):
+    download = SubmitField("Download to CSV")

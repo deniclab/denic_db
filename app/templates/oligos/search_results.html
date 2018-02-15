@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block app_content %}
+    <!-- Load required .js -->
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.1/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.1/js/responsive.bootstrap.min.js"></script>
+    <!-- -->
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#search_results').DataTable();
+        } );
+    </script>
+    <!--<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='oligo_search.css') }}">-->
+    <h1 style="text-align: center; color: #236ca1">Oligo Search Results</h1>
+    <div class="row">
+        <div class="col-xs-2">
+            {{ wtf.quick_form(form) }}
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table id="search_results" class="table table-striped table-fixed" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Oligo Tube</th>
+                    <th>Oligo Name</th>
+                    <th>Sequence</th>
+                    <th>Creator</th>
+                    <th>Date Created</th>
+                    <th>Restriction site</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in record_list %}
+                    <tr>
+                        <td class="col-sm-1"><a href="#">Edit</a></td>
+                        <td class="col-sm-1">{{ record['oligo_tube'] }}</td>
+                        <td class="col-sm-2" style="word-break: break-all; word-wrap:break-word;">{% if record['oligo_name'] is not none %}
+                                {{ record['oligo_name'] }}
+                            {% endif %}</td>
+                        <td class="col-sm-5" style="word-break: break-all; word-wrap:break-word;">{% if record['sequence'] is not none %}
+                                {{ record['sequence'] }}
+                            {% endif %}</td>
+                        <td class="col-sm-1">{% if record['creator_str'] is not none %}
+                                {{ record['creator_str'] }}
+                            {% endif %}</td>
+                        <td class="col-sm-1">{% if record['date_added'] is not none %}
+                                {{ record['date_added'] }}
+                            {% endif %}</td>
+                        <td class="col-sm-1">{% if record['restrixn_site'] is not none %}
+                                {{ record['restrixn_site'] }}
+                            {% endif %}</td>
+                        <td class="col-sm-2"><p>{% if record['notes'] is not none %}
+                                {{ record['notes'] }}
+                            {% endif %}</p></td>
+
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
