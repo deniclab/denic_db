@@ -116,7 +116,7 @@ class EditOligoForm(FlaskForm):
 
 class ConfirmOligoEditsForm(FlaskForm):
     submit = SubmitField('Confirm changes')
-
+    go_back = SubmitField('Go Back')
 
 class InitializeNewOligosForm(FlaskForm):
     input_type = RadioField('Choose input type',

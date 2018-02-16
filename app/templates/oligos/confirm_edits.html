@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    <h1 style="text-align: center; color: #236ca1">Confirm Oligo Edits</h1>
+    <div class="container-fluid" style="padding-top: 25px;">
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+            <div class="form-group col-sm-12">
+                <div class="row">
+                    <div class="form-group col-sm-2">
+                        <label for="oligo_tube">Oligo Tube</label>
+                    </div>
+                    <div class="form-group col-sm-3">
+                        <input class="form-control" id="oligo_tube" type="text" size=18 disabled value="{{ record_dict['oligo_tube'] }}">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-2">
+                        <label for="oligo_name">Oligo Name</label>
+                    </div>
+                    <div class="form-group col-sm-10">
+                        <input class="form-control" id="oligo_name" type="text" size=18 disabled value="{{ record_dict['oligo_name'] }}">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-2">
+                        <label for="sequence">Sequence</label>
+                    </div>
+                    <div class="form-group col-sm-10">
+                        <input class="form-control" id="sequence" type="text" size=18 disabled value="{{ record_dict['sequence'] }}">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-2">
+                        <label for="creator_str">Creator</label>
+                    </div>
+                    <div class="form-group col-sm-3">
+                        <input class="form-control" id="creator_str" type="text" size=18 disabled value="{{ record_dict['creator_str'] }}">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-2">
+                        <label for="date_added">Date Added</label>
+                    </div>
+                    <div class="form-group col-sm-3">
+                        <input class="form-control" id="date_added" type="text" size=18 disabled value="{{ record_dict['date_added'] }}">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-2">
+                        <label for="restrixn_site">Restriction Site</label>
+                    </div>
+                    <div class="form-group col-sm-3">
+                        <input class="form-control" id="restrixn_site" type="text" size=18 disabled value="{{ record_dict['restrixn_site'] }}">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-2">
+                        <label for="notes">Notes</label>
+                    </div>
+                    <div class="form-group col-sm-10">
+                        <input class="form-control" id="notes" type="text" size=18 disabled value="{{ record_dict['notes'] }}">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class='form-group col-xs-4'>
+                        {{ form.go_back(size=32, class="form-control",style="font-weight: bold; color: #b40000;") }}
+                    </div>
+                    <div class='form-group col-xs-4'>
+                        {{ form.submit(size=32, class="form-control",style="font-weight: bold; color: #236ca1;") }}
+                    </div>
+                </div>
+{% endblock %}

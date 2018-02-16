@@ -62,7 +62,7 @@ class Oligos(db.Model):
         return '<Oligo {}>'.format(self.oligo_tube)
 
     def update_record(self, record_dict):
-        for (key, value) in record_dict:
+        for (key, value) in record_dict.items():
             if key is not 'oligo_tube':
                 if getattr(self, key) != value:
                     setattr(self, key, value)
@@ -86,11 +86,12 @@ class Oligos(db.Model):
     def encode_oligo_dict(oligo_dict):
         """jwt-encode an oligo dict to send thru URL."""
         return jwt.encode(oligo_dict, app.config['SECRET_KEY'],
-                          algorithm=['HS256'])
+                          algorithm='HS256')
 
     @staticmethod
-    def decode_oligo_dict(oligo_dict):
+    def decode_oligo_dict(token):
         """decode jwt-encoded dictionary of oligo record."""
+        return jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
 
 
 @login.user_loader

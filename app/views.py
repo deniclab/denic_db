@@ -284,15 +284,17 @@ def edit_oligo():
 def confirm_oligo_edits():
     new_record = Oligos.decode_oligo_dict(request.args.get('new_record'))
     form = ConfirmOligoEditsForm()
-    oligo = Oligos.query.filter_by(oligo_tube=new_record['oligo_tube'])
-    if form.validate_on_submit():
+    oligo = Oligos.query.filter_by(oligo_tube=new_record['oligo_tube']).first()
+    if form.submit.data:
         oligo.update_record(new_record)
         flash('Your changes to oVD# %s were saved.'
               % new_record['oligo_tube'])
         return redirect(url_for('oligo_search_or_add'))
+    if form.go_back.data:
+        return redirect(url_for('edit_oligo', oligo_tube=new_record['oligo_tube']))
     for_template = Oligos.record_to_dict(oligo)
     # update the record dict to include the new values from edits
-    for (key, value) in new_record:
+    for (key, value) in new_record.items():
         for_template[key] = value
     return render_template('oligos/confirm_edits.html', form=form,
                            record_dict=for_template)

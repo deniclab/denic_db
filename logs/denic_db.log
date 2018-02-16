@@ -14,3 +14,31 @@
 2018-02-15 16:30:08,823 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
 2018-02-15 16:31:32,948 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
 2018-02-15 16:32:24,529 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-15 23:03:38,296 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-15 23:04:25,064 ERROR: Exception on /oligos/edit [POST] [in /Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py:1560]
+Traceback (most recent call last):
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1982, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1614, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1517, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/_compat.py", line 33, in reraise
+    raise value
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1612, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1598, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask_login/utils.py", line 261, in decorated_view
+    return func(*args, **kwargs)
+  File "/Users/nweir/Dropbox/code/denic_db/app/views.py", line 42, in decorated_function
+    return f(*args, **kwargs)
+  File "/Users/nweir/Dropbox/code/denic_db/app/views.py", line 274, in edit_oligo
+    'notes': form.notes.data}
+  File "/Users/nweir/Dropbox/code/denic_db/app/models.py", line 89, in encode_oligo_dict
+    algorithm=['HS256'])
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jwt/api_jwt.py", line 56, in encode
+    json_payload, key, algorithm, headers, json_encoder
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jwt/api_jws.py", line 77, in encode
+    if algorithm not in self._valid_algs:
+TypeError: unhashable type: 'list'
