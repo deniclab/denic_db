@@ -5,9 +5,9 @@ from app.forms import LoginForm, RegistrationForm, EditProfileForm
 from app.forms import ResetPasswordRequestForm, ResetPasswordForm
 from app.forms import AdminValidateAccountForm, SearchOligosForm
 from app.forms import InitializeNewOligosForm, DownloadRecords, EditOligoForm
-from app.forms import ConfirmOligoEditsForm
+from app.forms import ConfirmOligoEditsForm, AddNewOligoTable, ConfirmNewOligos
 from app.email import send_password_reset_email
-from app.models import User, Oligos
+from app.models import User, Oligos, TempOligo, record_to_dict
 from app.output import csv_response
 from flask import redirect, url_for, flash, render_template, request, abort
 from flask_login import current_user, login_user, logout_user, login_required
@@ -247,7 +247,7 @@ def search_results():
         return redirect(url_for('oligo_search_or_add'))
     record_list = []
     for r in output_records:
-        record_list.append(Oligos.record_to_dict(r))
+        record_list.append(record_to_dict(r))
     if form.validate_on_submit():
         return csv_response(record_list)
     return render_template('oligos/search_results.html',
@@ -261,7 +261,7 @@ def search_results():
 @verify_required
 def edit_oligo():
     record_id = request.args.get('oligo_tube')
-    record_dict = Oligos.record_to_dict(
+    record_dict = record_to_dict(
         Oligos.query.filter_by(oligo_tube=record_id).first())
     form = EditOligoForm()
     if form.validate_on_submit():
@@ -292,12 +292,43 @@ def confirm_oligo_edits():
         return redirect(url_for('oligo_search_or_add'))
     if form.go_back.data:
         return redirect(url_for('edit_oligo', oligo_tube=new_record['oligo_tube']))
-    for_template = Oligos.record_to_dict(oligo)
+    for_template = record_to_dict(oligo)
     # update the record dict to include the new values from edits
     for (key, value) in new_record.items():
         for_template[key] = value
     return render_template('oligos/confirm_edits.html', form=form,
                            record_dict=for_template)
+
+
+@app.route('/oligos/add_oligos_form', methods=['GET', 'POST'])
+@login_required
+@verify_required
+def oligo_add_form():
+    n_oligos = request.args.get('n_oligos')
+    form = AddNewOligoTable(n_oligos)
+    if form.validate_on_submit():
+        temp_ids = form.to_temp_records()
+        return redirect(url_for('confirm_new_oligos',
+                                temp_ids=','.join(str(i) for i in temp_ids)))
+    return render_template('oligos/add_new_oligos.html', form=form)
+
+
+@app.route('/oligos/confirm_new_oligos', methods=['GET', 'POST'])
+@login_required
+@verify_required
+def confirm_new_oligos():
+    # convert IDs back to list
+    temp_ids = [int(i) for i in request.args.get('temp_ids').split(',')]
+    form = ConfirmNewOligos()
+    record_dicts = [
+        record_to_dict(TempOligo.query.filter_by(temp_id=i).first())
+        for i in temp_ids
+        ]
+    if form.validate_on_submit():
+        return redirect(url_for('sshow_new_oligos',
+                                temp_ids=','.join(str(i) for i in temp_ids)))
+    return render_template('oligos/confirm_new_oligos.html',
+                           record_dicts=record_dicts, form=form)
 
 
 @app.before_request

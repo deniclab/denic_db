@@ -75,12 +75,6 @@ class Oligos(db.Model):
             *(getattr(Oligos, key).ilike(value) for (key, value)
               in filter_dict.items())).all()
 
-    @staticmethod
-    def record_to_dict(record):
-        """Convert a SQLAlchemy record output object to a dict of values."""
-        r_dict = record.__dict__
-        r_dict.pop('_sa_instance_state', None)
-        return r_dict
 
     @staticmethod
     def encode_oligo_dict(oligo_dict):
@@ -91,7 +85,27 @@ class Oligos(db.Model):
     @staticmethod
     def decode_oligo_dict(token):
         """decode jwt-encoded dictionary of oligo record."""
-        return jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+        return jwt.decode(token, app.config['SECRET_KEY'],
+                          algorithms=['HS256'])
+
+
+class TempOligo(db.Model):
+    temp_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    oligo_tube = db.Column(db.Integer, db.ForeignKey('oligos.oligo_tube'),
+                           index=True)
+    oligo_name = db.Column(db.String(150), index=True)
+    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    creator_str = db.Column(db.String(50))
+    sequence = db.Column(db.String(2000))
+    restrixn_site = db.Column(db.String(20))
+    notes = db.Column(db.String(500))
+
+
+def record_to_dict(record):
+    """Convert a SQLAlchemy record output object to a dict of values."""
+    r_dict = record.__dict__
+    r_dict.pop('_sa_instance_state', None)
+    return r_dict
 
 
 @login.user_loader

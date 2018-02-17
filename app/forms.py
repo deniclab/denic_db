@@ -1,3 +1,4 @@
+from app import db
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
@@ -5,7 +6,9 @@ from wtforms import TextAreaField, DateField, SelectField, FieldList, FormField
 from wtforms import IntegerField, RadioField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
 from wtforms.validators import Length
-from app.models import User
+from app.models import User, TempOligo
+from flask_login import current_user
+from datetime import date
 
 
 class LoginForm(FlaskForm):
@@ -118,6 +121,7 @@ class ConfirmOligoEditsForm(FlaskForm):
     submit = SubmitField('Confirm changes')
     go_back = SubmitField('Go Back')
 
+
 class InitializeNewOligosForm(FlaskForm):
     input_type = RadioField('Choose input type',
                             choices=[('table_input', 'Form'),
@@ -137,9 +141,8 @@ class InitializeNewOligosForm(FlaskForm):
 
 class AddNewOligoRecord(FlaskForm):
     oligo_name = StringField('Oligo Name',
-                             validators=[DataRequired(), Length(max=150)])
+                             validators=[Length(max=150)])
     creator = SelectField('Creator')  # TODO: NEED TO IMPLEMENT CHOICES IN VIEWS
-    date_added = DateField('Date added, format YYYY-MM-DD')
     sequence = StringField('Sequence', validators=[Length(max=2000)])
     restrixn_site = StringField('Restriction Site',
                                 validators=[Length(max=20)])
@@ -147,9 +150,33 @@ class AddNewOligoRecord(FlaskForm):
 
 
 class AddNewOligoTable(FlaskForm):
-    grid_oligo_records = FieldList(FormField(AddNewOligoRecord), min_entries=1)
-    submit = SubmitField('Create')
+    def __init__(self, n_records):
+        super(AddNewOligoTable, self).__init__()
+        self.n_records = n_records
+        oligos_grid = FieldList(FormField(AddNewOligoRecord), min_entries=1,
+                                max_entries=self.n_records)
+        submit = SubmitField('Submit')
 
+    def to_temp_records(self):
+        """Create TempOligos records from values. Returns list of db IDs."""
+        record_ids = []
+        for entry in self.oligos_grid.entries:  # iterate over rows in grid
+            if entry.oligo_name.data:  # if the row contains an oligo name
+                new_record = TempOligo(oligo_name=entry.oligo_name.data,
+                                       creator_str=entry.creator.data,
+                                       creator_id=current_user.id,
+                                       date_added=date.today(),
+                                       sequence=entry.sequence.data,
+                                       restrixn_site=entry.restrxn_site.data,
+                                       notes=entry.notes.data)
+                db.session.add(new_record)
+                db.session.commit()
+                record_ids.append(new_record.temp_id)
+        return record_ids  # use this as a ref to retrieve records later
+
+
+class ConfirmNewOligos(FlaskForm):
+    submit = SubmitField('Add to Database')
 
 class DownloadRecords(FlaskForm):
     download = SubmitField("Download to CSV")
