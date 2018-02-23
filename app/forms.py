@@ -126,7 +126,8 @@ class InitializeNewOligosForm(FlaskForm):
     input_type = RadioField('Choose input type',
                             choices=[('table_input', 'Form'),
                                      ('file_input', 'Upload file'),
-                                     ('paste_input', 'Copy-paste table')])
+                                     ('paste_input', 'Copy-paste table')],
+                            validators=[DataRequired()])
     number_oligos = IntegerField('Number of new oligos (form entry only)')
     upload_file = FileField('Upload .csv or .xlsx-format file',
                             validators=[FileAllowed(
@@ -136,13 +137,13 @@ class InitializeNewOligosForm(FlaskForm):
     paste_field = TextAreaField('Paste comma- or tab-separated values here')
     paste_format = RadioField('Delimiter', choices=[('\t', 'Tab'),
                                                     (',', 'Comma')])
-    submit = SubmitField('Submit')
+    submit_new = SubmitField('Submit')
 
 
 class AddNewOligoRecord(FlaskForm):
     oligo_name = StringField('Oligo Name',
                              validators=[Length(max=150)])
-    creator = SelectField('Creator')  # TODO: NEED TO IMPLEMENT CHOICES IN VIEWS
+    creator = StringField('Creator')
     sequence = StringField('Sequence', validators=[Length(max=2000)])
     restrixn_site = StringField('Restriction Site',
                                 validators=[Length(max=20)])
@@ -150,12 +151,9 @@ class AddNewOligoRecord(FlaskForm):
 
 
 class AddNewOligoTable(FlaskForm):
-    def __init__(self, n_records):
-        super(AddNewOligoTable, self).__init__()
-        self.n_records = n_records
-        oligos_grid = FieldList(FormField(AddNewOligoRecord), min_entries=1,
-                                max_entries=self.n_records)
-        submit = SubmitField('Submit')
+
+    oligos_grid = FieldList(FormField(AddNewOligoRecord), min_entries=0)
+    submit = SubmitField('Submit')
 
     def to_temp_records(self):
         """Create TempOligos records from values. Returns list of db IDs."""
@@ -177,6 +175,7 @@ class AddNewOligoTable(FlaskForm):
 
 class ConfirmNewOligos(FlaskForm):
     submit = SubmitField('Add to Database')
+
 
 class DownloadRecords(FlaskForm):
     download = SubmitField("Download to CSV")

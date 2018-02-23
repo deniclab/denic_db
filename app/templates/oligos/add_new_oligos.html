@@ -17,23 +17,21 @@
                 </tr>
             </thead>
             <tbody>
-                {% for r in form.oligos_grid %}
+                {% for r in form.oligos_grid.entries %}
                 <tr>
-                    <td>{{ r.form.oligo_name(class="form-control") }}</td>
-                    <td>{{ r.form.sequence(class="form-control") }}</td>
-                    <td>{{ r.form.creator(class="form-control") }}</td>
-                    <td>{{ r.form.restrixn_site(class="form-control") }}</td>
-                    <td>{{ r.form.notes(class="form-control") }}</td>
+                    <td>{{ r.oligo_name(class="form-control") }}</td>
+                    <td>{{ r.sequence(class="form-control") }}</td>
+                    <td>{{ r.creator(class="form-control") }}</td>
+                    <td>{{ r.restrixn_site(class="form-control") }}</td>
+                    <td>{{ r.notes(class="form-control") }}</td>
                 </tr>
+                {% endfor %}
             </tbody>
         </table>
         <div class="form-group col-xs-2">
-            {{ form.submit.label }}
-        </div>
-        <div class="form-group col-xs-2">
             {{ form.submit(size=32, class="form-control",style="font-weight: bold; color: #236ca1;")}}
         </div>
-        <div class="form-group col-xs-8"><!--spacer-->
+        <div class="form-group col-xs-10"><!--spacer-->
         </div>
     </div>
 </div>

@@ -6,6 +6,7 @@ from app.forms import ResetPasswordRequestForm, ResetPasswordForm
 from app.forms import AdminValidateAccountForm, SearchOligosForm
 from app.forms import InitializeNewOligosForm, DownloadRecords, EditOligoForm
 from app.forms import ConfirmOligoEditsForm, AddNewOligoTable, ConfirmNewOligos
+from app.forms import AddNewOligoRecord
 from app.email import send_password_reset_email
 from app.models import User, Oligos, TempOligo, record_to_dict
 from app.output import csv_response
@@ -182,7 +183,7 @@ def reset_password(token):
 def oligo_search_or_add():
     search_form = SearchOligosForm()
     add_init_form = InitializeNewOligosForm()
-    if search_form.show_all or search_form.all_by_me or search_form.submit:
+    if search_form.show_all.data or search_form.all_by_me.data or search_form.submit.data:
         if search_form.show_all.data:
             return redirect(url_for(
                 'search_results',
@@ -205,19 +206,19 @@ def oligo_search_or_add():
                 restrixn_site=search_form.restrixn_site.data,
                 notes=search_form.notes.data
             )))
-    if add_init_form.validate_on_submit():
+    if add_init_form.submit_new.data:
         # first make sure there weren't multiple options used
         if add_init_form.upload_file.data is not None and \
                 add_init_form.paste_field.data is not None:
             flash('You must use either upload or paste, not both.')
             return redirect(url_for('oligo_search_or_add'))
-        if add_init_form.upload_file.data is not None:
+        if add_init_form.input_type.data == 'file_input':
             f = add_init_form.upload_file.data
             # TODO: IMPLEMENT FILE TYPE READING/CONVERSION HERE AS NEEDED
             filename = secure_filename(f.filename)
             f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return redirect(url_for('check_oligos', filename=filename))
-        if add_init_form.paste_field.data is not None:
+        elif add_init_form.input_type.data == 'paste_input':
             # parse comma-separated or tab-separated data.
             delimiter = add_init_form.paste_format.data
             temp_fname = random.choices(string.ascii_uppercase, k=6) + '.csv'
@@ -226,7 +227,7 @@ def oligo_search_or_add():
             pd_df.to_csv(os.path.join(app.config['UPLOAD_FOLDER'], temp_fname),
                          index=False)
             return redirect(url_for('check_oligos', filename=temp_fname))
-        if add_init_form.number_oligos.data is not None:
+        elif add_init_form.input_type.data == 'table_input':
             return redirect(url_for('oligo_add_form',
                                     n_oligos=add_init_form.number_oligos.data))
     return render_template('oligos/begin.html', search_form=search_form,
@@ -304,8 +305,11 @@ def confirm_oligo_edits():
 @login_required
 @verify_required
 def oligo_add_form():
-    n_oligos = request.args.get('n_oligos')
-    form = AddNewOligoTable(n_oligos)
+    n_oligos = int(request.args.get('n_oligos'))
+    form = AddNewOligoTable()
+    for _ in range(0, n_oligos):
+        form.oligos_grid.append_entry()
+
     if form.validate_on_submit():
         temp_ids = form.to_temp_records()
         return redirect(url_for('confirm_new_oligos',
@@ -325,7 +329,7 @@ def confirm_new_oligos():
         for i in temp_ids
         ]
     if form.validate_on_submit():
-        return redirect(url_for('sshow_new_oligos',
+        return redirect(url_for('show_new_oligos',
                                 temp_ids=','.join(str(i) for i in temp_ids)))
     return render_template('oligos/confirm_new_oligos.html',
                            record_dicts=record_dicts, form=form)
