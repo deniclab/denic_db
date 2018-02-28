@@ -3,7 +3,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms import TextAreaField, DateField, SelectField, FieldList, FormField
-from wtforms import IntegerField, RadioField
+from wtforms import Form, IntegerField, RadioField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
 from wtforms.validators import Length
 from app.models import User, TempOligo
@@ -52,15 +52,28 @@ class AdminValidateAccountForm(FlaskForm):
         self.username.choices = user_list
     username = SelectField('New accounts')
     approve = SelectField('Action',
-                           choices=[('no_selection', 'Choose one'),
-                                    ('valid', 'Validate User'),
-                                    ('invalid', 'Invalid - Delete User')])
+                          choices=[('no_selection', 'Choose one'),
+                                   ('valid', 'Validate User'),
+                                   ('invalid', 'Invalid - Delete User')])
     submit = SubmitField('Submit')
 
 
 class AdminPrivilegesForm(FlaskForm):
     """Form to give or remove admin privileges from a user."""
-    pass  # TODO: Implement.
+    def __init__(self):
+        """Populate list of users in need of validation."""
+        super(AdminPrivilegesForm, self).__init__()
+        # next line queries User db for non-validated users and
+        # adds them to validate.
+        user_list = [(q.username, q.username) for q in
+                     User.query.all()]
+        self.username.choices = user_list
+    username = SelectField('Users')
+    privileges = SelectField(
+        'Action', choices=[('no_selection', 'Choose one'),
+                           ('give_admin', 'Give Admin Privileges'),
+                           ('remove_admin', 'Remove Admin Privileges')])
+    admin_submit = SubmitField('Submit')
 
 
 class EditProfileForm(FlaskForm):
@@ -136,11 +149,12 @@ class InitializeNewOligosForm(FlaskForm):
 
     paste_field = TextAreaField('Paste comma- or tab-separated values here')
     paste_format = RadioField('Delimiter', choices=[('\t', 'Tab'),
-                                                    (',', 'Comma')])
+                                                    (',', 'Comma')],
+                              default=',')
     submit_new = SubmitField('Submit')
 
 
-class AddNewOligoRecord(FlaskForm):
+class AddNewOligoRecord(Form):
     oligo_name = StringField('Oligo Name',
                              validators=[Length(max=150)])
     creator = StringField('Creator')
@@ -152,7 +166,8 @@ class AddNewOligoRecord(FlaskForm):
 
 class AddNewOligoTable(FlaskForm):
 
-    oligos_grid = FieldList(FormField(AddNewOligoRecord), min_entries=0)
+    oligos_grid = FieldList(FormField(AddNewOligoRecord),
+                            min_entries=0)
     submit = SubmitField('Submit')
 
     def to_temp_records(self):
@@ -163,9 +178,8 @@ class AddNewOligoTable(FlaskForm):
                 new_record = TempOligo(oligo_name=entry.oligo_name.data,
                                        creator_str=entry.creator.data,
                                        creator_id=current_user.id,
-                                       date_added=date.today(),
                                        sequence=entry.sequence.data,
-                                       restrixn_site=entry.restrxn_site.data,
+                                       restrixn_site=entry.restrixn_site.data,
                                        notes=entry.notes.data)
                 db.session.add(new_record)
                 db.session.commit()

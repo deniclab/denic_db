@@ -1,9 +1,10 @@
 from app import app, db, login
-from datetime import datetime
+from datetime import datetime, date
 from time import time
 import jwt
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin
+from flask_login import UserMixin, current_user
+import pandas as pd
 from hashlib import md5
 
 
@@ -69,6 +70,24 @@ class Oligos(db.Model):
         db.session.commit()
 
     @staticmethod
+    def new_from_temp(temp_ids):
+        """Add records from the TempOligo table, returning their new IDs."""
+        new_tubes = []
+        for i in temp_ids:
+            temp_oligo = TempOligo.query.filter_by(temp_id=i).first()
+            new_record = Oligos(oligo_name=temp_oligo.oligo_name,
+                                date_added=date.today(),
+                                creator_id=current_user.id,
+                                creator_str=temp_oligo.creator_str,
+                                sequence=temp_oligo.sequence,
+                                restrixn_site=temp_oligo.restrixn_site,
+                                notes=temp_oligo.notes)
+            db.session.add(new_record)
+            db.session.commit()
+            new_tubes.append(new_record.oligo_tube)
+        return new_tubes
+
+    @staticmethod
     def filter_dict_to_records(filter_dict):
         """Take a dictionary of column:search_term pairs and get records."""
         return Oligos.query.filter(
@@ -99,6 +118,29 @@ class TempOligo(db.Model):
     sequence = db.Column(db.String(2000))
     restrixn_site = db.Column(db.String(20))
     notes = db.Column(db.String(500))
+
+    @staticmethod
+    def from_file(file_path, delimiter):
+        """Add new records from uploaded .csv, .txt, or copy-paste input."""
+        record_df = pd.read_csv(file_path)
+        # make sure the required column is present
+        record_df.columns = [x.lower() for x in record_df.columns]
+        if 'oligo name' not in list(record_df.columns.values):
+            raise ValueError('Oligo name column required.')
+        record_dict = record_df.to_dict(orient='records')
+        new_ids = []
+        for row in record_dict:
+            new_oligo = TempOligo(
+                oligo_name=row['oligo name'].strip(),
+                creator_id=current_user.id,
+                creator_str=row.get('creator', '').strip(),
+                sequence=row.get('sequence', '').strip(),
+                restrixn_site=row.get('restriction site', '').strip(),
+                notes=row.get('notes', '').strip())
+            db.session.add(new_oligo)
+            db.session.commit()
+            new_ids.append(new_oligo.temp_id)
+        return new_ids
 
 
 def record_to_dict(record):

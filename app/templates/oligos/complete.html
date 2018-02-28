@@ -2,40 +2,36 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block app_content %}
-<h1 style="text-align: center; color: #236ca1">Confirm new oligos</h1>
+<h1 style="text-align: center; color: #236ca1">New oligo record confirmation</h1>
 <div class="container" style="padding-top: 25px">
     <div class="table-responsive">
         <table class="table table-striped" cellspacing="0" width="100%">
             <thead>
                 <tr>
+                    <th class="col-xs-1">Oligo Tube</th>
                     <th class="col-xs-2">Oligo Name</th>
-                    <th class="col-xs-3">Sequence</th>
+                    <th class="col-xs-2">Sequence</th>
                     <th class="col-xs-1">Creator</th>
+                    <th class="col-xs-1">Date Added</th>
                     <th class="col-xs-2">Restriction site</th>
-                    <th class="col-xs-4">Notes</th>
+                    <th class="col-xs-3">Notes</th>
                 </tr>
             </thead>
             <tbody>
                 {% for r in record_dicts %}
                 <tr>
+                    <td style="font-weight: bold">{{ r['oligo_tube'] }}
                     <td>{{ r['oligo_name'] }}</td>
                     <td>{{ r['sequence'] }}</td>
                     <td>{{ r['creator_str'] }}</td>
+                    <td>{{ r['date_added']}}
                     <td>{{ r['restrixn_site'] }}</td>
                     <td>{{ r['notes'] }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-        <form action="" method="post">
-            {{ form.hidden_tag() }}
-            <div class="form-group col-xs-3">
-                {{ form.submit(size=32, class="form-control", style="font-weight: bold; color: #236ca1;") }}
-            </div>
-            <div class="form-group col-xs-9">
-                <p>Only press this button once!</p>
-            </div>
-        </form>
+        <a href="{{ url_for('oligo_search_or_add') }}">Back to Oligos home</a>
     </div>
 </div>
 {% endblock %}

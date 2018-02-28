@@ -18,7 +18,11 @@
                     <li class="nav-item"><a class="nav-link disabled" href="#">Plasmids</a></li>
                     <li class="nav-item"><a class="nav-link disabled" href="#">Yeast Strains</a></li>
                 </ul>
+
                 <ul class="nav navbar-nav navbar-right">
+                    {% if current_user.is_admin %}
+                    <li><a href="{{ url_for('validate_user') }}"><span class="glyphicon glyphicon-cog"></span>  Admin</a></li>
+                    {% endif %}
                     {% if current_user.is_anonymous %}
                     <li><a href="{{ url_for('login') }}"><span class="glyphicon glyphicon-log-in"></span>  Login</a></li>
                     {% else %}

@@ -42,3 +42,164 @@ Traceback (most recent call last):
   File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/jwt/api_jws.py", line 77, in encode
     if algorithm not in self._valid_algs:
 TypeError: unhashable type: 'list'
+2018-02-23 14:28:59,928 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-23 14:38:31,766 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-23 14:44:32,635 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-23 14:49:23,922 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-23 14:57:07,100 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-23 14:59:39,274 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-23 15:01:43,362 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-23 15:08:49,578 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-23 15:16:23,319 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-23 15:16:36,271 ERROR: Exception on /oligos/add_oligos_form [GET] [in /Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py:1560]
+Traceback (most recent call last):
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1982, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1614, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1517, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/_compat.py", line 33, in reraise
+    raise value
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1612, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1598, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask_login/utils.py", line 261, in decorated_view
+    return func(*args, **kwargs)
+  File "/Users/nweir/Dropbox/code/denic_db/app/views.py", line 43, in decorated_function
+    return f(*args, **kwargs)
+  File "/Users/nweir/Dropbox/code/denic_db/app/views.py", line 311, in oligo_add_form
+    form.oligos_grid.append_entry()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/wtforms/fields/core.py", line 968, in append_entry
+    return self._add_entry(data=data)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/wtforms/fields/core.py", line 957, in _add_entry
+    field.process(formdata, data)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/wtforms/fields/core.py", line 798, in process
+    self.form = self.form_class(formdata=formdata, obj=data, prefix=prefix)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/wtforms/form.py", line 212, in __call__
+    return type.__call__(cls, *args, **kwargs)
+TypeError: __init__() got an unexpected keyword argument 'formdata'
+2018-02-23 15:25:14,436 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-23 15:25:16,386 ERROR: Exception on /oligos/add_oligos_form [GET] [in /Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py:1560]
+Traceback (most recent call last):
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1982, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1614, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1517, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/_compat.py", line 33, in reraise
+    raise value
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1612, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1598, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask_login/utils.py", line 261, in decorated_view
+    return func(*args, **kwargs)
+  File "/Users/nweir/Dropbox/code/denic_db/app/views.py", line 43, in decorated_function
+    return f(*args, **kwargs)
+  File "/Users/nweir/Dropbox/code/denic_db/app/views.py", line 311, in oligo_add_form
+    form.oligos_grid.append_entry()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/wtforms/fields/core.py", line 968, in append_entry
+    return self._add_entry(data=data)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/wtforms/fields/core.py", line 956, in _add_entry
+    translations=self._translations)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/wtforms/fields/core.py", line 350, in bind
+    return self.field_class(*self.args, **kw)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/wtforms/fields/core.py", line 775, in __init__
+    super(FormField, self).__init__(label, validators, **kwargs)
+TypeError: __init__() got an unexpected keyword argument 'csrf_enabled'
+2018-02-23 15:25:18,340 ERROR: Exception on /oligos/add_oligos_form [GET] [in /Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py:1560]
+Traceback (most recent call last):
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1982, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1614, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1517, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/_compat.py", line 33, in reraise
+    raise value
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1612, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1598, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask_login/utils.py", line 261, in decorated_view
+    return func(*args, **kwargs)
+  File "/Users/nweir/Dropbox/code/denic_db/app/views.py", line 43, in decorated_function
+    return f(*args, **kwargs)
+  File "/Users/nweir/Dropbox/code/denic_db/app/views.py", line 311, in oligo_add_form
+    form.oligos_grid.append_entry()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/wtforms/fields/core.py", line 968, in append_entry
+    return self._add_entry(data=data)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/wtforms/fields/core.py", line 956, in _add_entry
+    translations=self._translations)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/wtforms/fields/core.py", line 350, in bind
+    return self.field_class(*self.args, **kw)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/wtforms/fields/core.py", line 775, in __init__
+    super(FormField, self).__init__(label, validators, **kwargs)
+TypeError: __init__() got an unexpected keyword argument 'csrf_enabled'
+2018-02-23 15:28:00,997 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-23 15:28:13,012 ERROR: Exception on /oligos/add_oligos_form [POST] [in /Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py:1560]
+Traceback (most recent call last):
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1982, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1614, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1517, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/_compat.py", line 33, in reraise
+    raise value
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1612, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1598, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask_login/utils.py", line 261, in decorated_view
+    return func(*args, **kwargs)
+  File "/Users/nweir/Dropbox/code/denic_db/app/views.py", line 43, in decorated_function
+    return f(*args, **kwargs)
+  File "/Users/nweir/Dropbox/code/denic_db/app/views.py", line 313, in oligo_add_form
+    temp_ids = form.to_temp_records()
+  File "/Users/nweir/Dropbox/code/denic_db/app/forms.py", line 169, in to_temp_records
+    restrixn_site=entry.restrxn_site.data,
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/wtforms/fields/core.py", line 822, in __getattr__
+    return getattr(self.form, name)
+AttributeError: 'AddNewOligoRecord' object has no attribute 'restrxn_site'
+2018-02-23 15:28:40,591 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-23 15:28:54,218 ERROR: Exception on /oligos/add_oligos_form [POST] [in /Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py:1560]
+Traceback (most recent call last):
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1982, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1614, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1517, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/_compat.py", line 33, in reraise
+    raise value
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1612, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask/app.py", line 1598, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/flask_login/utils.py", line 261, in decorated_view
+    return func(*args, **kwargs)
+  File "/Users/nweir/Dropbox/code/denic_db/app/views.py", line 43, in decorated_function
+    return f(*args, **kwargs)
+  File "/Users/nweir/Dropbox/code/denic_db/app/views.py", line 313, in oligo_add_form
+    temp_ids = form.to_temp_records()
+  File "/Users/nweir/Dropbox/code/denic_db/app/forms.py", line 170, in to_temp_records
+    notes=entry.notes.data)
+  File "<string>", line 4, in __init__
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/sqlalchemy/orm/state.py", line 417, in _initialize_instance
+    manager.dispatch.init_failure(self, args, kwargs)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/sqlalchemy/util/langhelpers.py", line 66, in __exit__
+    compat.reraise(exc_type, exc_value, exc_tb)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 187, in reraise
+    raise value
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/sqlalchemy/orm/state.py", line 414, in _initialize_instance
+    return manager.original_init(*mixed[1:], **kwargs)
+  File "/Users/nweir/.virtualenvs/flask/lib/python3.6/site-packages/sqlalchemy/ext/declarative/base.py", line 699, in _declarative_constructor
+    (k, cls_.__name__))
+TypeError: 'date_added' is an invalid keyword argument for TempOligo
+2018-02-23 15:29:43,735 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-23 16:32:03,621 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]
+2018-02-23 16:32:50,054 INFO: denic_db startup [in /Users/nweir/Dropbox/code/denic_db/app/__init__.py:46]

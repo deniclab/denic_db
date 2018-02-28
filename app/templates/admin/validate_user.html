@@ -2,10 +2,18 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-    <h1>Validate User</h1>
+<div class="container-fluid">
     <div class="row">
-        <div class="col-md-4">
-            {{ wtf.quick_form(form) }}
+        <div class="col-xs-4">
+            <h1 style="color: #b40000">Validate User</h1>
+            {{ wtf.quick_form(validate_form) }}
+        </div>
+        <div class="col-xs-2"><!-- spacer -->
+        </div>
+        <div class="col-xs-4">
+            <h1 style="color: #b40000">Edit Admins</h1>
+            {{ wtf.quick_form(admin_form) }}
         </div>
     </div>
+</div>
 {% endblock %}

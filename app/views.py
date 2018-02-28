@@ -6,7 +6,7 @@ from app.forms import ResetPasswordRequestForm, ResetPasswordForm
 from app.forms import AdminValidateAccountForm, SearchOligosForm
 from app.forms import InitializeNewOligosForm, DownloadRecords, EditOligoForm
 from app.forms import ConfirmOligoEditsForm, AddNewOligoTable, ConfirmNewOligos
-from app.forms import AddNewOligoRecord
+from app.forms import AdminPrivilegesForm
 from app.email import send_password_reset_email
 from app.models import User, Oligos, TempOligo, record_to_dict
 from app.output import csv_response
@@ -130,20 +130,44 @@ def edit_profile():
 @app.route('/admin/validate', methods=['GET', 'POST'])
 @admin_required
 def validate_user():
-    form = AdminValidateAccountForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if form.approve.data == 'valid':
+    validate_form = AdminValidateAccountForm()
+    admin_form = AdminPrivilegesForm()
+    if validate_form.submit.data:
+        if validate_form.username.data == "":
+            flash('Please select a user to edit privileges for.')
+            return redirect(url_for('validate_user'))
+        user = User.query.filter_by(
+            username=validate_form.username.data).first()
+        if validate_form.approve.data == 'valid':
             user.validated = True
             db.session.commit()
             flash('User {} has been verified'.format(user.username))
-        elif form.approve.data == 'invalid':
+        elif validate_form.approve.data == 'invalid':
             db.session.delete(user)
             db.session.commit()
             flash('User {} has been deleted'.format(user.username))
-        return redirect(url_for('admin/validate'))
+        else:
+            flash('You must select an action.')
+        return redirect(url_for('validate_user'))
+    if admin_form.admin_submit.data:
+        if admin_form.username.data == "":
+            flash('Please select a user to edit privileges for.')
+            return redirect(url_for('validate_user'))
+        user = User.query.filter_by(username=admin_form.username.data).first()
+        if admin_form.privileges.data == 'give_admin':
+            user.is_admin = True
+            db.session.commit()
+            flash('User {} now has admin privileges.'.format(user.username))
+        elif admin_form.privileges.data == 'remove_admin':
+            user.is_admin = False
+            db.session.commit()
+            flash('User {} set to non-administrator.'.format(user.username))
+        else:
+            flash('You must select an action.')
+        return redirect(url_for('validate_user'))
     return render_template('admin/validate_user.html', title='Validate User',
-                           form=form)
+                           validate_form=validate_form,
+                           admin_form=admin_form)
 
 
 @app.route('/reset_password_request', methods=['GET', 'POST'])
@@ -208,28 +232,53 @@ def oligo_search_or_add():
             )))
     if add_init_form.submit_new.data:
         # first make sure there weren't multiple options used
-        if add_init_form.upload_file.data is not None and \
-                add_init_form.paste_field.data is not None:
-            flash('You must use either upload or paste, not both.')
-            return redirect(url_for('oligo_search_or_add'))
-        if add_init_form.input_type.data == 'file_input':
+        if add_init_form.input_type.data == 'table_input':
+            return redirect(url_for('oligo_add_form',
+                                    n_oligos=add_init_form.number_oligos.data))
+        elif add_init_form.input_type.data == 'file_input':
+            if add_init_form.upload_file.data is None:
+                flash('You must upload a file using the browser if you select the Upload File option.')
+                return redirect(url_for('oligo_search_or_add'))
             f = add_init_form.upload_file.data
             # TODO: IMPLEMENT FILE TYPE READING/CONVERSION HERE AS NEEDED
             filename = secure_filename(f.filename)
-            f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('check_oligos', filename=filename))
+            output_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            f.save(output_path)
+            try:
+                new_records = TempOligo.from_file(
+                    output_path, delimiter=add_init_form.paste_format.data)
+                return redirect(url_for('confirm_new_oligos',
+                                        temp_ids=[','.join(str(i) for i in
+                                                           new_records)]))
+            except ValueError:
+                flash('The Oligo Name column is required.')
+                return redirect(url_for('oligo_search_or_add'))
+            return redirect(url_for('confirm_new_oligos',
+                                    temp_ids=new_records))
         elif add_init_form.input_type.data == 'paste_input':
+            if add_init_form.paste_field.data is None:
+                flash('You must paste content into the paste field if you select the Copy-paste table option.')
+                return redirect(url_for('oligo_search_or_add'))
             # parse comma-separated or tab-separated data.
             delimiter = add_init_form.paste_format.data
-            temp_fname = random.choices(string.ascii_uppercase, k=6) + '.csv'
+            temp_fname = ''.join(random.choices(string.ascii_uppercase,
+                                                k=6)) + '.csv'
             io_obj = StringIO(add_init_form.paste_field.data)
             pd_df = pd.read_csv(io_obj, delimiter=delimiter, header=0)
-            pd_df.to_csv(os.path.join(app.config['UPLOAD_FOLDER'], temp_fname),
-                         index=False)
-            return redirect(url_for('check_oligos', filename=temp_fname))
-        elif add_init_form.input_type.data == 'table_input':
-            return redirect(url_for('oligo_add_form',
-                                    n_oligos=add_init_form.number_oligos.data))
+            output_path = os.path.join(app.config['UPLOAD_FOLDER'], temp_fname)
+            pd_df.to_csv(output_path, index=False)
+            try:
+                new_records = TempOligo.from_file(
+                    output_path, delimiter=add_init_form.paste_format.data)
+                return redirect(url_for('confirm_new_oligos',
+                                        temp_ids=[','.join(str(i) for i in
+                                                           new_records)]))
+            except ValueError:
+                flash('The Oligo Name column is required.')
+                return redirect(url_for('oligo_search_or_add'))
+            return redirect(url_for('confirm_new_oligos',
+                                    temp_ids=new_records))
+
     return render_template('oligos/begin.html', search_form=search_form,
                            add_init_form=add_init_form)
 
@@ -309,7 +358,6 @@ def oligo_add_form():
     form = AddNewOligoTable()
     for _ in range(0, n_oligos):
         form.oligos_grid.append_entry()
-
     if form.validate_on_submit():
         temp_ids = form.to_temp_records()
         return redirect(url_for('confirm_new_oligos',
@@ -329,11 +377,22 @@ def confirm_new_oligos():
         for i in temp_ids
         ]
     if form.validate_on_submit():
+        new_oligos = Oligos.new_from_temp(temp_ids)
         return redirect(url_for('show_new_oligos',
-                                temp_ids=','.join(str(i) for i in temp_ids)))
+                                new_oligos=','.join(str(i) for i in
+                                                    new_oligos)))
     return render_template('oligos/confirm_new_oligos.html',
                            record_dicts=record_dicts, form=form)
 
+
+@app.route('/oligos/complete', methods=['GET'])
+@login_required
+@verify_required
+def show_new_oligos():
+    new_oligos = [int(i) for i in request.args.get('new_oligos').split(',')]
+    new_records = Oligos.query.filter(Oligos.oligo_tube.in_(new_oligos)).all()
+    record_dicts = [record_to_dict(i) for i in new_records]
+    return render_template('oligos/complete.html', record_dicts=record_dicts)
 
 @app.before_request
 def before_request():
