@@ -45,4 +45,7 @@ if not app.debug:
     app.logger.setLevel(logging.INFO)
     app.logger.info('denic_db startup')
 
+s3 = boto3.client('s3', aws_access_key_id=app.config['S3_KEY'],
+                  aws_secret_access_key=app.config['S3_SECRET'])
+
 from app import views, models, errors
