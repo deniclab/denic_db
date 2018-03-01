@@ -5,20 +5,23 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-xs-4">
-            <h1 style="color: #b40000">Validate User</h1>
+            <h2 style="color: #b40000">Validate User</h2>
             {{ wtf.quick_form(validate_form) }}
         </div>
         <div class="col-xs-2"><!-- spacer -->
         </div>
         <div class="col-xs-4">
-            <h1 style="color: #b40000">Edit Admins</h1>
+            <h2 style="color: #b40000">Edit Admins</h2>
             {{ wtf.quick_form(admin_form) }}
         </div>
     </div>
+    <br>
     <div class="row">
         <div class="col-xs-4">
-            <h1 style="color: #b40000">Delete User</h1>
+            <h2 style="color: #b40000">Delete User</h2>
             {{ wtf.quick_form(delete_form) }}
+            <br>
+            <em style="color: #b40000">Note: only non-administrators can be deleted. To delete an administrator, first remove their privileges.</em>
         </div>
         <div class="col-xs-6"><!-- spacer -->
         </div>
