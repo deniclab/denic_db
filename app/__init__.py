@@ -10,6 +10,7 @@ from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
 
 app = Flask(__name__)
+application = app
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 mail = Mail(app)
