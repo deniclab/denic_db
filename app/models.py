@@ -124,8 +124,9 @@ class TempOligo(db.Model):
         """Add new records from uploaded .csv, .txt, or copy-paste input."""
         # make sure the required column is present
         record_df.columns = [x.lower() for x in record_df.columns]
-        if 'oligo name' not in list(record_df.columns.values):
-            raise ValueError('Oligo name column required.')
+        if not set(('oligo name', 'sequence')).issubset(set(
+                record_df.columns.values)):
+            raise ValueError('Oligo name and sequence columns required.')
         record_dict = record_df.to_dict(orient='records')
         new_ids = []
         for row in record_dict:

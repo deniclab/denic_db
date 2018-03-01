@@ -173,10 +173,19 @@ class AddNewOligoRecord(Form):
     oligo_name = StringField('Oligo Name',
                              validators=[Length(max=150)])
     creator = StringField('Creator')
-    sequence = StringField('Sequence', validators=[Length(max=2000)])
+    sequence = StringField('Sequence', validators=[
+                                                   Length(max=2000)])
     restrixn_site = StringField('Restriction Site',
                                 validators=[Length(max=20)])
     notes = TextAreaField('Notes', validators=[Length(max=500)])
+
+    def validate(self):
+        if not Form.validate(self):
+            return False
+        if bool(self.oligo_name.data) != bool(self.sequence.data):
+            self.oligo_name.errors.append('Oligo name and sequence required.')
+            return False
+        return True
 
 
 class AddNewOligoTable(FlaskForm):

@@ -7,6 +7,15 @@
     <div class="table-responsive">
         <form action="" method="post">
             {{ form.hidden_tag() }}
+            {% for grid_name, grid_errors in form.errors.items() if grid_errors %}
+                {% for grid_error in grid_errors %}
+                    {% for field_name, field_errors in grid_error.items() %}
+                        {% for error in field_errors %}
+                        <span style="color: #b40000; font-weight: bold;">There was an error in {{ field_name }}: {{ error }}</span>
+                        {% endfor %}
+                    {% endfor %}
+                {% endfor %}
+            {% endfor %}
             <table class="table table-striped" cellspacing="0" width="100%">
                 <thead>
                     <tr>

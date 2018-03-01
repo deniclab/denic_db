@@ -255,7 +255,7 @@ def oligo_search_or_add():
                                         temp_ids=[','.join(str(i) for i in
                                                            new_records)]))
             except ValueError:
-                flash('The Oligo Name column is required.')
+                flash('The Oligo Name and Sequence columns are required.')
                 return redirect(url_for('oligo_search_or_add'))
             return redirect(url_for('confirm_new_oligos',
                                     temp_ids=new_records))
@@ -276,7 +276,7 @@ def oligo_search_or_add():
                                         temp_ids=[','.join(str(i) for i in
                                                            new_records)]))
             except ValueError:
-                flash('The Oligo Name column is required.')
+                flash('The Oligo Name and Sequence columns are required.')
                 return redirect(url_for('oligo_search_or_add'))
             return redirect(url_for('confirm_new_oligos',
                                     temp_ids=new_records))
