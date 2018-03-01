@@ -10,7 +10,6 @@ from app.forms import AdminPrivilegesForm
 from app.email import send_password_reset_email
 from app.models import User, Oligos, TempOligo, record_to_dict
 from app.output import csv_response
-from app.storage import upload_file_to_s3
 from flask import redirect, url_for, flash, render_template, request, abort
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
