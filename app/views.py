@@ -267,6 +267,7 @@ def oligo_search_or_add():
                                                 k=6)) + '.csv'
             io_obj = StringIO(add_init_form.paste_field.data)
             pd_df = pd.read_csv(io_obj, delimiter=delimiter, header=0)
+            pd_df = pd_df.fillna(value='')
             try:
                 new_records = TempOligo.from_pd(pd_df)
                 return redirect(url_for('confirm_new_oligos',
