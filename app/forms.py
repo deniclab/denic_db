@@ -63,8 +63,6 @@ class AdminPrivilegesForm(FlaskForm):
     def __init__(self):
         """Populate list of users in need of validation."""
         super(AdminPrivilegesForm, self).__init__()
-        # next line queries User db for non-validated users and
-        # adds them to validate.
         user_list = [(q.username, q.username) for q in
                      User.query.all()]
         self.username.choices = user_list
@@ -74,6 +72,23 @@ class AdminPrivilegesForm(FlaskForm):
                            ('give_admin', 'Give Admin Privileges'),
                            ('remove_admin', 'Remove Admin Privileges')])
     admin_submit = SubmitField('Submit')
+
+
+class AdminDeleteUserForm(FlaskForm):
+    """Form to remove users. Only allows deletion of non-administrators."""
+    def __init__(self):
+        """Populate list of users in need of validation."""
+        super(AdminDeleteUserForm, self).__init__()
+        # next line queries User db for non-administrator users and
+        # adds them to validate.
+        user_list = [(q.username, q.username) for q in
+                     User.query.filter_by(is_admin=False)]
+        self.username.choices = user_list
+    username = SelectField('Users')
+    action = SelectField(
+        'Action', choices=[('no_selection', 'Choose one'),
+                           ('delete_user', 'Delete user')])
+    delete_submit = SubmitField('Submit')
 
 
 class EditProfileForm(FlaskForm):

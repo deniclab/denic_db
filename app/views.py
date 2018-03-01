@@ -6,7 +6,7 @@ from app.forms import ResetPasswordRequestForm, ResetPasswordForm
 from app.forms import AdminValidateAccountForm, SearchOligosForm
 from app.forms import InitializeNewOligosForm, DownloadRecords, EditOligoForm
 from app.forms import ConfirmOligoEditsForm, AddNewOligoTable, ConfirmNewOligos
-from app.forms import AdminPrivilegesForm
+from app.forms import AdminPrivilegesForm, AdminDeleteUserForm
 from app.email import send_password_reset_email
 from app.models import User, Oligos, TempOligo, record_to_dict
 from app.output import csv_response
@@ -132,27 +132,22 @@ def edit_profile():
 def validate_user():
     validate_form = AdminValidateAccountForm()
     admin_form = AdminPrivilegesForm()
+    delete_form = AdminDeleteUserForm()
     if validate_form.submit.data:
-        if validate_form.username.data == "":
-            flash('Please select a user to edit privileges for.')
-            return redirect(url_for('validate_user'))
         user = User.query.filter_by(
             username=validate_form.username.data).first()
         if validate_form.approve.data == 'valid':
             user.validated = True
             db.session.commit()
-            flash('User {} has been verified'.format(user.username))
+            flash('User {} has been verified.'.format(user.username))
         elif validate_form.approve.data == 'invalid':
             db.session.delete(user)
             db.session.commit()
-            flash('User {} has been deleted'.format(user.username))
+            flash('User {} has been deleted.'.format(user.username))
         else:
             flash('You must select an action.')
         return redirect(url_for('validate_user'))
     if admin_form.admin_submit.data:
-        if admin_form.username.data == "":
-            flash('Please select a user to edit privileges for.')
-            return redirect(url_for('validate_user'))
         user = User.query.filter_by(username=admin_form.username.data).first()
         if admin_form.privileges.data == 'give_admin':
             user.is_admin = True
@@ -165,9 +160,19 @@ def validate_user():
         else:
             flash('You must select an action.')
         return redirect(url_for('validate_user'))
+    if delete_form.delete_submit.data:
+        user = User.query.filter_by(
+            username=delete_form.username.data).first()
+        if delete_form.action.data == 'delete_user':
+            db.session.delete(user)
+            db.session.commit()
+            flash('User {} has been deleted.'.format(user.username))
+        else:
+            flash('You must select an action.')
+        return redirect(url_for('validate_user'))
     return render_template('admin/validate_user.html', title='Validate User',
-                           validate_form=validate_form,
-                           admin_form=admin_form)
+                           validate_form=validate_form, admin_form=admin_form,
+                           delete_form=delete_form)
 
 
 @app.route('/reset_password_request', methods=['GET', 'POST'])
