@@ -120,9 +120,8 @@ class TempOligo(db.Model):
     notes = db.Column(db.String(500))
 
     @staticmethod
-    def from_file(file_path, delimiter):
+    def from_pd(record_df):
         """Add new records from uploaded .csv, .txt, or copy-paste input."""
-        record_df = pd.read_csv(file_path)
         # make sure the required column is present
         record_df.columns = [x.lower() for x in record_df.columns]
         if 'oligo name' not in list(record_df.columns.values):

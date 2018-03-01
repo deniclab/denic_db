@@ -142,10 +142,10 @@ class InitializeNewOligosForm(FlaskForm):
                                      ('paste_input', 'Copy-paste table')],
                             validators=[DataRequired()])
     number_oligos = IntegerField('Number of new oligos (form entry only)')
-    upload_file = FileField('Upload .csv or .xlsx-format file',
+    upload_file = FileField('Upload .csv or .txt file',
                             validators=[FileAllowed(
-                                ['csv', 'txt', 'xls', 'xlsx'],
-                                'Only csv, txt, and Excel files allowed.')])
+                                ['csv', 'txt'],
+                                'Only csv and txt allowed.')])
 
     paste_field = TextAreaField('Paste comma- or tab-separated values here')
     paste_format = RadioField('Delimiter', choices=[('\t', 'Tab'),
