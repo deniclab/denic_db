@@ -25,7 +25,7 @@ import jwt
 
 
 def admin_required(f):
-    """Decorator to prevent non-administrators from accessing admin content."""
+    """Prevent non-administrators from accessing admin content."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_admin:
@@ -35,7 +35,7 @@ def admin_required(f):
 
 
 def verify_required(f):
-    """Decorator to prevent unverified users from accessing databases."""
+    """Prevent unverified users from accessing databases."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.validated:
@@ -48,7 +48,9 @@ def verify_required(f):
 @app.route('/index')
 @login_required
 def index():
+    """Ref to home page."""
     return render_template('index.html', title='Home', posts='')  # TODO:fix
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -314,6 +316,7 @@ def edit_oligo():
     record_dict = record_to_dict(
         Oligos.query.filter_by(oligo_tube=record_id).first())
     form = EditOligoForm()
+    form.notes.data = record_dict['notes']
     if form.validate_on_submit():
         new_record = Oligos.encode_oligo_dict(
             {'oligo_tube': record_dict['oligo_tube'],
