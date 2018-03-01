@@ -8,7 +8,6 @@ from flask_bootstrap import Bootstrap
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
-import boto3, botocore
 
 app = Flask(__name__)
 app.config.from_object(Config)
