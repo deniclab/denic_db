@@ -8,6 +8,7 @@ from flask_bootstrap import Bootstrap
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
+import boto3, botocore
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -44,5 +45,8 @@ if not app.debug:
     app.logger.addHandler(file_handler)
     app.logger.setLevel(logging.INFO)
     app.logger.info('denic_db startup')
+
+s3 = boto3.client('s3', aws_access_key_id=app.config['S3_KEY'],
+                  aws_secret_access_key=app.config['S3_SECRET'])
 
 from app import views, models, errors

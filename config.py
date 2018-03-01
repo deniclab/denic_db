@@ -12,3 +12,8 @@ class Config(object):
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER')
     ADMINS = ['nweir@fas.harvard.edu']  # TODO: UDATE
+
+    S3_BUCKET = os.environ.get("S3_BUCKET_NAME")
+    S3_KEY = os.environ.get("S3_ACCESS_KEY")
+    S3_SECRET = os.environ.get("S3_SECRET_ACCESS_KEY")
+    S3_LOCATION = 'http://{}.s3.amazonaws.com/'.format(S3_BUCKET)

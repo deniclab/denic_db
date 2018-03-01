@@ -10,6 +10,7 @@ from app.forms import AdminPrivilegesForm
 from app.email import send_password_reset_email
 from app.models import User, Oligos, TempOligo, record_to_dict
 from app.output import csv_response
+from app.storage import upload_file_to_s3
 from flask import redirect, url_for, flash, render_template, request, abort
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
@@ -239,14 +240,11 @@ def oligo_search_or_add():
             if add_init_form.upload_file.data is None:
                 flash('You must upload a file using the browser if you select the Upload File option.')
                 return redirect(url_for('oligo_search_or_add'))
-            f = add_init_form.upload_file.data
-            # TODO: IMPLEMENT FILE TYPE READING/CONVERSION HERE AS NEEDED
-            filename = secure_filename(f.filename)
-            output_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            f.save(output_path)
+            pd_df = pd.read_csv(add_init_form.upload_file.data,
+                                delimiter=add_init_form.paste_format.data)
             try:
-                new_records = TempOligo.from_file(
-                    output_path, delimiter=add_init_form.paste_format.data)
+                new_records = TempOligo.from_pd(
+                    pd_df)
                 return redirect(url_for('confirm_new_oligos',
                                         temp_ids=[','.join(str(i) for i in
                                                            new_records)]))
@@ -268,8 +266,7 @@ def oligo_search_or_add():
             output_path = os.path.join(app.config['UPLOAD_FOLDER'], temp_fname)
             pd_df.to_csv(output_path, index=False)
             try:
-                new_records = TempOligo.from_file(
-                    output_path, delimiter=add_init_form.paste_format.data)
+                new_records = TempOligo.from_pd(pd_df)
                 return redirect(url_for('confirm_new_oligos',
                                         temp_ids=[','.join(str(i) for i in
                                                            new_records)]))
