@@ -70,7 +70,10 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():  # activated when submitted
         # use SQLAlchemy query to get record for the user trying to login
-        user = User.query.filter_by(username=form.username.data).first()
+        if "@" in form.username.data:  # if logged in using email
+            user = User.query.filter_by(email=form.username.data).first()
+        else:
+            user = User.query.filter_by(username=form.username.data).first()
         # next line checks if user wasn't in db or if the password didn't match
         if user is None or not user.check_password(form.password.data):
             flash('invalid username or password')
