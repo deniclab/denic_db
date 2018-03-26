@@ -44,6 +44,16 @@ def verify_required(f):
     return decorated_function
 
 
+def flash_errors(form):
+    """Flash form errors."""
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(u"Error in the %s field - %s" % (
+                getattr(form, field).label.text,
+                error
+            ), 'error')
+
+
 @app.route('/')
 @app.route('/index')
 @login_required
@@ -316,7 +326,6 @@ def edit_oligo():
     record_dict = record_to_dict(
         Oligos.query.filter_by(oligo_tube=record_id).first())
     form = EditOligoForm()
-    form.notes.data = record_dict['notes']
     if form.validate_on_submit():
         new_record = Oligos.encode_oligo_dict(
             {'oligo_tube': record_dict['oligo_tube'],
@@ -327,6 +336,9 @@ def edit_oligo():
              'notes': form.notes.data}
             )
         return redirect(url_for('confirm_oligo_edits', new_record=new_record))
+    else:
+        flash_errors(form)
+    form.notes.data = record_dict['notes']
     return render_template('oligos/edit_oligo.html', form=form,
                            record_dict=record_dict)
 
