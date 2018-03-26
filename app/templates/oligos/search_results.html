@@ -17,6 +17,9 @@
     <!--<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='oligo_search.css') }}">-->
     <h1 style="text-align: center; color: #236ca1">Oligo Search Results</h1>
     <div class="row">
+        <p style="color: #b40000; font-weight: bold; text-align: center;">{{ n_records }} records retrieved.</p>
+    </div>
+    <div class="row">
         <div class="col-xs-2">
             {{ wtf.quick_form(form) }}
         </div>

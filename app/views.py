@@ -310,12 +310,14 @@ def search_results():
     record_list = []
     for r in output_records:
         record_list.append(record_to_dict(r))
+    n_records = str(len(record_list))
     if form.validate_on_submit():
         return csv_response(record_list)
     return render_template('oligos/search_results.html',
                            title='Oligo search results',
                            record_list=record_list,
-                           form=form)
+                           form=form,
+                           n_records=n_records)
 
 
 @app.route('/oligos/edit', methods=['GET', 'POST'])
