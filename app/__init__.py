@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_bootstrap import Bootstrap
+from flask_sslify import SSLify
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
@@ -17,6 +18,7 @@ mail = Mail(app)
 bootstrap = Bootstrap(app)
 migrate = Migrate(app, db)
 login = LoginManager(app)
+sslify = SSLify(app)
 login.login_view = 'login'
 
 if not app.debug:
