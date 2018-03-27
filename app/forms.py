@@ -121,7 +121,12 @@ class ResetPasswordForm(FlaskForm):
 
 
 class SearchOligosForm(FlaskForm):
+    gate = RadioField('', choices=[('OR', 'ANY of the following'),
+                                   ('AND', 'ALL of the following')],
+                      default='OR', validators=[DataRequired()])
     oligo_tube = StringField('Oligo Tube')
+    use_range = BooleanField('To')
+    tube_range_end = StringField('Tube range end')
     oligo_name = StringField('Oligo Name')
     start_date = DateField('Date range start, format YYYY-MM-DD')
     end_date = DateField('Date range end, format YYYY-MM-DD')

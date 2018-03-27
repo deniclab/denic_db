@@ -6,7 +6,7 @@
     <div class="container-fluid">
         <h2 style="color: #b40000">Search the Database</h2>
         <div class="row">
-            <p><strong style="color: #b40000">Search instructions:</strong><br>
+            <p><span style="color: #b40000; font-weight: bold;">Search instructions:</span><br>
                 Fill any or all of the fields to search for oligos. "*" and other
                 wildcard characters are not accepted. To show all oligos created
                 under your username, click
@@ -19,10 +19,31 @@
             {{ search_form.hidden_tag() }}
             <div class="form-group col-sm-12">
                 <div class="row">
-                    <div class="form-group col-sm-6">
+                    <div class="form-group col-sm-12">
+                        {% for subfield in search_form.gate %}
+                            <tr>
+                                <td>{{ subfield(style="margin: 0 0 0 10px;") }}</td>
+                                <td>{{ subfield.label(style="font-weight: normal;")}}</td>
+                            </tr>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-3">
                         {{ search_form.oligo_tube(size=18, class="form-control", placeholder="Oligo Tube") }}
                     </div>
-                    <div class="form-group col-sm-6">
+                    <div class="form-group col-sm-2">
+                        <tr>
+                            <td>{{ search_form.use_range() }}</td>
+                            <td>{{ search_form.use_range.label(style="text-align: center; color:#236ca1") }}</td>
+                        </tr>
+                    </div>
+                    <div class="form-group col-sm-3">
+                        {{ search_form.tube_range_end(size=18, class="form-control", placeholder="Tube range end")}}
+                    </div>
+                    <div class="form-group col-sm-1">
+                    </div>
+                    <div class="form-group col-sm-3">
                         {{ search_form.creator(size=18, class="form-control", placeholder="Creator") }}
                     </div>
                 </div>

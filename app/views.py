@@ -14,7 +14,7 @@ from flask import redirect, url_for, flash, render_template, request, abort
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
-from datetime import datetime
+from datetime import datetime, date
 from functools import wraps
 import pandas as pd
 import os
@@ -22,6 +22,7 @@ from io import StringIO
 import random
 import string
 import jwt
+import copy
 
 
 def admin_required(f):
@@ -227,21 +228,29 @@ def reset_password(token):
 def oligo_search_or_add():
     search_form = SearchOligosForm()
     add_init_form = InitializeNewOligosForm()
-    if search_form.show_all.data or search_form.all_by_me.data or search_form.submit.data:
+    if search_form.show_all.data or search_form.all_by_me.data or \
+       search_form.submit.data:
         if search_form.show_all.data:
             return redirect(url_for(
                 'search_results',
-                filter_by=jwt.encode({}, app.config['SECRET_KEY'],
-                                     algorithm='HS256').decode('utf-8')))
+                filter_by=jwt.encode(
+                    {'gate': 'OR', 'use_range': False, 'oligo_tube': '%'},
+                    app.config['SECRET_KEY'],
+                    algorithm='HS256').decode('utf-8')))
         if search_form.all_by_me.data:
             return redirect(url_for(
                 'search_results',
-                filter_by=jwt.encode({'creator_id': current_user.id},
-                                     app.config['SECRET_KEY'],
-                                     algorithm='HS256').decode('utf-8')))
+                filter_by=jwt.encode(
+                    {'gate': 'OR', 'use_range': False,
+                     'creator_id': current_user.id},
+                    app.config['SECRET_KEY'],
+                    algorithm='HS256').decode('utf-8')))
         if search_form.submit.data:
             return redirect(url_for('search_results', filter_by=mk_query(
+                gate=search_form.gate.data,
+                use_range=search_form.use_range.data,
                 oligo_tube=search_form.oligo_tube.data,
+                tube_range_end=search_form.tube_range_end.data,
                 oligo_name=search_form.oligo_name.data,
                 start_date=search_form.start_date.data,
                 end_date=search_form.end_date.data,
@@ -414,6 +423,7 @@ def show_new_oligos():
     record_dicts = [record_to_dict(i) for i in new_records]
     return render_template('oligos/complete.html', record_dicts=record_dicts)
 
+
 @app.before_request
 def before_request():
     if current_user.is_authenticated:
@@ -423,6 +433,16 @@ def before_request():
 
 def mk_query(**kwargs):
     """Generate the SQLAlchemy filter_by argument to search oligo db."""
-    return jwt.encode({key: "%"+value+"%" for key, value in kwargs.items()
-                       if value is not None}, app.config['SECRET_KEY'],
+    return jwt.encode({key: _enc_value(value) for key, value in kwargs.items()
+                       if value is not None and value != ''},
+                      app.config['SECRET_KEY'],
                       algorithm='HS256').decode('utf-8')
+
+
+def _enc_value(v):
+    if type(v) is str:
+        return "%"+v+"%"
+    elif type(v) is date:
+        return(str(v))
+    else:
+        return v

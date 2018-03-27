@@ -1,4 +1,5 @@
 from app import app, db, login
+from sqlalchemy import or_
 from datetime import datetime, date
 from time import time
 import jwt
@@ -89,11 +90,49 @@ class Oligos(db.Model):
 
     @staticmethod
     def filter_dict_to_records(filter_dict):
-        """Take a dictionary of column:search_term pairs and get records."""
-        return Oligos.query.filter(
-            *(getattr(Oligos, key).ilike(value) for (key, value)
-              in filter_dict.items())).all()
+        """Take a dictionary of column:search_term pairs and get records.
 
+        `filter_dict` must contain two keys:
+            gate : str
+                should the filter utilize and AND or an OR gate across
+                the arguments. Note that if a tube range is used, it is
+                always used in an AND gate fashion.
+            use_range : bool
+                should a range of oligo tubes be searched. If true,
+                all other filters are applied first, and then the
+                results are filtered by the tube range.
+        """
+        gate = filter_dict.pop('gate')
+        gate = gate.strip('%')  # see views.mk_query and views._enc_value
+        use_range = filter_dict.pop('use_range')
+        oligo_tube = filter_dict.pop('oligo_tube', None)
+        tube_range_end = filter_dict.pop('tube_range_end', None)
+        date_range_start = filter_dict.pop('start_date', None)
+        date_range_end = filter_dict.pop('end_date', date.today())
+        # generate initial query which does not include oligo tube filtering
+        if gate == 'OR':
+            query_result = Oligos.query.filter(or_(
+                *(getattr(Oligos, key).ilike(value) for (key, value)
+                  in filter_dict.items())))
+        else:
+            query_result = Oligos.query.filter(
+                *(getattr(Oligos, key).ilike(value) for (key, value)
+                  in filter_dict.items()))
+        # add date range filtering to the query
+        if date_range_start is not None:
+            query_result = query_result.filter(
+                (Oligos.date_added >= date_range_start) &
+                (Oligos.date_added <= date_range_end))
+        # add oligo tube filtering to the query
+        if oligo_tube is not None:
+            if use_range:
+                query_result = query_result.filter(
+                    (Oligos.oligo_tube >= oligo_tube.strip("%")) &
+                    (Oligos.oligo_tube <= tube_range_end.strip("%")))
+            else:
+                query_result = query_result.filter(
+                    Oligos.oligo_tube.ilike(oligo_tube))
+        return query_result.all()
 
     @staticmethod
     def encode_oligo_dict(oligo_dict):
