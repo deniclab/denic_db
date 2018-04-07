@@ -13,3 +13,4 @@ class Config(object):
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER')
     ADMINS = ['nweir@fas.harvard.edu']  # TODO: UDATE
+    MAX_CONTENT_LENGTH = 25*1024*1024  # limit max upload size to 25 mb

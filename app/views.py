@@ -4,11 +4,13 @@ from app import app, db
 from app.forms import LoginForm, RegistrationForm, EditProfileForm
 from app.forms import ResetPasswordRequestForm, ResetPasswordForm
 from app.forms import AdminValidateAccountForm, SearchOligosForm
-from app.forms import InitializeNewOligosForm, DownloadRecords, EditOligoForm
+from app.forms import InitializeNewRecordsForm, DownloadRecords, EditOligoForm
 from app.forms import ConfirmOligoEditsForm, AddNewOligoTable, ConfirmNewOligos
 from app.forms import AdminPrivilegesForm, AdminDeleteUserForm
+from app.Forms import SearchPlasmidsForm
 from app.email import send_password_reset_email
-from app.models import User, Oligos, TempOligo, record_to_dict
+from app.models import User, Oligos, TempOligo, Plasmid, TempPlasmid
+from app.models import record_to_dict
 from app.output import csv_response
 from flask import redirect, url_for, flash, render_template, request, abort
 from flask_login import current_user, login_user, logout_user, login_required
@@ -227,26 +229,26 @@ def reset_password(token):
 @verify_required
 def oligo_search_or_add():
     search_form = SearchOligosForm()
-    add_init_form = InitializeNewOligosForm()
+    add_init_form = InitializeNewRecordsForm()
     if search_form.show_all.data or search_form.all_by_me.data or \
        search_form.submit.data:
         if search_form.show_all.data:
             return redirect(url_for(
-                'search_results',
+                'oligo_search_results',
                 filter_by=jwt.encode(
                     {'gate': 'OR', 'use_range': False, 'oligo_tube': '%'},
                     app.config['SECRET_KEY'],
                     algorithm='HS256').decode('utf-8')))
         if search_form.all_by_me.data:
             return redirect(url_for(
-                'search_results',
+                'oligo_search_results',
                 filter_by=jwt.encode(
                     {'gate': 'OR', 'use_range': False,
                      'creator_id': current_user.id},
                     app.config['SECRET_KEY'],
                     algorithm='HS256').decode('utf-8')))
         if search_form.submit.data:
-            return redirect(url_for('search_results', filter_by=mk_query(
+            return redirect(url_for('oligo_search_results', filter_by=mk_query(
                 gate=search_form.gate.data,
                 use_range=search_form.use_range.data,
                 oligo_tube=search_form.oligo_tube.data,
@@ -310,7 +312,7 @@ def oligo_search_or_add():
 @app.route('/oligos/search_results', methods=['GET', 'POST'])
 @login_required
 @verify_required
-def search_results():
+def oligo_search_results():
     form = DownloadRecords()
     search_terms = request.args.get('filter_by')
     search_terms = jwt.decode(search_terms, app.config['SECRET_KEY'],
@@ -422,6 +424,98 @@ def show_new_oligos():
     new_records = Oligos.query.filter(Oligos.oligo_tube.in_(new_oligos)).all()
     record_dicts = [record_to_dict(i) for i in new_records]
     return render_template('oligos/complete.html', record_dicts=record_dicts)
+
+
+@app.route('/plasmids/begin', methods=['GET', 'POST'])
+@login_required
+@verify_required
+def plasmid_search_or_add():
+    search_form = SearchPlasmidsForm()  # TODO
+    new_plasmid_form = NewPlasmidForm()  # TODO
+    if search_form.show_all.data or search_form.all_by_me.data or \
+       search_form.submit.data:
+        if search_form.show_all.data:
+            return redirect(url_for(
+                'plasmid_search_results',
+                filter_by=jwt.encode(
+                    {'gate': 'OR', 'use_range': False, 'pVD_number': '%'},
+                    app.config['SECRET_KEY'],
+                    algorithm='HS256').decode('utf-8')))
+        if search_form.all_by_me.data:
+            return redirect(url_for(
+                'plasmid_search_results',
+                filter_by=jwt.encode(
+                    {'gate': 'OR', 'use_range': False,
+                     'creator_id': current_user.id},
+                    app.config['SECRET_KEY'],
+                    algorithm='HS256').decode('utf-8')))
+        if search_form.submit.data:
+            # Handle "Other" options
+            if search_form.plasmid_type.data == 'Other':
+                plasmid_type = search_form.plasmid_type_other.data
+            else:
+                plasmid_type = search_form.plasmid_type.data
+            if search_form.bac_selection.data == 'Other':
+                bac_selection = search_form.bac_sel_other.data
+            else:
+                bac_selection = search_form.bac_selection.data
+            if search_form.yeast_selection.data == 'Other':
+                yeast_mamm_selection = search_form.yeast_mamm_sel_other.data
+            else:
+                yeast_mamm_selection = search_form.yeast_mamm_selection.data
+            if search_form.promoter.data == 'Other':
+                promoter = search_form.promoter_other.data
+            else:
+                promoter = search_form.promoter.data
+            if search_form.fusion.data == 'Other':
+                fusion = search_form.fusion_other.data
+            else:
+                fusion = search_form.fusion.data
+
+            return redirect(
+                url_for('plasmid_search_results', filter_by=mk_query(
+                    gate=search_form.gate.data,
+                    use_range=search_form.use_range.data,
+                    pVD_number=search_form.pVD_number.data,
+                    pVD_range_end=search_form.pVD_range_end.data,
+                    plasmid_name=search_form.plasmid_name.data,
+                    start_date=search_form.start_date.data,
+                    end_date=search_form.end_date.data,
+                    description=search_form.description.data,
+                    creator_str=search_form.creator.data,
+                    vector_digest=search_form.vector_digest.data,
+                    insert_digest=search_form.insert_digest.data,
+                    copy_no_bacteria=search_form.copy_no_bacteria.data,
+                    plasmid_type=plasmid_type,
+                    bac_selection=bac_selection,
+                    yeast_mamm_selection=yeast_mamm_selection,
+                    promoter=promoter,
+                    fusion=fusion,
+                    notes=search_form.notes.data
+                    )))
+    if new_plasmid_form.new_submit.data:  # TODO: FINISH UPDATING THIS
+        if not new_plasmid_form.validate():  # checks if plasmid name is there
+            flash_errors(new_plasmid_form)
+            return redirect(url_for('plasmid_search_or_add'))
+        if 'plasmid_map' in request.files:
+            plasmid_map = request.files['plasmid_map']
+            map_fname = secure_filename(plasmid_map.filename)
+            plasmid_map.save(os.path.join(app.config['UPLOAD_FOLDER'],
+                                          map_fname))
+        else:
+            map_fname = None
+        if 'data_file' in request.files:
+            data_file = request.files['data_file']
+            data_fname = secure_filename(data_file.filename)
+            data_file.save(os.path.join(app.config['UPLOAD_FOLDER'],
+                                        data_fname))
+        else:
+            data_fname = None
+        new_record = new_plasmid_form.to_temp_record(data_fname, map_fname)
+        return redirect(url_for('confirm_new_plasmid'),
+                        temp_id=new_record)
+    return render_template('plasmids/begin.html', search_form=search_form,
+                           new_plasmid_form=new_plasmid_form)
 
 
 @app.before_request

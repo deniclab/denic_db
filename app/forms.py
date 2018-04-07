@@ -6,7 +6,7 @@ from wtforms import TextAreaField, DateField, SelectField, FieldList, FormField
 from wtforms import Form, IntegerField, RadioField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
 from wtforms.validators import Length
-from app.models import User, TempOligo
+from app.models import User, TempOligo, TempPlasmid
 from flask_login import current_user
 from datetime import date
 
@@ -155,7 +155,7 @@ class ConfirmOligoEditsForm(FlaskForm):
     go_back = SubmitField('Go Back')
 
 
-class InitializeNewOligosForm(FlaskForm):
+class InitializeNewRecordsForm(FlaskForm):
     input_type = RadioField('Choose input type',
                             choices=[('table_input', 'Form'),
                                      ('file_input', 'Upload file'),
@@ -218,6 +218,192 @@ class AddNewOligoTable(FlaskForm):
 
 class ConfirmNewOligos(FlaskForm):
     submit = SubmitField('Add to Database')
+
+
+class SearchPlasmidsForm(FlaskForm):
+    # Note: Many of the fields in this form are statically defined in the HTML
+    # to allow option grouping in select fields. Therefore, changing
+    # SelectField options here won't necessarily change them in the website,
+    # and the changes may need to additionally be defined in
+    # templates/plasmids/begin.html .
+    gate = RadioField('', choices=[('OR', 'ANY of the following'),
+                                   ('AND', 'ALL of the following')],
+                      default='OR', validators=[DataRequired()])
+    pVD_number = StringField('pVD Number')
+    use_range = BooleanField('To')
+    pVD_range_end = StringField('pVD range end')
+    plasmid_name = StringField('Plasmid Name')
+    start_date = DateField('Date range start, format YYYY-MM-DD')
+    end_date = DateField('Date range end, format YYYY-MM-DD')
+    description = StringField('Description')
+    creator = StringField('Plasmid creator/source')
+    vector_digest = StringField('Vector digest')
+    insert_digest = StringField('Insert digest')
+    copy_no_bacteria = SelectField('Bacterial copy no.',
+                                   choices=[
+                                       ('', 'Select an option'),
+                                       ('Low', 'Low'), ('High', 'High')])
+    plasmid_type = SelectField('Plasmid Type', choices=[
+        ('', 'Select an option'),
+        ('Cloning vector', 'Cloning vector'),
+        ('E. coli expression', 'E. coli expression'), ('BAC', 'BAC')
+        ('Yeast CEN/ARS', 'Yeast CEN/ARS'),
+        ('Yeast 2 Micron', 'Yeast 2 Micron'),
+        ('Yeast Integrating', 'Yeast Integrating'),
+        ('YAC', 'YAC'),
+        ('Mammalian Transient Expression', 'Mammalian Transient Expression'),
+        ('Mammalian Retroviral', 'Mammalian Retroviral'),
+        ('Mammalian Lentiviral', 'Mammalian Lentiviral'),
+        ('Mammalian Integrating', 'Mammalian Integrating'),
+        ('Other', 'Other')])
+    plasmid_type_other = StringField('Other')
+    bac_selection = SelectField('Bacterial selection', choices=[
+        ('', 'Select an option'),
+        ('None', 'None'), ('Amp', 'Amp/Carb'), ('Cm', 'Cm'), ('Kn', 'Kan'),
+        ('Neo', 'Neo'), ('Phleo', 'Phleo'), ('Spec', 'Spec'), ('Tet', 'Tet'),
+        ('Other', 'Other/Multi')])
+    bac_sel_other = StringField('Other')
+    yeast_mamm_selection = SelectField('Yeast/Mammalian selection', choices=[
+        ('', 'Select an option'), ('NA', 'Not applicable'),
+        ('TRP', 'TRP'), ('HIS', 'HIS'), ('URA', 'URA'), ('LEU', 'LEU'),
+        ('KAN', 'KAN'), ('NAT', 'NAT'), ('yHYG', 'HYG (Yeast)'),
+        ('Blasticidin', 'Blasticidin'), ('mHYG', 'HYG (Mammalian)'),
+        ('Neo', 'Neo'), ('Puro', 'Puro'), ('Zeo', 'Zeo'),
+        ('Other', 'Other/Multi')])
+    yeast_mamm_sel_other = StringField('Other')
+    promoter = SelectField('Promoter', choices=[
+        ('', 'Select an option'),
+        ('pGAL', 'pGAL'), ('pTDH3', 'pTDH3/pGPD'), ('pZ4EV', 'pZ4EV'),
+        ('pZ3EV', 'pZ3EV'), ('pTET', 'pTET'), ('pCUP', 'pCUP'),
+        ('pMET', 'pMET'), ('CMV', 'CMV'), ('CAG', 'CAG'), ('MSCV', 'MSCV'),
+        ('Psyn1', 'Psyn1'), ('Psyn135', 'Psyn135'), ('PT7', 'PT7'),
+        ('PR', 'PR'), ('Plac', 'Plac'), ('Ptac', 'Ptac'), ('Para', 'Para'),
+        ('Other', 'Other')])
+    promoter_other = StringField('Other')
+    fusion = SelectField('Fusion', choices=[
+        ('', 'Select an option'),
+        ('GFP', '(e)GFP'), ('YFP', '(e)YFP/Citrine'), ('RFP', 'RFP/mCherry'),
+        ('CFP', '(e)CFP'), ('mTurquoise2', 'mTurquoise2'), ('sfGFP', 'sfGFP'),
+        ('sfYFP', 'sfYFP'), ('mNeongreen', 'mNeongreen'),
+        ('BFP', 'BFP/TagBFP(2)'), ('mEOS', 'mEOS variant'), ('Myc', 'Myc'),
+        ('HA', 'HA'), ('FLAG', 'FLAG'), ('6His', '6His'), ('10His', '10His'),
+        ('MBP', 'MBP'), ('GST', 'GST'), ('SUMO', 'SUMO'), ('MalE', 'MalE'),
+        ('SBP', 'SBP'), ('BiFC', 'BiFC fragment'), ('Gal4', 'Y2H (Gal4)'),
+        ('Ubi', 'Y2H (Ubi)'), ('Other', 'Other')])
+    fusion_other = StringField('Other')
+    notes = TextAreaField('Notes')
+    relative = StringField('Relative pVD #')
+    submit = SubmitField('Search')
+    show_all = SubmitField('Show All Plasmids')
+    all_by_me = SubmitField('Show All Plasmids I entered')
+
+
+class NewPlasmidForm(FlaskForm):
+    # Note: Many of the fields in this form are statically defined in the HTML
+    # to allow option grouping in select fields. Therefore, changing
+    # SelectField options here won't necessarily change them in the website,
+    # and the changes may need to additionally be defined in
+    # templates/plasmids/begin.html .
+    # Note that all field names are prefaced with "new" to distinguish them
+    # from fields in the search form.
+    new_plasmid_name = StringField('Plasmid Name', validators=[DataRequired()])
+    new_description = StringField('Description')
+    new_creator = StringField('Plasmid creator/source')
+    new_vector_digest = StringField('Vector digest')
+    new_insert_digest = StringField('Insert digest')
+    new_copy_no_bacteria = SelectField(
+        'Bacterial copy no.', choices=[('', 'Select an option'),
+                                       ('Low', 'Low'), ('High', 'High')])
+    new_plasmid_type = SelectField('Plasmid Type', choices=[
+        ('', 'Select an option'),
+        ('Cloning vector', 'Cloning vector'),
+        ('E. coli expression', 'E. coli expression'), ('BAC', 'BAC')
+        ('Yeast CEN/ARS', 'Yeast CEN/ARS'),
+        ('Yeast 2 Micron', 'Yeast 2 Micron'),
+        ('Yeast Integrating', 'Yeast Integrating'),
+        ('YAC', 'YAC'),
+        ('Mammalian Transient Expression', 'Mammalian Transient Expression'),
+        ('Mammalian Retroviral', 'Mammalian Retroviral'),
+        ('Mammalian Lentiviral', 'Mammalian Lentiviral'),
+        ('Mammalian Integrating', 'Mammalian Integrating'),
+        ('Other', 'Other')])
+    new_plasmid_type_other = StringField('Other')
+    new_bac_selection = SelectField('Bacterial selection', choices=[
+        ('', 'Select an option'),
+        ('None', 'None'), ('Amp', 'Amp/Carb'), ('Cm', 'Cm'), ('Kn', 'Kan'),
+        ('Neo', 'Neo'), ('Phleo', 'Phleo'), ('Spec', 'Spec'), ('Tet', 'Tet'),
+        ('Other', 'Other/Multi')])
+    new_bac_sel_other = StringField('Other')
+    new_yeast_mamm_selection = SelectField(
+        'Yeast/Mammalian selection', choices=[
+            ('', 'Select an option'), ('NA', 'Not applicable'),
+            ('TRP', 'TRP'), ('HIS', 'HIS'), ('URA', 'URA'), ('LEU', 'LEU'),
+            ('KAN', 'KAN'), ('NAT', 'NAT'), ('yHYG', 'HYG (Yeast)'),
+            ('Blasticidin', 'Blasticidin'), ('mHYG', 'HYG (Mammalian)'),
+            ('Neo', 'Neo'), ('Puro', 'Puro'), ('Zeo', 'Zeo'),
+            ('Other', 'Other/Multi')])
+    new_yeast_mamm_sel_other = StringField('Other')
+    new_promoter = SelectField('Promoter', choices=[
+        ('', 'Select an option'),
+        ('pGAL', 'pGAL'), ('pTDH3', 'pTDH3/pGPD'), ('pZ4EV', 'pZ4EV'),
+        ('pZ3EV', 'pZ3EV'), ('pTET', 'pTET'), ('pCUP', 'pCUP'),
+        ('pMET', 'pMET'), ('CMV', 'CMV'), ('CAG', 'CAG'), ('MSCV', 'MSCV'),
+        ('Psyn1', 'Psyn1'), ('Psyn135', 'Psyn135'), ('PT7', 'PT7'),
+        ('PR', 'PR'), ('Plac', 'Plac'), ('Ptac', 'Ptac'), ('Para', 'Para'),
+        ('Other', 'Other')])
+    new_promoter_other = StringField('Other')
+    new_fusion = SelectField('Fusion', choices=[
+        ('', 'Select an option'),
+        ('GFP', '(e)GFP'), ('YFP', '(e)YFP/Citrine'), ('RFP', 'RFP/mCherry'),
+        ('CFP', '(e)CFP'), ('mTurquoise2', 'mTurquoise2'), ('sfGFP', 'sfGFP'),
+        ('sfYFP', 'sfYFP'), ('mNeongreen', 'mNeongreen'),
+        ('BFP', 'BFP/TagBFP(2)'), ('mEOS', 'mEOS variant'), ('Myc', 'Myc'),
+        ('HA', 'HA'), ('FLAG', 'FLAG'), ('6His', '6His'), ('10His', '10His'),
+        ('MBP', 'MBP'), ('GST', 'GST'), ('SUMO', 'SUMO'), ('MalE', 'MalE'),
+        ('SBP', 'SBP'), ('BiFC', 'BiFC fragment'), ('Gal4', 'Y2H (Gal4)'),
+        ('Ubi', 'Y2H (Ubi)'), ('Other', 'Other')])
+    new_fusion_other = StringField('Other')
+    new_notes = TextAreaField('Notes')
+    new_parent = StringField('Comma-separated parent pVD #s')
+    plasmid_map = FileField('Upload Plasmid Map')
+    data_file = FileField('Upload Relevant Data Image')
+    sequenced = BooleanField('Insert sequenced?')
+    new_submit = SubmitField('Search')
+
+    def to_temp_record(self, data_fname, map_fname):
+        """Create entry in TempPlasmid table and return id."""
+        if self.new_plasmid_type.data == 'Other':
+            self.new_plasmid_type.data = self.new_plasmid_type_other.data
+        if self.new_bac_selection.data == 'Other':
+            self.new_bac_selection.data = self.new_bac_sel_other.data
+        if self.new_yeast_mamm_selection.data == 'Other':
+            self.new_yeast_mamm_selection.data =\
+                self.new_yeast_mamm_sel_other.data
+        if self.new_promoter.data == 'Other':
+            self.new_promoter.data = self.new_promoter_other.data
+        if self.new_fusion.data == 'Other':
+            self.new_fusion.data = self.new_fusion_other.data
+        new_record = TempPlasmid(
+            plasmid_name=self.new_plasmid_name.data,
+            creator_id=current_user.id,
+            creator_str=self.new_creator.data,
+            simple_description=self.new_description.data,
+            vector_digest=self.new_vector_digest.data,
+            insert_digest=self.new_insert_digest.data,
+            copy_no_bacteria=self.new_copy_no_bacteria.data,
+            plasmid_type=self.new_plasmid_type.data,
+            bac_selection=self.new_bac_selection.data,
+            yeast_mamm_selection=self.new_yeast_mamm_selection.data,
+            promoter=self.new_promoter.data,
+            fusion=self.new_fusion.data,
+            image_filename=data_fname,
+            map_filename=map_fname,
+            sequenced=self.sequenced.data,
+            notes=self.new_notes.data,
+            parent=self.new_parent.data)
+        db.session.add(new_record)
+        db.commit()
+        return new_record.temp_id
 
 
 class DownloadRecords(FlaskForm):
