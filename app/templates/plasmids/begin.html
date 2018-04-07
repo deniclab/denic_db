@@ -1,0 +1,391 @@
+{% extends "layout.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    <h1 style="text-align: center; color:#236ca1">pVD Oligo Database</h1>
+    <div class="container-fluid">
+        <h2 style="color: #b40000">Search the Database</h2>
+        <div class="row">
+            <p><span style="color: #b40000; font-weight: bold;">Search instructions:</span><br>
+                Fill any or all of the fields to search for plasmids. "*" and other
+                wildcard characters are not accepted. To show all plasmids entered under your username, click
+                <span style="color: #236ca1; font-weight: bold;"> Show All of My Plasmids</span>.
+                To view the entire database, click
+                <span style="color: #236ca1; font-weight: bold;">Show All Plasmids</span>.
+            </p>
+        </div>
+        <form action="" method="post">
+            {{ search_form.hidden_tag() }}
+            <div class="form-group col-sm-12">
+                <div class="row">
+                    <div class="form-group col-sm-12">
+                        {% for subfield in search_form.gate %}
+                            <tr>
+                                <td>{{ subfield(style="margin: 0 0 0 10px;") }}</td>
+                                <td>{{ subfield.label(style="font-weight: normal;")}}</td>
+                            </tr>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-3">
+                        {{ search_form.pVD_number(size=18, class="form-control", placeholder="pVD number") }}
+                    </div>
+                    <div class="form-group col-sm-1">
+                        <tr>
+                            <td>{{ search_form.use_range() }}</td>
+                            <td>{{ search_form.use_range.label(style="text-align: center; color:#236ca1") }}</td>
+                        </tr>
+                    </div>
+                    <div class="form-group col-sm-3">
+                        {{ search_form.pVD_range_end(size=18, class="form-control", placeholder="pVD range end")}}
+                    </div>
+                    <div class="form-group col-sm-2">
+                    </div>
+                    <div class="form-group col-sm-3">
+                        {{ search_form.creator(size=18, class="form-control", placeholder="Added By") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-6">
+                        {{ search_form.plasmid_name(size=18, class="form-control", placeholder="Plasmid Name") }}
+                    </div>
+                    <div class="form-group col-sm-6">
+                        {{ search_form.description(size=18, class="form-control", placeholder="Description") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-4">
+                        {{ search_form.start_date(size=18, class="form-control", placeholder="Start date (YYYY-MM-DD)") }}
+                    </div>
+                    <div class="form-group col-sm-4">
+                        {{ search_form.end_date(size=18, class="form-control", placeholder="End date (YYYY-MM-DD)") }}
+                    </div>
+                    <div class="form-group col-sm-2">
+                        {{ search_form.vector_digest(size=18, class="form-control", placeholder="Vector digest") }}
+                    </div>
+                    <div class="form-group col-sm-2">
+                        {{ search_form.insert_digest(size=18, class="form-control", placeholder="Insert digest") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-2">
+                        {{ search_form.copy_no_bacteria.label }}
+                        {{ search_form.copy_no_bacteria(size=18, class="form-control") }}
+                    </div>
+                    <div class="form-group col-sm-4">
+                        {{ search_form.plasmid_type.label }}
+                        <select class="form-control" id="plasmid_type" name="plasmid-type">
+                            <option value="">Select one</option>
+                            <optgroup label="Bacterial">
+                                <option value="Cloning Vector">Cloning vector</option>
+                                <option value="E. coli expression">E. coli expression</option>
+                                <option value="BAC">BAC</option>
+                            </optgroup>
+                            <optgroup label="Yeast">
+                                <option value="Yeast CEN/ARS">Yeast CEN/ARS</option>
+                                <option value="Yeast 2 Micron">Yeast 2 Micron</option>
+                                <option value="Yeast Integrating">Yeast Integrating</option>
+                                <option value="YAC">YAC</option>
+                            </optgroup>
+                            <optgroup label="Mammalian">
+                                <option value="Mammalian Transient Expression">Mammalian Transient Expression</option>
+                                <option value="Mammalian Retroviral">Mammalian Retroviral</option>
+                                <option value="Mammalian Lentiviral">Mammalian Lentiviral</option>
+                                <option value="Mammalian Integrating">Mammalian Integrating</option>
+                            </optgroup>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-sm-4">
+                        {{ search_form.plasmid_type_other(size=18, class="form-control", placeholder="Other") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-2">
+                        {{ search_form.bac_selection.label }}
+                        {{ search_form.bac_selection(size=18, class="form-control") }}
+                    </div>
+                    <div class="form-group col-sm-3">
+                        {{search_form.bac_selection_other(size=18, class="form-control", placeholder="Other")}}
+                    </div>
+                    <div class="form-group col-sm-1">
+                        <!-- spacer -->
+                    </div>
+                    <div class="form-group col-sm-3">
+                        {{ search_form.yeast_mamm_selection.label }}
+                        <select class="form-control" id="yeast_mamm_selection" name="yeast_mamm_selection">
+                            <option value="">Select one</option>
+                            <optgroup label="Yeast">
+                                <option value="NA">Not applicable</option>
+                                <option value="TRP">TRP</option>
+                                <option value="HIS">HIS</option>
+                                <option value="URA">URA</option>
+                                <option value="LEU">LEU</option>
+                                <option value="KAN">KAN</option>
+                                <option value="NAT">NAT</option>
+                                <option value="yHYG">HYG (Yeast)</option>
+                            </optgroup>
+                            <optgroup label="Mammalian">
+                                <option value="Blasticidin">Blasticidin</option>
+                                <option value="mHYG">HYG (Mammalian)</option>
+                                <option value="Neo">Neo</option>
+                                <option value="Puro">Puro</option>
+                                <option value="Zeo">Zeo</option>
+                            </optgroup>
+                            <option value="Other">Other/Multi</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-sm-3">
+                        {{ search_form.yeast_mamm_sel_other(size=18, class="form-control", placeholder="Other") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-2">
+                        {{ search_form.promoter.label }}
+                        <select class="form-control" id="promoter" name="promoter">
+                            <option value="">Select one</option>
+                            <optgroup label="E. coli">
+                                <option value="PT7">PT7</option>
+                                <option value="PR">PR</option>
+                                <option value="Plac">Plac</option>
+                                <option value="Ptac">Ptac</option>
+                                <option value="Para">Para</option>
+                                <option value="Psyn1">Psyn1</option>
+                                <option value="Psyn135">Psyn135</option>
+                            </optgroup>
+                            <optgroup label="Yeast">
+                                <option value="pGAL">pGAL</option>
+                                <option value="pTDH3">pTDH3/pGPD</option>
+                                <option value="pZ4EV">pZ4EV</option>
+                                <option value="pZ3EV">pZ3EV</option>
+                                <option value="pTET">pTET</option>
+                                <option value="pCUP">pCUP</option>
+                                <option value="pMET">pMET</option>
+                            </optgroup>
+                            <optgroup label="Mammalian">
+                                <option value="CMV">CMV</option>
+                                <option value="CAG">CAG</option>
+                                <option value="MSCV">MSCV</option>
+                            </optgroup>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-sm-3">
+                        {{ search_form.promoter_other(class="form-control", size=18, placeholder="Other") }}
+                    </div>
+                    <div class="form-group col-sm-1">
+                        <!-- spacer -->
+                    </div>
+                    <div class="form-group col-sm-2">
+                        {{ search_form.fusion.label }}
+                        {{ search_form.fusion(class="form-control", size=18) }}
+                    </div>
+                    <div class="form-group col-sm-4">
+                        {{ search_form.fusion_other(class="form-control", size=18, placeholder="Other") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-2">
+                        {{ search_form.relative(class="form-control", size=18, placeholder="Relative pVD number(s)") }}
+                    </div>
+                    <div class="form-group col-sm-10">
+                        {{ search_form.notes(size=18, class="form-control", placeholder="Notes") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-2">
+                        {{ search_form.submit(size=32, class="form-control", style="font-weight: bold; color: #236ca1") }}
+                    </div>
+                    <div class="form-group col-sm-4">
+                        {{ search_form.show_all(size=32, class="form-control", style="font-weight: bold; color: #236ca1") }}
+                    </div>
+                    <div class="form-group col-sm-4">
+                        {{ search_form.all_by_me(size=32, class="form-control", style="font-weight: bold; color: #236ca1") }}
+                    </div>
+                </div>
+            </div>
+        </form>
+        <br>
+        <br>
+        <h2 style="color: #b40000">Add New Plasmids</h2>
+        <div class="row">
+            <p><strong style="color: #b40000">Instructions for adding new plasmids:</strong><br>
+                <ul>
+                    <li>Fill out the form below and click <span style="color: #6b1313;">Submit</span>. Note that you need to click <span style="color: #6b1313;">Confirm</span> on the next page before your plasmid is entered into the database.</li>
+                    <li>The Plasmid Name field is required.</li>
+                    <li>You are strongly encouraged to fill out as much additional information as possible.</li>
+                    <li>In the parent plasmid field, enter the pVD numbers for any parent plasmids used to generate the new plasmid separated by commas. Enter only numbers and commas.</li>
+                    <li>Do not use commas anywhere in the form. They will be converted to grammatically incorrect semicolons to avoid formatting problems.</li>
+                </ul>
+            </p>
+        </div>
+        <div class="row">
+            <form action="" method="post" enctype="multipart/form-data">
+                {{ new_plasmid_form.hidden_tag() }}
+                <div class="form-group col-sm-12">
+                    <div class="row">
+                        <div class="form-group col-sm-3">
+                            {{ new_plasmid_form.new_plasmid_name(size=18, class="form-control", placeholder="Plasmid name") }}
+                        </div>
+                        <div class="form-group col-sm-2">
+                            {{ new_plasmid_form.new_creator(size=18, class="form-control", placeholder="Creator/Source")}}
+                        <div class="form-group col-sm-7">
+                            {{ new_plasmid_form.new_description(size=18, class="form-control", placeholder="Short description") }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-2">
+                            {{ new_plasmid_form.new_vector_digest(size=18, class="form-control", placeholder="Vector digest") }}
+                        </div>
+                        <div class="form-group col-sm-2">
+                            {{ new_plasmid_form.new_insert_digest(size=18, class="form-control", placeholder="Insert digest") }}
+                        </div>
+                        <div class="form-group col-sm-2">
+                            {{ new_plasmid_form.new_copy_no_bacteria.label }}
+                            {{ new_plasmid_form.new_copy_no_bacteria(size=18, class="form-control") }}
+                        </div>
+                        <div class="form-group col-sm-3">
+                            {{ new_plasmid_form.new_plasmid_type.label }}
+                            <select class="form-control" id="new_plasmid_type" name="new_plasmid-type">
+                                <option value="">Select one</option>
+                                <optgroup label="Bacterial">
+                                    <option value="Cloning Vector">Cloning vector</option>
+                                    <option value="E. coli expression">E. coli expression</option>
+                                    <option value="BAC">BAC</option>
+                                </optgroup>
+                                <optgroup label="Yeast">
+                                    <option value="Yeast CEN/ARS">Yeast CEN/ARS</option>
+                                    <option value="Yeast 2 Micron">Yeast 2 Micron</option>
+                                    <option value="Yeast Integrating">Yeast Integrating</option>
+                                    <option value="YAC">YAC</option>
+                                </optgroup>
+                                <optgroup label="Mammalian">
+                                    <option value="Mammalian Transient Expression">Mammalian Transient Expression</option>
+                                    <option value="Mammalian Retroviral">Mammalian Retroviral</option>
+                                    <option value="Mammalian Lentiviral">Mammalian Lentiviral</option>
+                                    <option value="Mammalian Integrating">Mammalian Integrating</option>
+                                </optgroup>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-sm-3">
+                            {{ new_plasmid_form.new_plasmid_type_other(size=18, class="form-control", placeholder="Other") }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-2">
+                            {{ new_plasmid_form.new_bac_selection.label }}
+                            {{ new_plasmid_form.new_bac_selection(size=18, class="form-control") }}
+                        </div>
+                        <div class="form-group col-sm-3">
+                            {{new_plasmid_form.bac_selection_other(size=18, class="form-control", placeholder="Other")}}
+                        </div>
+                        <div class="form-group col-sm-1">
+                            <!-- spacer -->
+                        </div>
+                        <div class="form-group col-sm-3">
+                            {{ new_plasmid_form.new_yeast_mamm_selection.label }}
+                            <select class="form-control" id="new_yeast_mamm_selection" name="new_yeast_mamm_selection">
+                                <option value="">Select one</option>
+                                <optgroup label="Yeast">
+                                    <option value="NA">Not applicable</option>
+                                    <option value="TRP">TRP</option>
+                                    <option value="HIS">HIS</option>
+                                    <option value="URA">URA</option>
+                                    <option value="LEU">LEU</option>
+                                    <option value="KAN">KAN</option>
+                                    <option value="NAT">NAT</option>
+                                    <option value="yHYG">HYG (Yeast)</option>
+                                </optgroup>
+                                <optgroup label="Mammalian">
+                                    <option value="Blasticidin">Blasticidin</option>
+                                    <option value="mHYG">HYG (Mammalian)</option>
+                                    <option value="Neo">Neo</option>
+                                    <option value="Puro">Puro</option>
+                                    <option value="Zeo">Zeo</option>
+                                </optgroup>
+                                <option value="Other">Other/Multi</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-sm-3">
+                            {{ new_plasmid_form.yeast_mamm_sel_other(size=18, class="form-control", placeholder="Other") }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-2">
+                            {{ new_plasmid_form.promoter.label }}
+                            <select class="form-control" id="new_promoter" name="new_promoter">
+                                <option value="">Select one</option>
+                                <optgroup label="E. coli">
+                                    <option value="PT7">PT7</option>
+                                    <option value="PR">PR</option>
+                                    <option value="Plac">Plac</option>
+                                    <option value="Ptac">Ptac</option>
+                                    <option value="Para">Para</option>
+                                    <option value="Psyn1">Psyn1</option>
+                                    <option value="Psyn135">Psyn135</option>
+                                </optgroup>
+                                <optgroup label="Yeast">
+                                    <option value="pGAL">pGAL</option>
+                                    <option value="pTDH3">pTDH3/pGPD</option>
+                                    <option value="pZ4EV">pZ4EV</option>
+                                    <option value="pZ3EV">pZ3EV</option>
+                                    <option value="pTET">pTET</option>
+                                    <option value="pCUP">pCUP</option>
+                                    <option value="pMET">pMET</option>
+                                </optgroup>
+                                <optgroup label="Mammalian">
+                                    <option value="CMV">CMV</option>
+                                    <option value="CAG">CAG</option>
+                                    <option value="MSCV">MSCV</option>
+                                </optgroup>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-sm-3">
+                            {{ new_plasmid_form.promoter_other(class="form-control", size=18, placeholder="Other") }}
+                        </div>
+                        <div class="form-group col-sm-1">
+                            <!-- spacer -->
+                        </div>
+                        <div class="form-group col-sm-2">
+                            {{ new_plasmid_form.fusion.label }}
+                            {{ new_plasmid_form.fusion(class="form-control", size=18) }}
+                        </div>
+                        <div class="form-group col-sm-4">
+                            {{ new_plasmid_form.fusion_other(class="form-control", size=18, placeholder="Other") }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-2">
+                            {{ new_plasmid_form.new_parent(class="form-control", size=18, placeholder="Parent pVD number(s)") }}
+                        </div>
+                        <div class="form-group col-sm-10">
+                            {{ new_plasmid_form.new_notes(size=18, class="form-control", placeholder="Notes") }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-3">
+                            {{ new_plasmid_form.plasmid_map.label }}
+                            {{ new_plasmid_form.plasmid_map() }}
+                        </div>
+                        <div class="form-group col-sm-3">
+                            {{ new_plasmid_form.data_file.label }}
+                            {{ new_plasmid_form.data_file() }}
+                        </div>
+                        <div class="form-group col-sm-2">
+                            <tr>
+                                <td>{{ new_plasmid_form.sequenced.label(style="text-align: center; color:#236ca1") }}</td>
+                                <td>{{ new_plasmid_form.sequenced() }}</td>
+                            </tr>
+                        </div>
+                        <div class="form-group col-sm-2">
+                            new_plasmid_form.new_submit(size=32, class="form-control", style="font-weight: bold; color: #236ca1")
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

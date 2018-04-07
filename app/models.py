@@ -149,7 +149,7 @@ class Oligos(db.Model):
 
 class TempOligo(db.Model):
     temp_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    oligo_tube = db.Column(db.Integer, db.ForeignKey('oligos.oligo_tube'),
+    oligo_tube = db.Column(db.Integer, db.ForeignKey('Oligos.oligo_tube'),
                            index=True)
     oligo_name = db.Column(db.String(150), index=True)
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
@@ -180,6 +180,64 @@ class TempOligo(db.Model):
             db.session.commit()
             new_ids.append(new_oligo.temp_id)
         return new_ids
+
+
+class Plasmid(db.Model):
+    pVD_number = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    plasmid_name = db.Column(db.String(150), index=True)
+    date_added = db.Column(db.Date(), index=True)
+    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    creator_str = db.Column(db.String(50))
+    simple_description = db.Column(db.String(200))
+    backbone = db.Column(db.String(100))
+    vector_digest = db.Column(db.String(100))
+    insert_digest = db.Column(db.String(100))
+    copy_no_bacteria = db.Column(db.String(5))
+    copy_no_yeast = db.Column(db.String(15))
+    bac_selection = db.Column(db.String(25))
+    yeast_mamm_selection = db.Column(db.String(50))
+    promoter = db.Column(db.String(50))
+    fusion = db.Column(db.String(50))
+    sequenced = db.Column(db.Boolean, default=False)
+    notes = db.Column(db.String(2000))
+    # because plasmid map and data are renamed to match pVD number,
+    # just need a boolean indicator of whether or not it's present
+    has_image_file = db.Column(db.Boolean, default=False)
+    has_map_file = db.Column(db.Boolean, default=False)
+
+    def __repr__(self):
+        return '<Plasmid {}>'.format(self.pVD_number)
+
+
+class PlasmidRelative(db.Model):
+    """SQLAlchemy model for recording plasmid parents and descendants."""
+
+    relation_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    pVD_number = db.Column(db.Integer, db.ForeignKey('plasmid.pVD_number'))
+    parent_plasmid = db.Column(db.Integer)
+
+
+class TempPlasmid(db.Model):
+    temp_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    pVD_number = db.Column(db.Integer, db.ForeignKey('Plasmid.pVD_number'),
+                           index=True)
+    plasmid_name = db.Column(db.String(150), index=True)
+    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    creator_str = db.Column(db.String(50))
+    simple_description = db.Column(db.String(200))
+    vector_digest = db.Column(db.String(100))
+    insert_digest = db.Column(db.String(100))
+    copy_no_bacteria = db.Column(db.String(5))
+    plasmid_type = db.Column(db.String(50))
+    bac_selection = db.Column(db.String(25))
+    yeast_mamm_selection = db.Column(db.String(25))
+    promoter = db.Column(db.String(50))
+    fusion = db.Column(db.String(50))
+    image_filename = db.Column(db.String(100))
+    map_filename = db.Column(db.String(100))
+    sequenced = db.Column(db.Boolean, default=False)
+    notes = db.Column(db.String(2000))
+    parent = db.Column(db.String(100))
 
 
 def record_to_dict(record):
