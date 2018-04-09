@@ -1,4 +1,4 @@
-from app import app, db, login
+from app import app, db, login, forms
 from sqlalchemy import or_
 from datetime import datetime, date
 from time import time
@@ -149,7 +149,7 @@ class Oligos(db.Model):
 
 class TempOligo(db.Model):
     temp_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    oligo_tube = db.Column(db.Integer, db.ForeignKey('Oligos.oligo_tube'),
+    oligo_tube = db.Column(db.Integer, db.ForeignKey('oligos.oligo_tube'),
                            index=True)
     oligo_name = db.Column(db.String(150), index=True)
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
@@ -189,11 +189,10 @@ class Plasmid(db.Model):
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
     creator_str = db.Column(db.String(50))
     simple_description = db.Column(db.String(200))
-    backbone = db.Column(db.String(100))
     vector_digest = db.Column(db.String(100))
     insert_digest = db.Column(db.String(100))
     copy_no_bacteria = db.Column(db.String(5))
-    copy_no_yeast = db.Column(db.String(15))
+    plasmid_type = db.Column(db.String(50))
     bac_selection = db.Column(db.String(25))
     yeast_mamm_selection = db.Column(db.String(50))
     promoter = db.Column(db.String(50))
@@ -208,6 +207,66 @@ class Plasmid(db.Model):
     def __repr__(self):
         return '<Plasmid {}>'.format(self.pVD_number)
 
+    @staticmethod
+    def filter_dict_to_records(filter_dict):
+        """Take a dictionary of column:search_term pairs and get records.
+
+        `filter_dict` must contain two keys:
+            gate : str
+                should the filter utilize and AND or an OR gate across
+                the arguments. Note that if a tube range is used, it is
+                always used in an AND gate fashion.
+            use_range : bool
+                should a range of plasmid tubes be searched. If true,
+                all other filters are applied first, and then the
+                results are filtered by the tube range.
+        """
+        gate = filter_dict.pop('gate')
+        gate = gate.strip('%')  # see views.mk_query and views._enc_value
+        use_range = filter_dict.pop('use_range')
+        pVD_number = filter_dict.pop('pVD_number', None)
+        pVD_range_end = filter_dict.pop('pVD_range_end', None)
+        date_range_start = filter_dict.pop('start_date', None)
+        date_range_end = filter_dict.pop('end_date', date.today())
+        # generate initial query which does not include oligo tube filtering
+        if gate == 'OR':
+            query_result = Plasmid.query.filter(or_(
+                *(getattr(Plasmid, key).ilike(value) for (key, value)
+                  in filter_dict.items())))
+        else:
+            query_result = Plasmid.query.filter(
+                *(getattr(Plasmid, key).ilike(value) for (key, value)
+                  in filter_dict.items()))
+        # get the list of relatives from the relative table
+        if 'relative' in filter_dict:
+            relative_list = app.forms.NewPlasmidForm.relative_field_to_pVDs(
+                filter_dict.pop('relative'))
+            relation_query = PlasmidRelative.query.filter(
+                or_(((PlasmidRelative.pVD_number.like(i)),
+                    (PlasmidRelative.parent_plasmid.like(i)))
+                    for i in relative_list))
+            relative_pvds = [
+                relation.pVD_number for relation in relation_query.all()]
+            if gate == 'OR':
+                plasmid_relatives = Plasmid.query.filter(
+                    Plasmid.pVD_number.in_(relative_pvds))
+                query_result = query_result.union(plasmid_relatives)
+        # add date range filtering to the query
+        if date_range_start is not None:
+            query_result = query_result.filter(
+                (Plasmid.date_added >= date_range_start) &
+                (Plasmid.date_added <= date_range_end))
+        # add oligo tube filtering to the query
+        if pVD_number is not None:
+            if use_range:
+                query_result = query_result.filter(
+                    (Plasmid.pVD_number >= pVD_number.strip("%")) &
+                    (Plasmid.pVD_number <= pVD_range_end.strip("%")))
+            else:
+                query_result = query_result.filter(
+                    Plasmid.pVD_number.ilike(pVD_number))
+        return query_result.all()
+
 
 class PlasmidRelative(db.Model):
     """SQLAlchemy model for recording plasmid parents and descendants."""
@@ -219,7 +278,7 @@ class PlasmidRelative(db.Model):
 
 class TempPlasmid(db.Model):
     temp_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    pVD_number = db.Column(db.Integer, db.ForeignKey('Plasmid.pVD_number'),
+    pVD_number = db.Column(db.Integer, db.ForeignKey('plasmid.pVD_number'),
                            index=True)
     plasmid_name = db.Column(db.String(150), index=True)
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)

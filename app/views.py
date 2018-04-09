@@ -6,8 +6,8 @@ from app.forms import ResetPasswordRequestForm, ResetPasswordForm
 from app.forms import AdminValidateAccountForm, SearchOligosForm
 from app.forms import InitializeNewRecordsForm, DownloadRecords, EditOligoForm
 from app.forms import ConfirmOligoEditsForm, AddNewOligoTable, ConfirmNewOligos
+from app.forms import SearchPlasmidsForm, NewPlasmidForm
 from app.forms import AdminPrivilegesForm, AdminDeleteUserForm
-from app.Forms import SearchPlasmidsForm
 from app.email import send_password_reset_email
 from app.models import User, Oligos, TempOligo, Plasmid, TempPlasmid
 from app.models import record_to_dict
@@ -471,7 +471,6 @@ def plasmid_search_or_add():
                 fusion = search_form.fusion_other.data
             else:
                 fusion = search_form.fusion.data
-
             return redirect(
                 url_for('plasmid_search_results', filter_by=mk_query(
                     gate=search_form.gate.data,
@@ -491,7 +490,8 @@ def plasmid_search_or_add():
                     yeast_mamm_selection=yeast_mamm_selection,
                     promoter=promoter,
                     fusion=fusion,
-                    notes=search_form.notes.data
+                    notes=search_form.notes.data,
+                    relative=search_form.relative.data
                     )))
     if new_plasmid_form.new_submit.data:  # TODO: FINISH UPDATING THIS
         if not new_plasmid_form.validate():  # checks if plasmid name is there
@@ -516,6 +516,131 @@ def plasmid_search_or_add():
                         temp_id=new_record)
     return render_template('plasmids/begin.html', search_form=search_form,
                            new_plasmid_form=new_plasmid_form)
+
+
+@app.route('/plasmids/search_results', methods=['GET', 'POST'])
+@login_required
+@verify_required
+def plasmid_search_results():
+    form = DownloadRecords()
+    search_terms = request.args.get('filter_by')
+    search_terms = jwt.decode(search_terms, app.config['SECRET_KEY'],
+                              algorithms=['HS256'])
+    output_records = Plasmid.filter_dict_to_records(search_terms)
+    if len(output_records) == 0:  # if the search didn't return any items
+        flash("Your search did not return any results.")
+        return redirect(url_for('plasmid_search_or_add'))
+    record_list = []
+    for r in output_records:
+        record_list.append(record_to_dict(r))
+    n_records = str(len(record_list))
+    if form.validate_on_submit():
+        return csv_response(record_list)
+    return render_template('plasmids/search_results.html',
+                           title='Plasmid search results',
+                           record_list=record_list,
+                           form=form,
+                           n_records=n_records)
+
+
+@app.route('/plasmids/confirm_new_plasmid', methods=['GET', 'POST'])
+@login_required
+@verify_required
+def confirm_new_plasmid():
+    # convert IDs back to list
+    temp_id = int(request.args.get('temp_id'))
+    form = ConfirmNewOligos()  # this is just a submit button
+    record_dict = record_to_dict(
+        TempPlasmid.query.filter_by(temp_id=temp_id).first())
+    if form.validate_on_submit():
+        new_plasmid = Plasmid.new_from_temp(temp_id)
+        return redirect(url_for('show_new_plasmid',
+                                new_plasmid=new_plasmid))
+    return render_template('plasmids/confirm_new_plasmid.html',
+                           record_dict=record_dict, form=form)
+
+
+@app.route('/plasmids/show_new_plasmid', methods=['GET'])
+@login_required
+@verify_required
+def show_new_plasmid():
+    new_plasmid = request.args.get('new_plasmid')
+    new_record = Plasmid.query.filter(pVD_number=new_plasmid).all()
+    record_dict = record_to_dict(new_record)
+    return render_template('plasmids/complete.html', record_dict=record_dict)
+
+
+@app.route('/plasmids/edit', methods=['GET', 'POST'])
+@login_required
+@verify_required
+def edit_plasmid():
+    record_id = request.args.get('pVD_number')
+    record_dict = record_to_dict(
+        Plasmid.query.filter_by(pVD_number=record_id).first())
+    form = EditPlasmidForm()
+    if form.validate_on_submit():
+        new_record = Plasmid.encode_plasmid_dict(
+            {'pVD_number': record_dict['pVD_number'],
+             'plasmid_name': form.plasmid_name.data,
+             'creator_str': form.creator_str.data,
+             'simple_description': form.description.data,
+             'vector_digest': form.vector_digest.data,
+             'insert_digest': form.insert_digest.data,
+             'copy_no_bacteria': form.copy_no_bacteria.data,
+             'plasmid_type': form.plasmid_type.data,
+             'bac_selection': form.bac_selection.data,
+             'yeast_mamm_selection': form.yeast_mamm_selection.data,
+             'promoter': form.promoter.data,
+             'fusion': form.fusion.data,
+             'sequenced': form.sequenced.data,
+             'notes': form.notes.data}
+            )
+        if 'plasmid_map' in request.files:
+            plasmid_map = request.files['plasmid_map']
+            map_fname = secure_filename(plasmid_map.filename)
+            plasmid_map.save(os.path.join(app.config['UPLOAD_FOLDER'],
+                                          map_fname))
+        else:
+            map_fname = None
+        if 'data_file' in request.files:
+            data_file = request.files['data_file']
+            data_fname = secure_filename(data_file.filename)
+            data_file.save(os.path.join(app.config['UPLOAD_FOLDER'],
+                                        data_fname))
+        else:
+            data_fname = None
+        return redirect(url_for(
+            'confirm_plasmid_edits', new_record=new_record,
+            map_fname=map_fname, data_fname=data_fname))
+    else:
+        flash_errors(form)
+    form.notes.data = record_dict['notes']
+    return render_template('plasmids/edit_plasmid.html', form=form,
+                           record_dict=record_dict)
+
+
+@app.route('/plasmids/confirm_edit', methods=['GET', 'POST'])
+@login_required
+@verify_required
+def confirm_plasmid_edits():
+    new_record = Plasmid.decode_plasmid_dict(request.args.get('new_record'))
+    form = ConfirmOligoEditsForm()  # this is just 2 submit buttons
+    plasmid = Plasmid.query.filter_by(
+        pVD_number=new_record['pVD_number']).first()
+    if form.submit.data:
+        plasmid.update_record(new_record)
+        flash('Your changes to pVD# %s were saved.'
+              % new_record['pVD_number'])
+        return redirect(url_for('plasmid_search_or_add'))
+    if form.go_back.data:
+        return redirect(url_for('edit_plasmid',
+                                pVD_number=new_record['pVD_number']))
+    for_template = record_to_dict([plasmid])
+    # update the record dict to include the new values from edits
+    for (key, value) in new_record.items():
+        for_template[key] = value
+    return render_template('plasmids/confirm_edits.html', form=form,
+                           record_dict=for_template)
 
 
 @app.before_request
