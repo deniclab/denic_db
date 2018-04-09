@@ -2,16 +2,19 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-    <h1 style="text-align: center; color:#236ca1">pVD Oligo Database</h1>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='plasmid_search.css') }}">
+    <h1 style="text-align: center; color:#236ca1">pVD Plasmid Database</h1>
     <div class="container-fluid">
         <h2 style="color: #b40000">Search the Database</h2>
         <div class="row">
             <p><span style="color: #b40000; font-weight: bold;">Search instructions:</span><br>
-                Fill any or all of the fields to search for plasmids. "*" and other
-                wildcard characters are not accepted. To show all plasmids entered under your username, click
-                <span style="color: #236ca1; font-weight: bold;"> Show All of My Plasmids</span>.
-                To view the entire database, click
-                <span style="color: #236ca1; font-weight: bold;">Show All Plasmids</span>.
+                <ul>
+                    <li>Fill any or all of the fields to search for plasmids.</li>
+                    <li>"*" and other wildcard characters are not accepted.</li>
+                    <li>To show all plasmids entered under your username, click <span style="color: #236ca1; font-weight: bold;"> Show All of My Plasmids</span>.</li>
+                    <li>To view the entire database, click <span style="color: #236ca1; font-weight: bold;">Show All Plasmids</span>.</li>
+                    <li><strong>To use the <span style="color: #236ca1; font-weight: bold;">Other</span> options, select Other in the associated dropdown menu first.</strong></li>
+                </ul>
             </p>
         </div>
         <form action="" method="post">
@@ -28,7 +31,10 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="form-group col-sm-3">
+                    <h4 style="text-align: center; color:#b40000">General plasmid information</h4>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-2">
                         {{ search_form.pVD_number(size=18, class="form-control", placeholder="pVD number") }}
                     </div>
                     <div class="form-group col-sm-1">
@@ -37,13 +43,17 @@
                             <td>{{ search_form.use_range.label(style="text-align: center; color:#236ca1") }}</td>
                         </tr>
                     </div>
-                    <div class="form-group col-sm-3">
+                    <div class="form-group col-sm-2">
                         {{ search_form.pVD_range_end(size=18, class="form-control", placeholder="pVD range end")}}
                     </div>
-                    <div class="form-group col-sm-2">
+                    <div class="form-group col-sm-1">
+                        <!-- placeholder -->
                     </div>
                     <div class="form-group col-sm-3">
                         {{ search_form.creator(size=18, class="form-control", placeholder="Added By") }}
+                    </div>
+                    <div class="form-group col-sm-3">
+                        {{ search_form.relative(class="form-control", size=18, placeholder="Relative pVD number(s)") }}
                     </div>
                 </div>
                 <div class="row">
@@ -55,25 +65,35 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="form-group col-sm-4">
+                    <div class="form-group col-sm-3">
                         {{ search_form.start_date(size=18, class="form-control", placeholder="Start date (YYYY-MM-DD)") }}
                     </div>
-                    <div class="form-group col-sm-4">
+                    <div class="form-group col-sm-3">
                         {{ search_form.end_date(size=18, class="form-control", placeholder="End date (YYYY-MM-DD)") }}
                     </div>
-                    <div class="form-group col-sm-2">
-                        {{ search_form.vector_digest(size=18, class="form-control", placeholder="Vector digest") }}
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-12">
+                        {{ search_form.notes(size=18, class="form-control", placeholder="Notes") }}
                     </div>
-                    <div class="form-group col-sm-2">
-                        {{ search_form.insert_digest(size=18, class="form-control", placeholder="Insert digest") }}
-                    </div>
+                </div>
+                <div class="row">
+                    <h4 style="text-align: center; color:#b40000">Functional details</h4>
                 </div>
                 <div class="row">
                     <div class="form-group col-sm-2">
                         {{ search_form.copy_no_bacteria.label }}
-                        {{ search_form.copy_no_bacteria(size=18, class="form-control") }}
+                        {{ search_form.copy_no_bacteria(class="form-control") }}
                     </div>
-                    <div class="form-group col-sm-4">
+                    <div class="form-group col-sm-2">
+                        <label for="vector_digest"> </label>
+                        {{ search_form.vector_digest(size=18, class="form-control", placeholder="Vector digest") }}
+                    </div>
+                    <div class="form-group col-sm-2">
+                        <label for="insert_digest"></label>
+                        {{ search_form.insert_digest(size=18, class="form-control", placeholder="Insert digest") }}
+                    </div>
+                    <div class="form-group col-sm-3">
                         {{ search_form.plasmid_type.label }}
                         <select class="form-control" id="plasmid_type" name="plasmid-type">
                             <option value="">Select one</option>
@@ -97,17 +117,19 @@
                             <option value="Other">Other</option>
                         </select>
                     </div>
-                    <div class="form-group col-sm-4">
+                    <div class="form-group col-sm-3">
+                        <label for="plasmid_type_other">Plasmid type (Other)</label>
                         {{ search_form.plasmid_type_other(size=18, class="form-control", placeholder="Other") }}
                     </div>
                 </div>
                 <div class="row">
                     <div class="form-group col-sm-2">
                         {{ search_form.bac_selection.label }}
-                        {{ search_form.bac_selection(size=18, class="form-control") }}
+                        {{ search_form.bac_selection(class="form-control") }}
                     </div>
                     <div class="form-group col-sm-3">
-                        {{search_form.bac_selection_other(size=18, class="form-control", placeholder="Other")}}
+                        <label for="bac_sel_other">Bacterial selection (Other)</label>
+                        {{search_form.bac_sel_other(size=18, class="form-control", placeholder="Other")}}
                     </div>
                     <div class="form-group col-sm-1">
                         <!-- spacer -->
@@ -137,6 +159,7 @@
                         </select>
                     </div>
                     <div class="form-group col-sm-3">
+                        <label for="yeast_mamm_sel_other">Yeast/Mammalian Selection (Other)</label>
                         {{ search_form.yeast_mamm_sel_other(size=18, class="form-control", placeholder="Other") }}
                     </div>
                 </div>
@@ -172,6 +195,7 @@
                         </select>
                     </div>
                     <div class="form-group col-sm-3">
+                        <label for="promoter_other">Promoter (Other)</label>
                         {{ search_form.promoter_other(class="form-control", size=18, placeholder="Other") }}
                     </div>
                     <div class="form-group col-sm-1">
@@ -179,44 +203,40 @@
                     </div>
                     <div class="form-group col-sm-2">
                         {{ search_form.fusion.label }}
-                        {{ search_form.fusion(class="form-control", size=18) }}
+                        {{ search_form.fusion(class="form-control") }}
                     </div>
                     <div class="form-group col-sm-4">
+                        <label for="fusion_other">Fusion (Other)</label>
                         {{ search_form.fusion_other(class="form-control", size=18, placeholder="Other") }}
                     </div>
                 </div>
                 <div class="row">
-                    <div class="form-group col-sm-2">
-                        {{ search_form.relative(class="form-control", size=18, placeholder="Relative pVD number(s)") }}
-                    </div>
-                    <div class="form-group col-sm-10">
-                        {{ search_form.notes(size=18, class="form-control", placeholder="Notes") }}
-                    </div>
-                </div>
-                <div class="row">
+                    <br>
                     <div class="form-group col-sm-2">
                         {{ search_form.submit(size=32, class="form-control", style="font-weight: bold; color: #236ca1") }}
                     </div>
-                    <div class="form-group col-sm-4">
+                    <div class="form-group col-sm-3">
                         {{ search_form.show_all(size=32, class="form-control", style="font-weight: bold; color: #236ca1") }}
                     </div>
-                    <div class="form-group col-sm-4">
+                    <div class="form-group col-sm-3">
                         {{ search_form.all_by_me(size=32, class="form-control", style="font-weight: bold; color: #236ca1") }}
                     </div>
                 </div>
             </div>
         </form>
-        <br>
-        <br>
-        <h2 style="color: #b40000">Add New Plasmids</h2>
+        <div class="row">
+        </div>
+        <h2 style="color: #b40000">Add New Plasmid</h2>
         <div class="row">
             <p><strong style="color: #b40000">Instructions for adding new plasmids:</strong><br>
                 <ul>
-                    <li>Fill out the form below and click <span style="color: #6b1313;">Submit</span>. Note that you need to click <span style="color: #6b1313;">Confirm</span> on the next page before your plasmid is entered into the database.</li>
+                    <li>Fill out the form below and click <span style="color: #236ca1; font-weight: bold;">Submit</span>. Note that you need to click <span style="color: #236ca1; font-weight: bold;">Confirm</span> on the next page before your plasmid is entered into the database.</li>
                     <li>The Plasmid Name field is required.</li>
                     <li>You are strongly encouraged to fill out as much additional information as possible.</li>
                     <li>In the parent plasmid field, enter the pVD numbers for any parent plasmids used to generate the new plasmid separated by commas. Enter only numbers and commas.</li>
-                    <li>Do not use commas anywhere in the form. They will be converted to grammatically incorrect semicolons to avoid formatting problems.</li>
+                    <li>Do not use commas anywhere in the form (except to separate parents in the parent plasmid field). They will be converted to grammatically incorrect semicolons to avoid formatting problems.</li>
+                    <li>GenBank (.gb) format is recommended for uploading plasmid maps as it is compatible with most sequence analysis software.</li>
+                    <li><strong>To use the <span style="color: #236ca1; font-weight: bold;">Other</span> options, select Other in the associated dropdown menu first.</strong></li>
                 </ul>
             </p>
         </div>
@@ -225,25 +245,48 @@
                 {{ new_plasmid_form.hidden_tag() }}
                 <div class="form-group col-sm-12">
                     <div class="row">
-                        <div class="form-group col-sm-3">
+                        <h4 style="text-align: center; color:#b40000">General plasmid information</h4>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-4">
                             {{ new_plasmid_form.new_plasmid_name(size=18, class="form-control", placeholder="Plasmid name") }}
                         </div>
-                        <div class="form-group col-sm-2">
-                            {{ new_plasmid_form.new_creator(size=18, class="form-control", placeholder="Creator/Source")}}
-                        <div class="form-group col-sm-7">
+                        <div class="form-group col-sm-8">
                             {{ new_plasmid_form.new_description(size=18, class="form-control", placeholder="Short description") }}
                         </div>
                     </div>
                     <div class="row">
+                        <div class="form-group col-sm-4">
+                            <div class="row">
+                                <div class="form-group col-sm-12">
+                                    {{ new_plasmid_form.new_creator(size=18, class="form-control", placeholder="Creator/Source") }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-sm-12">
+                                    {{ new_plasmid_form.new_parent(class="form-control", size=18, placeholder="Parent pVD number(s), comma-separated") }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-sm-8">
+                            {{ new_plasmid_form.new_notes(size=18, class="form-control", placeholder="Notes") }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <h4 style="text-align: center; color:#b40000">Functional details</h4>
+                    </div>
+                    <div class="row">
                         <div class="form-group col-sm-2">
+                            {{ new_plasmid_form.new_copy_no_bacteria.label }}
+                            {{ new_plasmid_form.new_copy_no_bacteria(class="form-control") }}
+                        </div>
+                        <div class="form-group col-sm-2">
+                            <label for="new_vector_digest"></label>
                             {{ new_plasmid_form.new_vector_digest(size=18, class="form-control", placeholder="Vector digest") }}
                         </div>
                         <div class="form-group col-sm-2">
+                            <label for="new_insert_digest"></label>
                             {{ new_plasmid_form.new_insert_digest(size=18, class="form-control", placeholder="Insert digest") }}
-                        </div>
-                        <div class="form-group col-sm-2">
-                            {{ new_plasmid_form.new_copy_no_bacteria.label }}
-                            {{ new_plasmid_form.new_copy_no_bacteria(size=18, class="form-control") }}
                         </div>
                         <div class="form-group col-sm-3">
                             {{ new_plasmid_form.new_plasmid_type.label }}
@@ -270,16 +313,18 @@
                             </select>
                         </div>
                         <div class="form-group col-sm-3">
+                            <label for="new_plasmid_type_other">Plasmid type (Other)</label>
                             {{ new_plasmid_form.new_plasmid_type_other(size=18, class="form-control", placeholder="Other") }}
                         </div>
                     </div>
                     <div class="row">
                         <div class="form-group col-sm-2">
                             {{ new_plasmid_form.new_bac_selection.label }}
-                            {{ new_plasmid_form.new_bac_selection(size=18, class="form-control") }}
+                            {{ new_plasmid_form.new_bac_selection(class="form-control") }}
                         </div>
                         <div class="form-group col-sm-3">
-                            {{new_plasmid_form.bac_selection_other(size=18, class="form-control", placeholder="Other")}}
+                            <label for="new_bac_sel_other">Bacterial selection (Other)</label>
+                            {{new_plasmid_form.new_bac_sel_other(size=18, class="form-control", placeholder="Other")}}
                         </div>
                         <div class="form-group col-sm-1">
                             <!-- spacer -->
@@ -309,12 +354,13 @@
                             </select>
                         </div>
                         <div class="form-group col-sm-3">
-                            {{ new_plasmid_form.yeast_mamm_sel_other(size=18, class="form-control", placeholder="Other") }}
+                            <label for="new_yeast_mamm_sel_other">Yeast/Mammalian Selection (Other)</label>
+                            {{ new_plasmid_form.new_yeast_mamm_sel_other(size=18, class="form-control", placeholder="Other") }}
                         </div>
                     </div>
                     <div class="row">
                         <div class="form-group col-sm-2">
-                            {{ new_plasmid_form.promoter.label }}
+                            {{ new_plasmid_form.new_promoter.label }}
                             <select class="form-control" id="new_promoter" name="new_promoter">
                                 <option value="">Select one</option>
                                 <optgroup label="E. coli">
@@ -344,26 +390,23 @@
                             </select>
                         </div>
                         <div class="form-group col-sm-3">
-                            {{ new_plasmid_form.promoter_other(class="form-control", size=18, placeholder="Other") }}
+                            <label for="new_promoter_other">Promoter (Other)</label>
+                            {{ new_plasmid_form.new_promoter_other(class="form-control", size=18, placeholder="Other") }}
                         </div>
                         <div class="form-group col-sm-1">
                             <!-- spacer -->
                         </div>
                         <div class="form-group col-sm-2">
-                            {{ new_plasmid_form.fusion.label }}
-                            {{ new_plasmid_form.fusion(class="form-control", size=18) }}
+                            {{ new_plasmid_form.new_fusion.label }}
+                            {{ new_plasmid_form.new_fusion(class="form-control") }}
                         </div>
                         <div class="form-group col-sm-4">
-                            {{ new_plasmid_form.fusion_other(class="form-control", size=18, placeholder="Other") }}
+                            <label for="new_fusion_other">Fusion (Other/Multi)</label>
+                            {{ new_plasmid_form.new_fusion_other(class="form-control", size=18, placeholder="Other") }}
                         </div>
                     </div>
                     <div class="row">
-                        <div class="form-group col-sm-2">
-                            {{ new_plasmid_form.new_parent(class="form-control", size=18, placeholder="Parent pVD number(s)") }}
-                        </div>
-                        <div class="form-group col-sm-10">
-                            {{ new_plasmid_form.new_notes(size=18, class="form-control", placeholder="Notes") }}
-                        </div>
+                        <br> <!-- spacer -->
                     </div>
                     <div class="row">
                         <div class="form-group col-sm-3">
@@ -380,8 +423,11 @@
                                 <td>{{ new_plasmid_form.sequenced() }}</td>
                             </tr>
                         </div>
+                    </div>
+                    <div class="row">
+                        <br>
                         <div class="form-group col-sm-2">
-                            new_plasmid_form.new_submit(size=32, class="form-control", style="font-weight: bold; color: #236ca1")
+                            {{ new_plasmid_form.new_submit(size=32, class="form-control", style="font-weight: bold; color: #236ca1") }}
                         </div>
                     </div>
                 </div>
