@@ -50,7 +50,7 @@
                         <!-- placeholder -->
                     </div>
                     <div class="form-group col-sm-3">
-                        {{ search_form.creator(size=18, class="form-control", placeholder="Added By") }}
+                        {{ search_form.creator(size=18, class="form-control", placeholder="Added By/Source") }}
                     </div>
                     <div class="form-group col-sm-3">
                         {{ search_form.relative(class="form-control", size=18, placeholder="Relative pVD number(s)") }}
@@ -70,6 +70,12 @@
                     </div>
                     <div class="form-group col-sm-3">
                         {{ search_form.end_date(size=18, class="form-control", placeholder="End date (YYYY-MM-DD)") }}
+                    </div>
+                    <div class="form-group col-sm-3">
+                        {{ search_form.backbone(size=18, class="form-control", placeholder="Backbone") }}
+                    </div>
+                    <div class="form-group col-sm-3">
+                        {{ search_form.insert_source(size=18, class="form-control", placeholder="Source of insert") }}
                     </div>
                 </div>
                 <div class="row">
@@ -138,8 +144,9 @@
                         {{ search_form.yeast_mamm_selection.label }}
                         <select class="form-control" id="yeast_mamm_selection" name="yeast_mamm_selection">
                             <option value="">Select one</option>
+                            <option value="NA">Not applicable</option>
+                            <option value="Other">Other/Multi</option>
                             <optgroup label="Yeast">
-                                <option value="NA">Not applicable</option>
                                 <option value="TRP">TRP</option>
                                 <option value="HIS">HIS</option>
                                 <option value="URA">URA</option>
@@ -155,7 +162,6 @@
                                 <option value="Puro">Puro</option>
                                 <option value="Zeo">Zeo</option>
                             </optgroup>
-                            <option value="Other">Other/Multi</option>
                         </select>
                     </div>
                     <div class="form-group col-sm-3">
@@ -256,19 +262,21 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="form-group col-sm-4">
-                            <div class="row">
-                                <div class="form-group col-sm-12">
-                                    {{ new_plasmid_form.new_creator(size=18, class="form-control", placeholder="Creator/Source") }}
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="form-group col-sm-12">
-                                    {{ new_plasmid_form.new_parent(class="form-control", size=18, placeholder="Parent pVD number(s), comma-separated") }}
-                                </div>
-                            </div>
+                        <div class="form-group col-sm-3">
+                            {{ new_plasmid_form.new_creator(size=18, class="form-control", placeholder="Creator/Source") }}
                         </div>
-                        <div class="form-group col-sm-8">
+                        <div class="form-group col-sm-4">
+                            {{ new_plasmid_form.new_parent(class="form-control", size=18, placeholder="Parent pVD number(s), comma-separated") }}
+                        </div>
+                        <div class="form-group col-sm-2">
+                            {{ new_plasmid_form.new_backbone(size=18, class="form-control", placeholder="Backbone") }}
+                        </div>
+                        <div class="form-group col-sm-3">
+                            {{ new_plasmid_form.new_insert_source(size=18, class="form-control", placeholder="Source of insert") }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-12">
                             {{ new_plasmid_form.new_notes(size=18, class="form-control", placeholder="Notes") }}
                         </div>
                     </div>
@@ -333,8 +341,9 @@
                             {{ new_plasmid_form.new_yeast_mamm_selection.label }}
                             <select class="form-control" id="new_yeast_mamm_selection" name="new_yeast_mamm_selection">
                                 <option value="">Select one</option>
+                                <option value="NA">Not applicable</option>
+                                <option value="Other">Other/Multi</option>
                                 <optgroup label="Yeast">
-                                    <option value="NA">Not applicable</option>
                                     <option value="TRP">TRP</option>
                                     <option value="HIS">HIS</option>
                                     <option value="URA">URA</option>
@@ -350,7 +359,7 @@
                                     <option value="Puro">Puro</option>
                                     <option value="Zeo">Zeo</option>
                                 </optgroup>
-                                <option value="Other">Other/Multi</option>
+
                             </select>
                         </div>
                         <div class="form-group col-sm-3">

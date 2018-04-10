@@ -1,0 +1,124 @@
+{% extends "layout.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='plasmid_search.css') }}">
+<h1 style="text-align: center; color: #236ca1">Confirm Plasmid Edits</h1>
+<p> {{ record_dict }} </p>
+<div class="container-fluid" style="padding-top: 25px;">
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <div class="form-group col-sm-12">
+            <div class="row">
+                <div class="form-group col-sm-2">
+                    <label for="pVD_number">pVD Number</label>
+                    <input class="form-control" id="pVD_number" type="text" size=18 disabled value="{{ record_dict['pVD_number'] }}">
+                </div>
+                <div class="form-group col-sm-4">
+                    <label for="plasmid_name">Plasmid Name</label>
+                    <input class="form-control" id="plasmid_name" type="text" size=18 disabled value="{{ record_dict['plasmid_name'] }}">
+                </div>
+                <div class="form-group col-sm-2">
+                    <label for="sequence">Creator/Source</label>
+                    <input class="form-control" id="creator_str" type="text" size=18 disabled value="{{ record_dict['creator_str'] }}">
+                </div>
+                <div class="form-group col-sm-2">
+                    <label for="creator_str">Date Added</label>
+                    <input class="form-control" id="date_added" type="text" size=18 disabled value="{{ record_dict['date_added'] }}">
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-sm-12">
+                    <label for="simple_description">Description</label>
+                    <input class="form-control" id="date_added" type="text" size=18 disabled value="{{ record_dict['simple_description'] }}">
+                </div>
+            </div>
+            <div class="row">
+                <div class='form-group col-sm-3'>
+                    <label for="backbone">Plasmid Backbone</label>
+                    <input class="form-control" id="backbone" type="text" size=18 disabled value="{{ record_dict['backbone'] }}">
+                </div>
+                <div class='form-group col-sm-3'>
+                    <label for="insert_source">Source of Insert</label>
+                    <input class="form-control" id="insert_source" type="text" size=18 disabled value="{{ record_dict['insert_source'] }}">
+                </div>
+                <div class='form-group col-sm-3'>
+                    <label for="vector_digest">Vector Digest</label>
+                    <input class="form-control" id="vector_digest" type="text" size=18 disabled value="{{ record_dict['vector_digest'] }}">
+                </div>
+                <div class='form-group col-sm-3'>
+                    <label for="insert_digest">Insert Digest</label>
+                    <input class="form-control" id="insert_digest" type="text" size=18 disabled value="{{ record_dict['insert_digest'] }}">
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-sm-2">
+                    <label for="bac_selection">Bacterial Selection</label>
+                    <input class="form-control" id="bac_selection" type="text" size=18 disabled value="{{ record_dict['bac_selection'] }}">
+                </div>
+                <div class="form-group col-sm-3">
+                    <label for="yeast_mamm_selection">Yeast/Mammalian Selection</label>
+                    <input class="form-control" id="yeast_mamm_selection" type="text" size=18 disabled value="{{ record_dict['yeast_mamm_selection'] }}">
+                </div>
+                <div class="form-group col-sm-1">
+                    <!-- spacer -->
+                </div>
+                <div class="form-group col-sm-3">
+                    <label for="promoter">Promoter</label>
+                    <input class="form-control" id="promoter" type="text" size=18 disabled value="{{ record_dict['promoter'] }}">
+                </div>
+                <div class="form-group col-sm-3">
+                    <label for="fusion">Fusion</label>
+                    <input class="form-control" id="fusion" type="text" size=18 disabled value="{{ record_dict['fusion'] }}">
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-sm-3">
+                    <label for="parents">Parent plasmids</label>
+                    <input class="form-control" id="parents" type="text" size=18 disabled value="{{ record_dict['parents'] }}">
+                </div>
+                <div class="form-group col-sm-2">
+                    <tr>
+                        <td><label for="sequenced">Sequenced</label></td>
+                        {% if record_dict['sequenced'] %}
+                        <td><input id="sequenced" type="checkbox" disabled checked></td>
+                        {% else %}
+                        <td><input id="sequenced" type="checkbox" disabled></td>
+                        {% endif %}
+                    </tr>
+                </div>
+                <div class="form-group col-sm-3">
+                    <span style="font-weight: bold; color: #236ca1;">Data file: </span>
+                    {% if not data_fname %}
+                        <span style="font-weight: bold; color: #236ca1;">Unchanged.</span>
+                    {% else %}
+                        <span style="font-weight: bold; color: #b40000;">Updated to {{ data_fname }}.</span>
+                    {% endif %}
+                </div>
+                <div class="form-group col-sm-3">
+                    <span style="font-weight: bold; color: #236ca1;">Plasmid map: </span>
+                    {% if not plasmid_map %}
+                        <span style="font-weight: bold; color: #236ca1;">Unchanged.</span>
+                    {% else %}
+                        <span style="font-weight: bold; color: #b40000;">Updated to {{ plasmid_map }}.</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-sm-12">
+                    <label for="notes">Notes</label>
+                    <input class="form-control" id="notes" type="text" size=18 disabled value="{{ record_dict['notes'] }}">
+                </div>
+            </div>
+            <div class="row">
+                <div class='form-group col-xs-4'>
+                    {{ form.go_back(size=32, class="form-control",style="font-weight: bold; color: #b40000;") }}
+                </div>
+                <div class='form-group col-xs-4'>
+                    {{ form.submit(size=32, class="form-control",style="font-weight: bold; color: #236ca1;") }}
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
