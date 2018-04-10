@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, current_user
 import pandas as pd
 from hashlib import md5
+import re
 
 
 class User(UserMixin, db.Model):
@@ -189,6 +190,8 @@ class Plasmid(db.Model):
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
     creator_str = db.Column(db.String(50))
     simple_description = db.Column(db.String(200))
+    backbone = db.Column(db.String(50))
+    insert_source = db.Column(db.String(50))
     vector_digest = db.Column(db.String(100))
     insert_digest = db.Column(db.String(100))
     copy_no_bacteria = db.Column(db.String(5))
@@ -201,11 +204,18 @@ class Plasmid(db.Model):
     notes = db.Column(db.String(2000))
     # because plasmid map and data are renamed to match pVD number,
     # just need a boolean indicator of whether or not it's present
-    has_image_file = db.Column(db.Boolean, default=False)
-    has_map_file = db.Column(db.Boolean, default=False)
+    image_filename = db.Column(db.String(100))
+    map_filename = db.Column(db.String(100))
 
     def __repr__(self):
         return '<Plasmid {}>'.format(self.pVD_number)
+
+    def update_record(self, record_dict):
+        for (key, value) in record_dict.items():
+            if key is not 'pVD_number':
+                if getattr(self, key) != value:
+                    setattr(self, key, value)
+        db.session.commit()
 
     @staticmethod
     def filter_dict_to_records(filter_dict):
@@ -275,6 +285,11 @@ class PlasmidRelative(db.Model):
     pVD_number = db.Column(db.Integer, db.ForeignKey('plasmid.pVD_number'))
     parent_plasmid = db.Column(db.Integer)
 
+    @staticmethod
+    def string_to_pVDs(relative_field):
+        """Extract list of relative pVD numbers from the relative field."""
+        return [int(i) for i in re.findall('[0-9]+', relative_field)]
+
 
 class TempPlasmid(db.Model):
     temp_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -286,6 +301,8 @@ class TempPlasmid(db.Model):
     simple_description = db.Column(db.String(200))
     vector_digest = db.Column(db.String(100))
     insert_digest = db.Column(db.String(100))
+    backbone = db.Column(db.String(25))
+    insert_source = db.Column(db.String(50))
     copy_no_bacteria = db.Column(db.String(5))
     plasmid_type = db.Column(db.String(50))
     bac_selection = db.Column(db.String(25))

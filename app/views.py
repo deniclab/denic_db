@@ -6,10 +6,11 @@ from app.forms import ResetPasswordRequestForm, ResetPasswordForm
 from app.forms import AdminValidateAccountForm, SearchOligosForm
 from app.forms import InitializeNewRecordsForm, DownloadRecords, EditOligoForm
 from app.forms import ConfirmOligoEditsForm, AddNewOligoTable, ConfirmNewOligos
-from app.forms import SearchPlasmidsForm, NewPlasmidForm
+from app.forms import SearchPlasmidsForm, NewPlasmidForm, EditPlasmidForm
 from app.forms import AdminPrivilegesForm, AdminDeleteUserForm
 from app.email import send_password_reset_email
-from app.models import User, Oligos, TempOligo, Plasmid, TempPlasmid
+from app.models import User, Oligos, TempOligo
+from app.models import Plasmid, TempPlasmid, PlasmidRelative
 from app.models import record_to_dict
 from app.output import csv_response
 from flask import redirect, url_for, flash, render_template, request, abort
@@ -24,8 +25,6 @@ from io import StringIO
 import random
 import string
 import jwt
-import copy
-
 
 def admin_required(f):
     """Prevent non-administrators from accessing admin content."""
@@ -459,7 +458,7 @@ def plasmid_search_or_add():
                 bac_selection = search_form.bac_sel_other.data
             else:
                 bac_selection = search_form.bac_selection.data
-            if search_form.yeast_selection.data == 'Other':
+            if search_form.yeast_mamm_selection.data == 'Other':
                 yeast_mamm_selection = search_form.yeast_mamm_sel_other.data
             else:
                 yeast_mamm_selection = search_form.yeast_mamm_selection.data
@@ -484,6 +483,8 @@ def plasmid_search_or_add():
                     creator_str=search_form.creator.data,
                     vector_digest=search_form.vector_digest.data,
                     insert_digest=search_form.insert_digest.data,
+                    backbone=search_form.backbone.data,
+                    insert_source=search_form.insert_source.data,
                     copy_no_bacteria=search_form.copy_no_bacteria.data,
                     plasmid_type=plasmid_type,
                     bac_selection=bac_selection,
@@ -579,22 +580,14 @@ def edit_plasmid():
         Plasmid.query.filter_by(pVD_number=record_id).first())
     form = EditPlasmidForm()
     if form.validate_on_submit():
-        new_record = Plasmid.encode_plasmid_dict(
-            {'pVD_number': record_dict['pVD_number'],
-             'plasmid_name': form.plasmid_name.data,
-             'creator_str': form.creator_str.data,
-             'simple_description': form.description.data,
-             'vector_digest': form.vector_digest.data,
-             'insert_digest': form.insert_digest.data,
-             'copy_no_bacteria': form.copy_no_bacteria.data,
-             'plasmid_type': form.plasmid_type.data,
-             'bac_selection': form.bac_selection.data,
-             'yeast_mamm_selection': form.yeast_mamm_selection.data,
-             'promoter': form.promoter.data,
-             'fusion': form.fusion.data,
-             'sequenced': form.sequenced.data,
-             'notes': form.notes.data}
-            )
+        output_dict = record_dict
+        for fieldname, value in form.data.items():
+            if fieldname in ('plasmid_map', 'data_file', 'submit',
+                             'csrf_token'):
+                continue  # these fields handled later (or left out)
+            if value not in ('', None, 'None'):
+                output_dict[fieldname] = value
+        new_record = Oligos.encode_oligo_dict(output_dict)  # jwt dict encoder
         if 'plasmid_map' in request.files:
             plasmid_map = request.files['plasmid_map']
             map_fname = secure_filename(plasmid_map.filename)
@@ -614,7 +607,12 @@ def edit_plasmid():
             map_fname=map_fname, data_fname=data_fname))
     else:
         flash_errors(form)
+    parent_plasmids = [i.parent_plasmid for i in
+                       PlasmidRelative.query.filter_by(pVD_number=record_id)]
+    parent_plasmids = ','.join(parent_plasmids)
     form.notes.data = record_dict['notes']
+    form.parents.data = parent_plasmids
+    # TODO: ADD LINES HERE TO PASS VALS TO RELATIVE FIELD
     return render_template('plasmids/edit_plasmid.html', form=form,
                            record_dict=record_dict)
 
@@ -623,11 +621,31 @@ def edit_plasmid():
 @login_required
 @verify_required
 def confirm_plasmid_edits():
-    new_record = Plasmid.decode_plasmid_dict(request.args.get('new_record'))
+    new_record = Oligos.decode_oligo_dict(request.args.get('new_record'))
     form = ConfirmOligoEditsForm()  # this is just 2 submit buttons
     plasmid = Plasmid.query.filter_by(
         pVD_number=new_record['pVD_number']).first()
     if form.submit.data:
+        parent_plasmids = new_record.pop('parents', '')
+        parent_plasmids = PlasmidRelative.string_to_pVDs(parent_plasmids)
+        # first, check if records exist that match the listed parents, and
+        # if records exist for the same pVD that have other parents which
+        # need to be removed.
+        db_parents = PlasmidRelative.query.filter_by(
+            pVD_number=plasmid.pVD_number).all()
+        db_parent_list = [p.parent_plasmid for p in db_parents]
+        for d in db_parents:
+            # remove the ones that aren't in the list passed by the user
+            if d.parent_plasmid not in parent_plasmids:
+                db.session.delete(d)
+                db.session.commit()
+        for p in parent_plasmids:
+            # add the ones that aren't already in the PlasmidRelative table
+            if p not in db_parent_list:
+                new_parent = PlasmidRelative(pVD_number=plasmid.pVD_number,
+                                             parent_plasmid=p)
+                db.session.add(new_parent)
+                db.session.commit()
         plasmid.update_record(new_record)
         flash('Your changes to pVD# %s were saved.'
               % new_record['pVD_number'])
@@ -635,7 +653,7 @@ def confirm_plasmid_edits():
     if form.go_back.data:
         return redirect(url_for('edit_plasmid',
                                 pVD_number=new_record['pVD_number']))
-    for_template = record_to_dict([plasmid])
+    for_template = record_to_dict(plasmid)
     # update the record dict to include the new values from edits
     for (key, value) in new_record.items():
         for_template[key] = value
