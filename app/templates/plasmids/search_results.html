@@ -33,9 +33,10 @@
                     <th>Plasmid Name</th>
                     <th>Plasmid Type</th>
                     <th>Creator</th>
-                    <th>Date Created</th>
                     <th>Bacterial Selection</th>
                     <th>Yeast/Mammalian Selection</th>
+                    <th>Map file</th>
+                    <th>Data file</th>
                 </tr>
             </thead>
             <tbody>
@@ -52,15 +53,20 @@
                         <td class="col-sm-1">{% if record['creator_str'] is not none %}
                                 {{ record['creator_str'] }}
                             {% endif %}</td>
-                        <td class="col-sm-1">{% if record['date_added'] is not none %}
-                                {{ record['date_added'] }}
-                            {% endif %}</td>
                         <td class="col-sm-1">{% if record['bac_selection'] is not none %}
                                 {{ record['bac_selection'] }}
                             {% endif %}</td>
                         <td class="col-sm-2"><p>{% if record['yeast_mamm_selection'] is not none %}
                                 {{ record['yeast_mamm_selection'] }}
                             {% endif %}</p></td>
+                        <td class="col-sm-1">
+                            {% if record['map_filename'] is not none %}
+                            <a href="{{ url_for('download_plasmid_file', pVD_number=record['pVD_number'], type='map') }}">Map</a>
+                            {% endif %}</td>
+                        <td class="col-sm-1">
+                            {% if record['image_filename'] is not none %}
+                            <a href="{{ url_for('download_plasmid_file', pVD_number=record['pVD_number'], type='data') }}">Data File</a>
+                            {% endif %}</td>
                     </tr>
                 {% endfor %}
             </tbody>

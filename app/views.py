@@ -14,6 +14,7 @@ from app.models import Plasmid, TempPlasmid, PlasmidRelative
 from app.models import record_to_dict
 from app.output import csv_response
 from flask import redirect, url_for, flash, render_template, request, abort
+from flask import send_from_directory
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
@@ -429,8 +430,8 @@ def show_new_oligos():
 @login_required
 @verify_required
 def plasmid_search_or_add():
-    search_form = SearchPlasmidsForm()  # TODO
-    new_plasmid_form = NewPlasmidForm()  # TODO
+    search_form = SearchPlasmidsForm()
+    new_plasmid_form = NewPlasmidForm()
     if search_form.show_all.data or search_form.all_by_me.data or \
        search_form.submit.data:
         if search_form.show_all.data:
@@ -513,8 +514,8 @@ def plasmid_search_or_add():
         else:
             data_fname = None
         new_record = new_plasmid_form.to_temp_record(data_fname, map_fname)
-        return redirect(url_for('confirm_new_plasmid'),
-                        temp_id=new_record)
+        return redirect(url_for('confirm_new_plasmid',
+                        temp_id=new_record))
     return render_template('plasmids/begin.html', search_form=search_form,
                            new_plasmid_form=new_plasmid_form)
 
@@ -553,8 +554,11 @@ def confirm_new_plasmid():
     form = ConfirmNewOligos()  # this is just a submit button
     record_dict = record_to_dict(
         TempPlasmid.query.filter_by(temp_id=temp_id).first())
+    record_dict['parent'] = PlasmidRelative.string_to_pVDs(
+        record_dict['parent'])  # convert from string to list
     if form.validate_on_submit():
         new_plasmid = Plasmid.new_from_temp(temp_id)
+        PlasmidRelative.pVD_list_to_records(new_plasmid, record_dict['parent'])
         return redirect(url_for('show_new_plasmid',
                                 new_plasmid=new_plasmid))
     return render_template('plasmids/confirm_new_plasmid.html',
@@ -566,9 +570,14 @@ def confirm_new_plasmid():
 @verify_required
 def show_new_plasmid():
     new_plasmid = request.args.get('new_plasmid')
-    new_record = Plasmid.query.filter(pVD_number=new_plasmid).all()
+    new_record = Plasmid.query.filter_by(pVD_number=new_plasmid).first()
     record_dict = record_to_dict(new_record)
-    return render_template('plasmids/complete.html', record_dict=record_dict)
+    parent_plasmids = PlasmidRelative.query.filter_by(
+        pVD_number=new_record.pVD_number).all()
+    parent_plasmids = ['pVD'+str(p.parent_plasmid) for p in parent_plasmids]
+    parent_plasmids = ', '.join(parent_plasmids)
+    return render_template('plasmids/complete.html', record_dict=record_dict,
+                           parent_plasmids=parent_plasmids)
 
 
 @app.route('/plasmids/edit', methods=['GET', 'POST'])
@@ -579,20 +588,26 @@ def edit_plasmid():
     record_dict = record_to_dict(
         Plasmid.query.filter_by(pVD_number=record_id).first())
     form = EditPlasmidForm()
-    if form.validate_on_submit():
+    if form.download_map.data:
+        return send_from_directory(app.config['UPLOAD_FOLDER'],
+                                   record_dict['map_filename'])
+    if form.download_data.data:
+        return send_from_directory(app.config['UPLOAD_FOLDER'],
+                                   record_dict['data_filename'])
+    if form.submit.data and form.validate():
         output_dict = record_dict
         for fieldname, value in form.data.items():
             if fieldname in ('plasmid_map', 'data_file', 'submit',
-                             'csrf_token'):
+                             'csrf_token', 'download_map', 'download_data'):
                 continue  # these fields handled later (or left out)
             if value not in ('', None, 'None'):
                 output_dict[fieldname] = value
-        new_record = Oligos.encode_oligo_dict(output_dict)  # jwt dict encoder
         if 'plasmid_map' in request.files:
             plasmid_map = request.files['plasmid_map']
             map_fname = secure_filename(plasmid_map.filename)
             plasmid_map.save(os.path.join(app.config['UPLOAD_FOLDER'],
                                           map_fname))
+            output_dict['map_filename'] = map_fname
         else:
             map_fname = None
         if 'data_file' in request.files:
@@ -600,8 +615,10 @@ def edit_plasmid():
             data_fname = secure_filename(data_file.filename)
             data_file.save(os.path.join(app.config['UPLOAD_FOLDER'],
                                         data_fname))
+            output_dict['image_filename'] = data_fname
         else:
             data_fname = None
+        new_record = Oligos.encode_oligo_dict(output_dict)  # jwt dict encoder
         return redirect(url_for(
             'confirm_plasmid_edits', new_record=new_record,
             map_fname=map_fname, data_fname=data_fname))
@@ -659,6 +676,23 @@ def confirm_plasmid_edits():
         for_template[key] = value
     return render_template('plasmids/confirm_edits.html', form=form,
                            record_dict=for_template)
+
+
+@app.route('/plasmids/download', methods=['GET'])
+@login_required
+@verify_required
+def download_plasmid_file():
+    pVD_number = request.args.get('pVD_number')
+    file_type = request.args.get('type')
+    record = Plasmid.query.filter_by(pVD_number=pVD_number).first()
+    if file_type == 'map':
+        return send_from_directory(app.config['UPLOAD_FOLDER'],
+                                   record.map_filename, as_attachment=True,
+                                   attachment_filename=record.map_filename)
+    elif file_type == 'data':
+        return send_from_directory(app.config['UPLOAD_FOLDER'],
+                                   record.image_filename, as_attachment=True,
+                                   attachment_filename=record.image_filename)
 
 
 @app.before_request

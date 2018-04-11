@@ -3,26 +3,24 @@
 
 {% block app_content %}
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='plasmid_search.css') }}">
-<h1 style="text-align: center; color: #236ca1">Confirm Plasmid Edits</h1>
-<p> {{ record_dict }} </p>
+<h1 style="text-align: center; color: #236ca1">New plasmid details</h1>
 <div class="container-fluid" style="padding-top: 25px;">
     <form action="" method="post">
-        {{ form.hidden_tag() }}
         <div class="form-group col-sm-12">
             <div class="row">
                 <div class="form-group col-sm-2">
-                    <label for="pVD_number">pVD Number</label>
+                    <label for="pVD_number" size=24>pVD Number</label>
                     <input class="form-control" id="pVD_number" type="text" size=18 disabled value="{{ record_dict['pVD_number'] }}">
                 </div>
                 <div class="form-group col-sm-4">
                     <label for="plasmid_name">Plasmid Name</label>
                     <input class="form-control" id="plasmid_name" type="text" size=18 disabled value="{{ record_dict['plasmid_name'] }}">
                 </div>
-                <div class="form-group col-sm-2">
+                <div class="form-group col-sm-3">
                     <label for="creator_str">Creator/Source</label>
                     <input class="form-control" id="creator_str" type="text" size=18 disabled value="{{ record_dict['creator_str'] }}">
                 </div>
-                <div class="form-group col-sm-2">
+                <div class="form-group col-sm-3">
                     <label for="date_added">Date Added</label>
                     <input class="form-control" id="date_added" type="text" size=18 disabled value="{{ record_dict['date_added'] }}">
                 </div>
@@ -78,8 +76,8 @@
             </div>
             <div class="row">
                 <div class="form-group col-sm-3">
-                    <label for="parents">Parent plasmids</label>
-                    <input class="form-control" id="parents" type="text" size=18 disabled value="{{ record_dict['parents'] }}">
+                    <label for="parent">Parent plasmids</label>
+                    <input class="form-control" id="parent" type="text" size=18 disabled value="{{ parent_plasmids }}">
                 </div>
                 <div class="form-group col-sm-2">
                     <tr>
@@ -93,18 +91,18 @@
                 </div>
                 <div class="form-group col-sm-3">
                     <span style="font-weight: bold; color: #236ca1;">Data file: </span>
-                    {% if not record_dict['data_filename'] %}
-                        <span style="font-weight: bold; color: #236ca1;">Unchanged.</span>
+                    {% if not data_fname %}
+                        <span style="font-weight: bold; color: #236ca1;">None.</span>
                     {% else %}
-                        <span style="font-weight: bold; color: #b40000;">Updated to {{ record_dict['data_filename'] }}</span>
+                        <span style="font-weight: bold; color: #b40000;">{{ data_fname }}</span>
                     {% endif %}
                 </div>
                 <div class="form-group col-sm-3">
                     <span style="font-weight: bold; color: #236ca1;">Plasmid map: </span>
-                    {% if not record_dict['map_filename'] %}
-                        <span style="font-weight: bold; color: #236ca1;">Unchanged.</span>
+                    {% if not plasmid_map %}
+                        <span style="font-weight: bold; color: #236ca1;">None.</span>
                     {% else %}
-                        <span style="font-weight: bold; color: #b40000;">Updated to {{ record_dict['map_filename'] }}</span>
+                        <span style="font-weight: bold; color: #b40000;">{{ plasmid_map }}</span>
                     {% endif %}
                 </div>
             </div>
@@ -112,14 +110,6 @@
                 <div class="form-group col-sm-12">
                     <label for="notes">Notes</label>
                     <input class="form-control" id="notes" type="text" size=18 disabled value="{{ record_dict['notes'] }}">
-                </div>
-            </div>
-            <div class="row">
-                <div class='form-group col-xs-4'>
-                    {{ form.go_back(size=32, class="form-control",style="font-weight: bold; color: #b40000;") }}
-                </div>
-                <div class='form-group col-xs-4'>
-                    {{ form.submit(size=32, class="form-control",style="font-weight: bold; color: #236ca1;") }}
                 </div>
             </div>
         </div>
