@@ -4,14 +4,13 @@
 {% block app_content %}
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='plasmid_search.css') }}">
 <h1 style="text-align: center; color: #236ca1">Edit Plasmid</h1>
-<p> {{ record_dict }} </p>
 <div class="row">
     <p><strong style="color: #b40000">Edit instructions:</strong><br>
         Change values in the fields below to edit a Plasmid record. Note that you cannot change the pVD number or the date it was added to the database.
     </p>
 </div>
 <div class="container" style="padding-top: 25px;">
-    <form action="" method="post">
+    <form action="" method="post" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
         <div class="form-group col-sm-12">
             <div class="row">
@@ -179,6 +178,27 @@
                 </div>
             </div>
             <div class="row">
+                <div class="form-group col-sm-12">
+                    {{ form.notes.label }}
+                    {{ form.notes(class="form-control") }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-sm-2">
+                    <!-- placeholder -->
+                </div>
+                <div class="form-group col-sm-3">
+                    {% if record_dict['data_filename'] %}
+                    {{ form.download_data(class="form-control", size=32, style="font-weight: bold; color: #236ca1;") }}
+                    {% endif %}
+                </div>
+                <div class="form-group col-sm-3">
+                    {% if record_dict['map_filename'] %}
+                    {{ form.download_map(class="form-control", size=32, style="font-weight: bold; color: #236ca1;") }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
                 <div class="form-group col-sm-2">
                     <tr>
                         <td>{{ form.sequenced() }}</td>
@@ -199,14 +219,9 @@
                     {% endif %}
                     {{ form.plasmid_map() }}
                 </div>
-            <div class="row">
                 <div class="form-group col-sm-3">
                     {{ form.parents.label }}
                     {{ form.parents(class="form-control", size=18, placeholder="Comma-separated list of ALL parents") }}
-                </div>
-                <div class="form-group col-sm-9">
-                    {{ form.notes.label }}
-                    {{ form.notes(class="form-control") }}
                 </div>
             </div>
             <div class="row">

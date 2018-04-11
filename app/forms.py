@@ -398,8 +398,8 @@ class NewPlasmidForm(FlaskForm):
             creator_id=current_user.id,
             creator_str=self.new_creator.data,
             simple_description=self.new_description.data,
-            backbone=self.backbone,
-            insert_source=self.insert_source,
+            backbone=self.new_backbone.data,
+            insert_source=self.new_insert_source.data,
             vector_digest=self.new_vector_digest.data,
             insert_digest=self.new_insert_digest.data,
             copy_no_bacteria=self.new_copy_no_bacteria.data,
@@ -414,7 +414,7 @@ class NewPlasmidForm(FlaskForm):
             notes=self.new_notes.data,
             parent=self.new_parent.data)
         db.session.add(new_record)
-        db.commit()
+        db.session.commit()
         return new_record.temp_id
 
 
@@ -483,8 +483,10 @@ class EditPlasmidForm(FlaskForm):
         ('Ubi', 'Y2H (Ubi)'), ('Other', 'Other/Multi')],
                          default='')
     fusion_other = StringField('Other')
+    download_map = SubmitField('Download Plasmid Map')
     plasmid_map = FileField("Upload new plasmid map (.gb preferred)")
     sequenced = BooleanField('Insert sequenced?')
+    download_data = SubmitField('Download Data File')
     data_file = FileField('Upload New Data File (<25 MB)')
     notes = TextAreaField('Notes')
     parents = StringField('Parent pVD #(s)')

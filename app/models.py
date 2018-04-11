@@ -277,6 +277,33 @@ class Plasmid(db.Model):
                     Plasmid.pVD_number.ilike(pVD_number))
         return query_result.all()
 
+    def new_from_temp(temp_id):
+        """Add a record from TempPlasmid, returning its new pVD number."""
+        temp_plasmid = TempPlasmid.query.filter_by(temp_id=temp_id).first()
+        new_record = Plasmid(
+            plasmid_name=temp_plasmid.plasmid_name,
+            date_added=date.today(),
+            creator_id=current_user.id,
+            creator_str=temp_plasmid.creator_str,
+            simple_description=temp_plasmid.simple_description,
+            vector_digest=temp_plasmid.vector_digest,
+            insert_digest=temp_plasmid.insert_digest,
+            backbone=temp_plasmid.backbone,
+            insert_source=temp_plasmid.insert_source,
+            copy_no_bacteria=temp_plasmid.copy_no_bacteria,
+            plasmid_type=temp_plasmid.plasmid_type,
+            bac_selection=temp_plasmid.bac_selection,
+            yeast_mamm_selection=temp_plasmid.yeast_mamm_selection,
+            promoter=temp_plasmid.promoter,
+            fusion=temp_plasmid.fusion,
+            image_filename=temp_plasmid.image_filename,
+            map_filename=temp_plasmid.map_filename,
+            sequenced=temp_plasmid.sequenced,
+            notes=temp_plasmid.notes)
+        db.session.add(new_record)
+        db.session.commit()
+        return new_record.pVD_number
+
 
 class PlasmidRelative(db.Model):
     """SQLAlchemy model for recording plasmid parents and descendants."""
@@ -289,6 +316,16 @@ class PlasmidRelative(db.Model):
     def string_to_pVDs(relative_field):
         """Extract list of relative pVD numbers from the relative field."""
         return [int(i) for i in re.findall('[0-9]+', relative_field)]
+
+    @staticmethod
+    def pVD_list_to_records(pVD_child, pVD_parent_list):
+        """Takes string of relative pVD numbers and creates parent records."""
+        if pVD_parent_list:
+            for p in pVD_parent_list:
+                parent_record = PlasmidRelative(pVD_number=pVD_child,
+                                                parent_plasmid=p)
+                db.session.add(parent_record)
+                db.session.commit()
 
 
 class TempPlasmid(db.Model):
