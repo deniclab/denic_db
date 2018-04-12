@@ -32,3 +32,4 @@ def download_file_from_s3(filename, bucket_name, folder=None):
     else:
         source_path = filename
     s3.download_file(bucket_name, source_path, filename)
+    return "{}{}".format(app.config['S3_LOCATION'], source_path)
