@@ -720,10 +720,10 @@ def download_plasmid_file():
     if file_type == 'map':
         if app.config['USE_S3']:
             f = download_file_from_s3(
-                record.data_filename, app.config['S3_BUCKET'],
+                record.map_filename, app.config['S3_BUCKET'],
                 app.config['UPLOAD_FOLDER'])
             response = make_response(f['Body'].read())
-            response.headers['Content-Disposition'] = 'attachment;filename='+record.data_filename
+            response.headers['Content-Disposition'] = 'attachment;filename='+record.map_filename
             response.headers['Content-Type'] = f['ContentType']
             return response
         else:
