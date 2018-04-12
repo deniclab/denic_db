@@ -15,7 +15,7 @@ from app.models import record_to_dict
 from app.helpers import upload_file_to_s3, download_file_from_s3
 from app.output import csv_response
 from flask import redirect, url_for, flash, render_template, request, abort
-from flask import send_from_directory, send_file
+from flask import send_from_directory, make_response
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
@@ -719,9 +719,9 @@ def download_plasmid_file():
     record = Plasmid.query.filter_by(pVD_number=pVD_number).first()
     if file_type == 'map':
         if app.config['USE_S3']:
-            return download_file_from_s3(
+            return make_response(download_file_from_s3(
                 record.map_filename, app.config['S3_BUCKET'],
-                app.config['UPLOAD_FOLDER'])
+                app.config['UPLOAD_FOLDER']))
         else:
             return send_from_directory(
                 app.config['UPLOAD_FOLDER'],
@@ -729,9 +729,9 @@ def download_plasmid_file():
                 attachment_filename=record.map_filename)
     elif file_type == 'data':
         if app.config['USE_S3']:
-            return download_file_from_s3(
+            return make_response(download_file_from_s3(
                 record.image_filename, app.config['S3_BUCKET'],
-                app.config['UPLOAD_FOLDER'])
+                app.config['UPLOAD_FOLDER']))
         else:
             return send_from_directory(
                 app.config['UPLOAD_FOLDER'],
