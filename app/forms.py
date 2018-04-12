@@ -123,8 +123,8 @@ class ResetPasswordForm(FlaskForm):
 
 class SearchOligosForm(FlaskForm):
     gate = RadioField('', choices=[
-        ('OR', 'ANY of these fields (ex. by Vlad OR with Get3 in the name)'),
-        ('AND', 'ALL of these fields (ex. by Vlad AND with Get3 in the name)')],
+        ('OR', 'ANY of these fields (ex. created by Vlad OR with Get3 in the name)'),
+        ('AND', 'ALL of these fields (ex. created by Vlad AND with Get3 in the name)')],
                       default='OR', validators=[DataRequired()])
     oligo_tube = StringField('Oligo Tube')
     tube_range_end = StringField('Tube range end')
@@ -230,8 +230,8 @@ class SearchPlasmidsForm(FlaskForm):
     # and the changes may need to additionally be defined in
     # templates/plasmids/begin.html .
     gate = RadioField('', choices=[
-        ('OR', 'ANY of the following fields (ex. Amp OR Yeast CEN/ARS plasmid)'),
-        ('AND', 'ALL of the following fields (ex. Amp AND Yeast CEN/ARS plasmid)')],
+        ('OR', 'ANY of the following fields (ex. Amp selection OR Yeast CEN/ARS plasmid)'),
+        ('AND', 'ALL of the following fields (ex. Amp selection AND Yeast CEN/ARS plasmid)')],
                       default='OR', validators=[DataRequired()])
     pVD_number = StringField('pVD Number')
     pVD_range_end = StringField('pVD range end')

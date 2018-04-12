@@ -23,3 +23,12 @@ def upload_file_to_s3(f, bucket_name, folder=None, acl='public-read'):
         return e
 
     return "{}{}".format(app.config['S3_LOCATION'], save_key)
+
+
+def download_file_from_s3(filename, bucket_name, folder=None):
+    """Download a file from S3 storage."""
+    if folder:
+        source_path = os.path.join(folder, filename)
+    else:
+        source_path = filename
+    s3.download_file(bucket_name, source_path, filename)
