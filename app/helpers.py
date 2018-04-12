@@ -31,4 +31,4 @@ def download_file_from_s3(filename, bucket_name, folder=None):
         source_path = os.path.join(folder, filename)
     else:
         source_path = filename
-    return s3.download_file(bucket_name, source_path, filename)
+    return s3.get_object(bucket_name, source_path, filename)
