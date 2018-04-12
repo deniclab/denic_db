@@ -4,7 +4,6 @@
 {% block app_content %}
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='plasmid_search.css') }}">
 <h1 style="text-align: center; color: #236ca1">Confirm Plasmid Edits</h1>
-<p> {{ record_dict }} </p>
 <div class="container-fluid" style="padding-top: 25px;">
     <form action="" method="post">
         {{ form.hidden_tag() }}

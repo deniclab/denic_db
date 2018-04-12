@@ -12,6 +12,7 @@ from app.email import send_password_reset_email
 from app.models import User, Oligos, TempOligo
 from app.models import Plasmid, TempPlasmid, PlasmidRelative
 from app.models import record_to_dict
+from app.helpers import upload_file_to_s3
 from app.output import csv_response
 from flask import redirect, url_for, flash, render_template, request, abort
 from flask import send_from_directory
@@ -236,21 +237,19 @@ def oligo_search_or_add():
             return redirect(url_for(
                 'oligo_search_results',
                 filter_by=jwt.encode(
-                    {'gate': 'OR', 'use_range': False, 'oligo_tube': '%'},
+                    {'gate': 'OR', 'oligo_tube': '%'},
                     app.config['SECRET_KEY'],
                     algorithm='HS256').decode('utf-8')))
         if search_form.all_by_me.data:
             return redirect(url_for(
                 'oligo_search_results',
                 filter_by=jwt.encode(
-                    {'gate': 'OR', 'use_range': False,
-                     'creator_id': current_user.id},
+                    {'gate': 'OR', 'creator_id': current_user.id},
                     app.config['SECRET_KEY'],
                     algorithm='HS256').decode('utf-8')))
         if search_form.submit.data:
             return redirect(url_for('oligo_search_results', filter_by=mk_query(
                 gate=search_form.gate.data,
-                use_range=search_form.use_range.data,
                 oligo_tube=search_form.oligo_tube.data,
                 tube_range_end=search_form.tube_range_end.data,
                 oligo_name=search_form.oligo_name.data,
@@ -326,7 +325,7 @@ def oligo_search_results():
         record_list.append(record_to_dict(r))
     n_records = str(len(record_list))
     if form.validate_on_submit():
-        return csv_response(record_list)
+        return csv_response(record_list, 'oligos')
     return render_template('oligos/search_results.html',
                            title='Oligo search results',
                            record_list=record_list,
@@ -438,43 +437,41 @@ def plasmid_search_or_add():
             return redirect(url_for(
                 'plasmid_search_results',
                 filter_by=jwt.encode(
-                    {'gate': 'OR', 'use_range': False, 'pVD_number': '%'},
+                    {'gate': 'OR', 'pVD_number': '%'},
                     app.config['SECRET_KEY'],
                     algorithm='HS256').decode('utf-8')))
         if search_form.all_by_me.data:
             return redirect(url_for(
                 'plasmid_search_results',
                 filter_by=jwt.encode(
-                    {'gate': 'OR', 'use_range': False,
-                     'creator_id': current_user.id},
+                    {'gate': 'OR', 'creator_id': current_user.id},
                     app.config['SECRET_KEY'],
                     algorithm='HS256').decode('utf-8')))
         if search_form.submit.data:
             # Handle "Other" options
-            if search_form.plasmid_type.data == 'Other':
+            if search_form.plasmid_type_other.data:
                 plasmid_type = search_form.plasmid_type_other.data
             else:
                 plasmid_type = search_form.plasmid_type.data
-            if search_form.bac_selection.data == 'Other':
+            if search_form.bac_sel_other.data:
                 bac_selection = search_form.bac_sel_other.data
             else:
                 bac_selection = search_form.bac_selection.data
-            if search_form.yeast_mamm_selection.data == 'Other':
+            if search_form.yeast_mamm_sel_other.data:
                 yeast_mamm_selection = search_form.yeast_mamm_sel_other.data
             else:
                 yeast_mamm_selection = search_form.yeast_mamm_selection.data
-            if search_form.promoter.data == 'Other':
+            if search_form.promoter_other.data:
                 promoter = search_form.promoter_other.data
             else:
                 promoter = search_form.promoter.data
-            if search_form.fusion.data == 'Other':
+            if search_form.fusion_other.data:
                 fusion = search_form.fusion_other.data
             else:
                 fusion = search_form.fusion.data
             return redirect(
                 url_for('plasmid_search_results', filter_by=mk_query(
                     gate=search_form.gate.data,
-                    use_range=search_form.use_range.data,
                     pVD_number=search_form.pVD_number.data,
                     pVD_range_end=search_form.pVD_range_end.data,
                     plasmid_name=search_form.plasmid_name.data,
@@ -502,15 +499,25 @@ def plasmid_search_or_add():
         if 'plasmid_map' in request.files:
             plasmid_map = request.files['plasmid_map']
             map_fname = secure_filename(plasmid_map.filename)
-            plasmid_map.save(os.path.join(app.config['UPLOAD_FOLDER'],
-                                          map_fname))
+            if app.config['USE_S3']:
+                plasmid_map.filename = map_fname
+                upload_file_to_s3(plasmid_map, app.config['S3_BUCKET'],
+                                  folder=app.config['UPLOAD_FOLDER'])
+            else:
+                plasmid_map.save(os.path.join(app.config['UPLOAD_FOLDER'],
+                                              map_fname))
         else:
             map_fname = None
         if 'data_file' in request.files:
             data_file = request.files['data_file']
             data_fname = secure_filename(data_file.filename)
-            data_file.save(os.path.join(app.config['UPLOAD_FOLDER'],
-                                        data_fname))
+            if app.config['USE_S3']:
+                data_file.filename = data_fname
+                upload_file_to_s3(data_file, app.config['S3_BUCKET'],
+                                  folder=app.config['UPLOAD_FOLDER'])
+            else:
+                data_file.save(os.path.join(app.config['UPLOAD_FOLDER'],
+                                            data_fname))
         else:
             data_fname = None
         new_record = new_plasmid_form.to_temp_record(data_fname, map_fname)
@@ -537,7 +544,7 @@ def plasmid_search_results():
         record_list.append(record_to_dict(r))
     n_records = str(len(record_list))
     if form.validate_on_submit():
-        return csv_response(record_list)
+        return csv_response(record_list, 'plasmids')
     return render_template('plasmids/search_results.html',
                            title='Plasmid search results',
                            record_list=record_list,
@@ -596,6 +603,21 @@ def edit_plasmid():
                                    record_dict['data_filename'])
     if form.submit.data and form.validate():
         output_dict = record_dict
+        if form.plasmid_type_other.data:
+            form.plasmid_type.data = form.plasmid_type_other.data
+            form.plasmid_type_other.data = None
+        if form.bac_sel_other.data:
+            form.bac_selection.data = form.bac_sel_other.data
+            form.bac_sel_other.data = None
+        if form.yeast_mamm_sel_other.data:
+            form.yeast_mamm_selection.data = form.yeast_mamm_sel_other.data
+            form.yeast_mamm_sel_other.data = None
+        if form.promoter_other.data:
+            form.promoter.data = form.promoter_other.data
+            form.promoter_other.data = None
+        if form.fusion_other.data:
+            form.fusion.data = form.fusion_other.data
+            form.fusion_other.data = None
         for fieldname, value in form.data.items():
             if fieldname in ('plasmid_map', 'data_file', 'submit',
                              'csrf_token', 'download_map', 'download_data'):
@@ -605,16 +627,26 @@ def edit_plasmid():
         if 'plasmid_map' in request.files:
             plasmid_map = request.files['plasmid_map']
             map_fname = secure_filename(plasmid_map.filename)
-            plasmid_map.save(os.path.join(app.config['UPLOAD_FOLDER'],
-                                          map_fname))
+            if app.config['USE_S3']:
+                plasmid_map.filename = map_fname
+                upload_file_to_s3(plasmid_map, app.config['S3_BUCKET'],
+                                  folder=app.config['UPLOAD_FOLDER'])
+            else:
+                plasmid_map.save(os.path.join(app.config['UPLOAD_FOLDER'],
+                                              map_fname))
             output_dict['map_filename'] = map_fname
         else:
             map_fname = None
         if 'data_file' in request.files:
             data_file = request.files['data_file']
             data_fname = secure_filename(data_file.filename)
-            data_file.save(os.path.join(app.config['UPLOAD_FOLDER'],
-                                        data_fname))
+            if app.config['USE_S3']:
+                data_file.filename = data_fname
+                upload_file_to_s3(data_file, app.config['S3_BUCKET'],
+                                  folder=app.config['UPLOAD_FOLDER'])
+            else:
+                data_file.save(os.path.join(app.config['UPLOAD_FOLDER'],
+                                            data_fname))
             output_dict['image_filename'] = data_fname
         else:
             data_fname = None
@@ -624,7 +656,7 @@ def edit_plasmid():
             map_fname=map_fname, data_fname=data_fname))
     else:
         flash_errors(form)
-    parent_plasmids = [i.parent_plasmid for i in
+    parent_plasmids = [str(i.parent_plasmid) for i in
                        PlasmidRelative.query.filter_by(pVD_number=record_id)]
     parent_plasmids = ','.join(parent_plasmids)
     form.notes.data = record_dict['notes']

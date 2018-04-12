@@ -14,3 +14,10 @@ class Config(object):
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER')
     ADMINS = ['nweir@fas.harvard.edu']  # TODO: UDATE
     MAX_CONTENT_LENGTH = 25*1024*1024  # limit max upload size to 25 mb
+
+    # S3 STORAGE #
+    USE_S3 = os.environ.get('USE_S3') or False
+    S3_BUCKET = os.environ.get('S3_BUCKET') or None
+    S3_ACCESS_KEY = os.environ.get('S3_ACCESS_KEY') or None
+    S3_SECRET_KEY = os.environ.get('S3_SECRET_KEY')
+    S3_LOCATION = 'http://{}.s3.amazonaws.com/'.format(S3_BUCKET)

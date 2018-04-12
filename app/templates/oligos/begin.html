@@ -25,6 +25,7 @@
                                 <td>{{ subfield(style="margin: 0 0 0 10px;") }}</td>
                                 <td>{{ subfield.label(style="font-weight: normal;")}}</td>
                             </tr>
+                            <br>
                         {% endfor %}
                     </div>
                 </div>
@@ -33,15 +34,10 @@
                         {{ search_form.oligo_tube(size=18, class="form-control", placeholder="Oligo Tube") }}
                     </div>
                     <div class="form-group col-sm-1">
-                        <tr>
-                            <td>{{ search_form.use_range() }}</td>
-                            <td>{{ search_form.use_range.label(style="text-align: center; color:#236ca1") }}</td>
-                        </tr>
+                        <p style="text-align: center; color: #236ca1; font-weight: bold;">To (optional)</p>
                     </div>
                     <div class="form-group col-sm-3">
                         {{ search_form.tube_range_end(size=18, class="form-control", placeholder="Tube range end")}}
-                    </div>
-                    <div class="form-group col-sm-2">
                     </div>
                     <div class="form-group col-sm-3">
                         {{ search_form.creator(size=18, class="form-control", placeholder="Creator") }}

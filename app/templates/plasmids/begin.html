@@ -13,7 +13,6 @@
                     <li>"*" and other wildcard characters are not accepted.</li>
                     <li>To show all plasmids entered under your username, click <span style="color: #236ca1; font-weight: bold;"> Show All of My Plasmids</span>.</li>
                     <li>To view the entire database, click <span style="color: #236ca1; font-weight: bold;">Show All Plasmids</span>.</li>
-                    <li><strong>To use the <span style="color: #236ca1; font-weight: bold;">Other</span> options, select Other in the associated dropdown menu first.</strong></li>
                 </ul>
             </p>
         </div>
@@ -27,6 +26,7 @@
                                 <td>{{ subfield(style="margin: 0 0 0 10px;") }}</td>
                                 <td>{{ subfield.label(style="font-weight: normal;")}}</td>
                             </tr>
+                            <br>
                         {% endfor %}
                     </div>
                 </div>
@@ -38,10 +38,7 @@
                         {{ search_form.pVD_number(size=18, class="form-control", placeholder="pVD number") }}
                     </div>
                     <div class="form-group col-sm-1">
-                        <tr>
-                            <td>{{ search_form.use_range() }}</td>
-                            <td>{{ search_form.use_range.label(style="text-align: center; color:#236ca1") }}</td>
-                        </tr>
+                        <p style="text-align: center; color: #236ca1; font-weight: bold;">To (optional)</p>
                     </div>
                     <div class="form-group col-sm-2">
                         {{ search_form.pVD_range_end(size=18, class="form-control", placeholder="pVD range end")}}
@@ -242,7 +239,6 @@
                     <li>In the parent plasmid field, enter the pVD numbers for any parent plasmids used to generate the new plasmid separated by commas. Enter only numbers and commas.</li>
                     <li>Do not use commas anywhere in the form (except to separate parents in the parent plasmid field). They will be converted to grammatically incorrect semicolons to avoid formatting problems.</li>
                     <li>GenBank (.gb) format is recommended for uploading plasmid maps as it is compatible with most sequence analysis software.</li>
-                    <li><strong>To use the <span style="color: #236ca1; font-weight: bold;">Other</span> options, select Other in the associated dropdown menu first.</strong></li>
                 </ul>
             </p>
         </div>

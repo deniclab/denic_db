@@ -122,11 +122,11 @@ class ResetPasswordForm(FlaskForm):
 
 
 class SearchOligosForm(FlaskForm):
-    gate = RadioField('', choices=[('OR', 'ANY of the following'),
-                                   ('AND', 'ALL of the following')],
+    gate = RadioField('', choices=[
+        ('OR', 'ANY of these fields (ex. by Vlad OR with Get3 in the name)'),
+        ('AND', 'ALL of these fields (ex. by Vlad AND with Get3 in the name)')],
                       default='OR', validators=[DataRequired()])
     oligo_tube = StringField('Oligo Tube')
-    use_range = BooleanField('To')
     tube_range_end = StringField('Tube range end')
     oligo_name = StringField('Oligo Name')
     start_date = DateField('Date range start, format YYYY-MM-DD')
@@ -205,6 +205,8 @@ class AddNewOligoTable(FlaskForm):
         record_ids = []
         for entry in self.oligos_grid.entries:  # iterate over rows in grid
             if entry.oligo_name.data:  # if the row contains an oligo name
+                if not entry.creator.data:
+                    entry.creator.data = current_user.username
                 new_record = TempOligo(oligo_name=entry.oligo_name.data,
                                        creator_str=entry.creator.data,
                                        creator_id=current_user.id,
@@ -227,11 +229,11 @@ class SearchPlasmidsForm(FlaskForm):
     # SelectField options here won't necessarily change them in the website,
     # and the changes may need to additionally be defined in
     # templates/plasmids/begin.html .
-    gate = RadioField('', choices=[('OR', 'ANY of the following'),
-                                   ('AND', 'ALL of the following')],
+    gate = RadioField('', choices=[
+        ('OR', 'ANY of the following fields (ex. Amp OR Yeast CEN/ARS plasmid)'),
+        ('AND', 'ALL of the following fields (ex. Amp AND Yeast CEN/ARS plasmid)')],
                       default='OR', validators=[DataRequired()])
     pVD_number = StringField('pVD Number')
-    use_range = BooleanField('To')
     pVD_range_end = StringField('pVD range end')
     plasmid_name = StringField('Plasmid Name')
     start_date = DateField('Date range start, format YYYY-MM-DD')
@@ -382,17 +384,20 @@ class NewPlasmidForm(FlaskForm):
 
     def to_temp_record(self, data_fname, map_fname):
         """Create entry in TempPlasmid table and return id."""
-        if self.new_plasmid_type.data == 'Other':
+        if self.new_plasmid_type_other.data:
             self.new_plasmid_type.data = self.new_plasmid_type_other.data
-        if self.new_bac_selection.data == 'Other':
+        if self.new_bac_sel_other.data:
             self.new_bac_selection.data = self.new_bac_sel_other.data
-        if self.new_yeast_mamm_selection.data == 'Other':
+        if self.new_yeast_mamm_sel_other.data:
             self.new_yeast_mamm_selection.data =\
                 self.new_yeast_mamm_sel_other.data
-        if self.new_promoter.data == 'Other':
+        if self.new_promoter_other.data:
             self.new_promoter.data = self.new_promoter_other.data
-        if self.new_fusion.data == 'Other':
+        if self.new_fusion_other.data:
             self.new_fusion.data = self.new_fusion_other.data
+        # handle empty creator string
+        if not self.new_creator.data:
+            self.new_creator.data = current_user.username
         new_record = TempPlasmid(
             plasmid_name=self.new_plasmid_name.data,
             creator_id=current_user.id,

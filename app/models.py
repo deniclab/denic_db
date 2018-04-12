@@ -105,9 +105,12 @@ class Oligos(db.Model):
         """
         gate = filter_dict.pop('gate')
         gate = gate.strip('%')  # see views.mk_query and views._enc_value
-        use_range = filter_dict.pop('use_range')
         oligo_tube = filter_dict.pop('oligo_tube', None)
+        if oligo_tube is not None:
+            oligo_tube = re.findall('[0-9]+', oligo_tube)[0]
         tube_range_end = filter_dict.pop('tube_range_end', None)
+        if tube_range_end is not None:
+            tube_range_end = re.findall('[0-9]+', tube_range_end)[0]
         date_range_start = filter_dict.pop('start_date', None)
         date_range_end = filter_dict.pop('end_date', date.today())
         # generate initial query which does not include oligo tube filtering
@@ -126,7 +129,7 @@ class Oligos(db.Model):
                 (Oligos.date_added <= date_range_end))
         # add oligo tube filtering to the query
         if oligo_tube is not None:
-            if use_range:
+            if tube_range_end:
                 query_result = query_result.filter(
                     (Oligos.oligo_tube >= oligo_tube.strip("%")) &
                     (Oligos.oligo_tube <= tube_range_end.strip("%")))
@@ -170,6 +173,8 @@ class TempOligo(db.Model):
         record_dict = record_df.to_dict(orient='records')
         new_ids = []
         for row in record_dict:
+            if not row.get('creator', '').strip():
+                row['creator'] = current_user.username
             new_oligo = TempOligo(
                 oligo_name=row['oligo name'].strip(),
                 creator_id=current_user.id,
@@ -233,9 +238,13 @@ class Plasmid(db.Model):
         """
         gate = filter_dict.pop('gate')
         gate = gate.strip('%')  # see views.mk_query and views._enc_value
-        use_range = filter_dict.pop('use_range')
         pVD_number = filter_dict.pop('pVD_number', None)
+        # remove characters
+        if pVD_number not in (None, '%'):
+            pVD_number = re.findall('[0-9]+', pVD_number)[0]
         pVD_range_end = filter_dict.pop('pVD_range_end', None)
+        if pVD_range_end is not None:
+            pVD_range_end = re.findall('[0-9]+', pVD_range_end)[0]
         date_range_start = filter_dict.pop('start_date', None)
         date_range_end = filter_dict.pop('end_date', date.today())
         # generate initial query which does not include oligo tube filtering
@@ -268,7 +277,7 @@ class Plasmid(db.Model):
                 (Plasmid.date_added <= date_range_end))
         # add oligo tube filtering to the query
         if pVD_number is not None:
-            if use_range:
+            if pVD_range_end:
                 query_result = query_result.filter(
                     (Plasmid.pVD_number >= pVD_number.strip("%")) &
                     (Plasmid.pVD_number <= pVD_range_end.strip("%")))
