@@ -719,9 +719,13 @@ def download_plasmid_file():
     record = Plasmid.query.filter_by(pVD_number=pVD_number).first()
     if file_type == 'map':
         if app.config['USE_S3']:
-            return make_response(download_file_from_s3(
-                record.map_filename, app.config['S3_BUCKET'],
-                app.config['UPLOAD_FOLDER']))
+            f = download_file_from_s3(
+                record.data_filename, app.config['S3_BUCKET'],
+                app.config['UPLOAD_FOLDER'])
+            response = make_response(f['Body'].read())
+            response.headers['Content-Disposition'] = 'attachment;filename='+record.data_filename
+            response.headers['Content-Type'] = f['ContentType']
+            return response
         else:
             return send_from_directory(
                 app.config['UPLOAD_FOLDER'],
@@ -729,9 +733,13 @@ def download_plasmid_file():
                 attachment_filename=record.map_filename)
     elif file_type == 'data':
         if app.config['USE_S3']:
-            return make_response(download_file_from_s3(
+            f = download_file_from_s3(
                 record.image_filename, app.config['S3_BUCKET'],
-                app.config['UPLOAD_FOLDER']))
+                app.config['UPLOAD_FOLDER'])
+            response = make_response(f['Body'].read())
+            response.headers['Content-Disposition'] = 'attachment;filename='+record.image_filename
+            response.headers['Content-Type'] = f['ContentType']
+            return response
         else:
             return send_from_directory(
                 app.config['UPLOAD_FOLDER'],
