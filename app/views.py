@@ -8,7 +8,7 @@ from app.forms import InitializeNewRecordsForm, DownloadRecords, EditOligoForm
 from app.forms import ConfirmOligoEditsForm, AddNewOligoTable, ConfirmNewOligos
 from app.forms import SearchPlasmidsForm, NewPlasmidForm, EditPlasmidForm
 from app.forms import AdminPrivilegesForm, AdminDeleteUserForm
-from app.email import send_password_reset_email
+from app.email import send_password_reset_email, send_validation_request_email
 from app.models import User, Oligos, TempOligo
 from app.models import Plasmid, TempPlasmid, PlasmidRelative
 from app.models import record_to_dict
@@ -113,6 +113,7 @@ def register():
         user.validated = False
         db.session.add(user)
         db.session.commit()
+        send_validation_request_email(user)
         flash('You have successfully registered. The administrators have been contacted to approve.')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
