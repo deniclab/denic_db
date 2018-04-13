@@ -2,6 +2,6 @@ Dear Denic Lab intranet admins,
 
 A new user, {{ new_username }}, with the email address {{ new_email }} has requested access to the Denic Lab Intranet. To validate or deny their request, click here:
 
-{{ url_for('validate_user', _external=True)) }}
+{{ url_for('validate_user', _external=True) }}
 
 Thank you!
