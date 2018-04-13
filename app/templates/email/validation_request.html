@@ -1,10 +1,10 @@
 <p>Dear Denic Lab intranet admins,</p>
 <p>
     A new user, {{ new_username }}, with the email address {{ new_email }} has requested access to the Denic Lab Intranet. To validate or deny their request,
-    <a href="{{ url_for('validate_user') }}">
+    <a href="{{ url_for('validate_user', _external=True)) }}">
         click here
     </a>.
 </p>
 <p>Alternatively, you can paste the following link in your browser's address bar:</p>
-<p>{{ url_for('validate_user') }}</p>
+<p>{{ url_for('validate_user', _external=True)) }}</p>
 <p> Thank you!</p>
