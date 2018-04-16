@@ -7,6 +7,7 @@ from wtforms import Form, IntegerField, RadioField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
 from wtforms.validators import Length
 from app.models import User, TempOligo, TempPlasmid
+from app.helpers import MultiCheckboxField
 from flask_login import current_user
 from datetime import date
 import re
@@ -484,6 +485,55 @@ class EditPlasmidForm(FlaskForm):
     notes = TextAreaField('Notes')
     parents = StringField('Parent pVD #(s)')
     submit = SubmitField('Submit changes')
+
+
+class StrainGenotype(Form):
+    genotype = StringField('Genotype', validators=[Length(max=50)])
+
+
+class SearchStrainsForm(FlaskForm):
+    gate = RadioField('', choices=[
+        ('OR', 'ANY of these fields (ex. entered by Vlad OR with deltaget3 in genotype)'),
+        ('AND', 'ALL of these fields (ex. entered by Vlad AND with deltaget3 in genotype)')],
+                      default='OR', validators=[DataRequired()])
+    VDY_number = StringField('VDY number')
+    VDY_range_end = StringField('VDY range end')
+    other_names = StringField('Other name(s)')
+    start_date = DateField('Date range start, format YYYY-MM-DD')
+    end_date = DateField('Date range end, format YYYY-MM-DD')
+    origin = StringField('Lab of Origin')
+    creator = StringField('Creator')
+    strain_background = StringField('Strain Background and/or Mating Type')
+    notebook_ref = StringField('Notebook Reference')
+    marker = StringField('Selectable Marker')
+    plasmid = StringField('Replicating Plasmid')
+    plasmid_selexn = StringField('Plasmid Selection')
+    notes = TextAreaField('Notes')
+    genotype_list = FieldList(FormField(StrainGenotype), min_entries=10)
+    submit = SubmitField('Search')
+    show_all = SubmitField('Show All Strains')
+    all_by_me = SubmitField('Show All Strains I Entered')
+
+
+class NewStrainForm(FlaskForm):
+    new_other_names = StringField('Other name(s)')
+    new_origin = StringField('Lab of Origin')
+    new_new_creator = StringField('Creator')
+    new_strain_background = StringField('Strain Background and/or Mating Type')
+    new_notebook_ref = StringField('Notebook Reference')
+    new_marker = StringField('Selectable Marker')
+    new_plasmid = StringField('Replicating Plasmid')
+    new_plasmid_selexn = StringField('Plasmid Selection')
+    new_notes = TextAreaField('Notes')
+    new_genotype_list = FieldList(FormField(StrainGenotype), min_entries=10)
+    validation = MultiCheckboxField(
+        'Validation Method(s)',
+        choices=((0, 'Not Validated'), (1, 'Colony PCR'), (2, 'Western Blot'),
+                 (3, 'Sequencing'), (4, 'Microscopy'),
+                 (5, 'Other (see Notes)')),
+        default=[0])
+    data_file = FileField('Upload image with relevant data')
+    new_submit = SubmitField('Search')
 
 
 class DownloadRecords(FlaskForm):

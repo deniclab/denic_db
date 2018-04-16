@@ -369,6 +369,62 @@ def record_to_dict(record):
     return r_dict
 
 
+class Strain(db.Model):
+    VDY_number = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    other_names = db.Column(db.String(150), index=True)
+    date_added = db.Column(db.Date(), index=True)
+    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    creator_str = db.Column(db.String(50))
+    strain_background = db.Column(db.String(50))
+    notebook_ref = db.Column(db.String(20))
+    marker = db.Column(db.String(50))
+    plasmid = db.Column(db.String(100))
+    plasmid_selexn = db.Column(db.String(50))
+    validation = db.Column(db.String(25))
+    notes = db.Column(db.String(2000))
+    image_filename = db.Column(db.String(100))
+
+    def __repr__(self):
+        return '<Strain {}>'.format(self.VDY_number)
+
+    def update_record(self, record_dict):
+        for (key, value) in record_dict.items():
+            if key is not 'VDY_number':
+                if getattr(self, key) != value:
+                    setattr(self, key, value)
+        db.session.commit()
+
+
+class StrainGenotype(db.Model):
+    genotype_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    VDY_number = db.Column(db.Integer, db.ForeignKey('strain.VDY_number'),
+                           index=True)
+    locus_info = db.Column(db.String(50))
+
+
+class TempStrain(db.Model):
+    temp_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    other_names = db.Column(db.String(150), index=True)
+    date_added = db.Column(db.Date(), index=True)
+    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    creator_str = db.Column(db.String(50))
+    strain_background = db.Column(db.String(50))
+    notebook_ref = db.Column(db.String(20))
+    marker = db.Column(db.String(50))
+    plasmid = db.Column(db.String(100))
+    plasmid_selexn = db.Column(db.String(50))
+    validation = db.Column(db.String(25))
+    notes = db.Column(db.String(2000))
+    image_filename = db.Column(db.String(100))
+
+
+class TempStrainGenotype(db.Model):
+    genotype_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    temp_strain_id = db.Column(db.Integer, db.ForeignKey('tempstrain.temp_id'),
+                               index=True)
+    locus_info = db.Column(db.String(50))
+
+
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))

@@ -148,6 +148,7 @@ def edit_profile():
 
 
 @app.route('/admin/validate', methods=['GET', 'POST'])
+@login_required
 @admin_required
 def validate_user():
     validate_form = AdminValidateAccountForm()
@@ -746,6 +747,71 @@ def download_plasmid_file():
                 app.config['UPLOAD_FOLDER'],
                 record.image_filename, as_attachment=True,
                 attachment_filename=record.image_filename)
+
+
+@app.route('/strains/begin', methods=['GET', 'POST'])
+@login_required
+@verify_required
+def strain_search_or_add():
+    search_form = SearchStrainsForm()
+    new_strain_form = NewStrainForm()
+    if search_form.show_all.data or search_form.all_by_me.data or \
+       search_form.submit.data:
+        if search_form.show_all.data:
+            return redirect(url_for(
+                'strain_search_results',
+                filter_by=jwt.encode(
+                    {'gate': 'OR', 'VDY_number': '%'},
+                    app.config['SECRET_KEY'],
+                    algorithm='HS256').decode('utf-8')))
+        if search_form.all_by_me.data:
+            return redirect(url_for(
+                'strain_search_results',
+                filter_by=jwt.encode(
+                    {'gate': 'OR', 'creator_id': current_user.id},
+                    app.config['SECRET_KEY'],
+                    algorithm='HS256').decode('utf-8')))
+        if search_form.submit.data:
+            return redirect(
+                url_for('strain_search_results', filter_by=mk_query(
+                    gate=search_form.gate.data,
+                    VDY_number=search_form.VDY_number.data,
+                    VDY_range_end=search_form.VDY_range_end.data,
+                    other_names=search_form.other_names.data,
+                    start_date=search_form.start_date.data,
+                    end_date=search_form.end_date.data,
+                    origin=search_form.origin.data,
+                    creator_str=search_form.creator.data,
+                    strain_background=search_form.strain_background.data,
+                    notebook_ref=search_form.notebook_ref.data,
+                    marker=search_form.marker.data,
+                    genotype=search_form.genotype.data,  # TODO: FIX THIS
+                    notes=search_form.notes.data,
+                    relative=search_form.relative.data,
+                    plasmid=search_form.plasmid.data,
+                    plasmid_selexn=search_form.plasmid_selexn.data
+                    )))
+    if new_strain_form.new_submit.data:  # TODO: FINISH UPDATING THIS
+        if not new_strain_form.validate():  # checks if plasmid name is there
+            flash_errors(new_strain_form)
+            return redirect(url_for('strain_search_or_add'))
+        if 'data_file' in request.files:
+            data_file = request.files['data_file']
+            data_fname = secure_filename(data_file.filename)
+            if app.config['USE_S3']:
+                data_file.filename = data_fname
+                upload_file_to_s3(data_file, app.config['S3_BUCKET'],
+                                  folder=app.config['UPLOAD_FOLDER'])
+            else:
+                data_file.save(os.path.join(app.config['UPLOAD_FOLDER'],
+                                            data_fname))
+        else:
+            data_fname = None
+        new_record = new_strain_form.to_temp_record(data_fname)
+        return redirect(url_for('confirm_new_strain',
+                        temp_id=new_record))
+    return render_template('strains/begin.html', search_form=search_form,
+                           new_strain_form=new_strain_form)
 
 
 @app.before_request

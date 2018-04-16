@@ -1,0 +1,173 @@
+{% extends "layout.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='plasmid_search.css') }}">
+    <h1 style="text-align: center; color:#236ca1">VDY Strain Database</h1>
+    <div class="container-fluid">
+        <h2 style="color: #b40000">Search the Database</h2>
+        <div class="row">
+            <p><span style="color: #b40000; font-weight: bold;">Search instructions:</span><br>
+                <ul>
+                    <li>Fill any or all of the fields to search for strains.</li>
+                    <li>"*" and other wildcard characters are not accepted.</li>
+                    <li>To show all strains entered under your username, click <span style="color: #236ca1; font-weight: bold;"> Show All of My Strains</span>.</li>
+                    <li>To view the entire database, click <span style="color: #236ca1; font-weight: bold;">Show All Strains</span>.</li>
+                </ul>
+            </p>
+        </div>
+        <form action="" method="post">
+            {{ search_form.hidden_tag() }}
+            <div class="form-group col-sm-12">
+                <div class="row">
+                    <div class="form-group col-sm-12">
+                        {% for subfield in search_form.gate %}
+                            <tr>
+                                <td>{{ subfield(style="margin: 0 0 0 10px;") }}</td>
+                                <td>{{ subfield.label(style="font-weight: normal;")}}</td>
+                            </tr>
+                            <br>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-2">
+                        {{ search_form.VDY_number(size=18, class="form-control", placeholder="VDY Number") }}
+                    </div>
+                    <div class="form-group col-sm-1">
+                        <p style="text-align: center; color: #236ca1; font-weight: bold;">To (optional)</p>
+                    </div>
+                    <div class="form-group col-sm-2">
+                        {{ search_form.VDY_range_end(size=18, class="form-control", placeholder="VDY range end")}}
+                    </div>
+                    <div class="form-group col-sm-1">
+                        <!-- placeholder -->
+                    </div>
+                    <div class="form-group col-sm-3">
+                        {{ search_form.creator(size=18, class="form-control", placeholder="Added By") }}
+                    </div>
+                    <div class="form-group col-sm-3">
+                        {{ search_form.relative(class="form-control", size=18, placeholder="Relative VDY number(s), comma-separated") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-4">
+                        {{ search_form.other_names(size=18, class="form-control", placeholder="Other Name(s)") }}
+                    </div>
+                    <div class="form-group col-sm-4">
+                        {{ search_form.origin(size=18, class="form-control", placeholder="Lab of Origin") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-3">
+                        {{ search_form.start_date(size=18, class="form-control", placeholder="Start date (YYYY-MM-DD)") }}
+                    </div>
+                    <div class="form-group col-sm-3">
+                        {{ search_form.end_date(size=18, class="form-control", placeholder="End date (YYYY-MM-DD)") }}
+                    </div>
+                    <div class="form-group col-sm-3">
+                        {{ search_form.strain_background(size=18, class="form-control", placeholder="Strain Background and/or Mating Type") }}
+                    </div>
+                    <div class="form-group col-sm-3">
+                        {{ search_form.notebook_ref(size=18, class="form-control", placeholder="Notebook Reference") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-2">
+                        {{ search_form.marker(size=18, class="form-control",
+                        placeholder="Selectable Marker(s)") }}
+                    </div>
+                    <div class="form-group col-sm-2">
+                        <label for="genotype_list">Genotype information</label>
+                        {{ search_form.genotype_list(size=18, class="form-control") }}
+
+                    </div>
+                    <div class="form-group col-sm-2">
+                        {{ search_form.plasmid(size=18, class="form-control", placeholder="Replicating Plasmid") }}
+                    </div>
+                    <div class="form-group col-sm-2">
+                        {{ search_form.plasmid_selexn(size=18, class="form-control", placeholder="Plasmid Selection") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-12">
+                        {{ search_form.notes(size=18, class="form-control", placeholder="Notes") }}
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="row">
+        </div>
+        <h2 style="color: #b40000">Add New Strain</h2>
+        <div class="row">
+            <p><strong style="color: #b40000">Instructions for adding new strains:</strong><br>
+                <ul>
+                    <li>Fill out the form below and click <span style="color: #236ca1; font-weight: bold;">Submit</span>. Note that you need to click <span style="color: #236ca1; font-weight: bold;">Confirm</span> on the next page before your strain is entered into the database.</li>
+                    <li>You are strongly encouraged to fill out as much additional information as possible.</li>
+                    <li>In the parent plasmid field, enter the pVD numbers for any parent plasmids used to generate the new plasmid separated by commas. Enter only numbers and commas.</li>
+                    <li>Do not use commas anywhere in the form. They will be converted to grammatically incorrect semicolons to avoid formatting problems.</li>
+                </ul>
+            </p>
+        </div>
+        <div class="row">
+            <form action="" method="post" enctype="multipart/form-data">
+                {{ new_strain_form.hidden_tag() }}
+                <div class="form-group col-sm-12">
+                    <div class="row">
+                        <div class="form-group col-sm-3">
+                            {{ new_strain_form.new_creator(size=18, class="form-control", placeholder="Added By") }}
+                        </div>
+                        <div class="form-group col-sm-2">
+                            {{ new_strain_form.parent_strain(class="form-control", size=18, placeholder="Parent VDY number(s), comma-separated") }}
+                        </div>
+                        <div class="form-group col-sm-3">
+                            {{ new_strain_form.new_other_names(size=18, class="form-control", placeholder="Other Names") }}
+                        </div>
+                        <div class="form-group col-sm-2">
+                            {{ new_strain_form.origin(size=18, class="form-control", placeholder="Lab of Origin") }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-3">
+                            {{ new_strain_form.new_strain_background(size=18, class="form-control", placeholder="Strain Background or Mating Type") }}
+                        </div>
+                        <div class="form-group col-sm-2">
+                            {{ new_strain_form.new_notebook_ref(size=18, class="form-control", placeholder="Notebook Reference") }}
+                        </div>
+                        <div class="form-group col-sm-2">
+                            {{ new_strain_form.new_marker(size=18, class="form-control",
+                            placeholder="Selectable marker(s)") }}
+                        </div>
+                        <div class="form-group col-sm-2">
+                            {{ new_strain_form.new_plasmid(size=18, class="form-control", placeholder="Replicating Plasmid") }}
+                        </div>
+                        <div class="form-group col-sm-2">
+                            {{ new_strain_form.new_plasmid_selexn(size=18, class="form-control", placeholder="Plasmid Selection") }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <p><span style="font-weight: bold; color: #236ca1">Genotype information:</span> Enter genotype information in the fields below, <strong>one locus per field.</strong></p>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            new_strain_form.genotype_list(class="form-control", size=18)
+                        </div>
+                        <div class="form-group col-sm-4">
+                            {{ new_strain_form.validation.label }}
+                            {{ new_strain_form.validation(size=18) }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-3">
+                            {{ new_strain_form.data_file.label }}
+                            {{ new_strain_form.data_file() }}
+                        </div>
+                        <div class="form-group col-sm-2">
+                            {{ new_strain_form.new_submit(size=32, class="form-control", style="font-weight: bold; color: #236ca1") }}
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

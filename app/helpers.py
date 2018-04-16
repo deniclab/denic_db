@@ -1,4 +1,5 @@
 from app import app
+from wtforms import SelectMultipleField, widgets
 import boto3
 import os
 
@@ -32,3 +33,15 @@ def download_file_from_s3(filename, bucket_name, folder=None):
     else:
         source_path = filename
     return s3.get_object(Bucket=bucket_name, Key=source_path)
+
+
+class MultiCheckboxField(SelectMultipleField):
+    """
+    A multiple-select, except displays a list of checkboxes.
+
+    Iterating the field will produce subfields, allowing custom rendering of
+    the enclosed checkbox fields.
+    """
+
+    widget = widgets.ListWidget(prefix_label=False)
+    option_widget = widgets.CheckboxInput()
