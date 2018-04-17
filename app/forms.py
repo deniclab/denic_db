@@ -6,7 +6,8 @@ from wtforms import TextAreaField, DateField, SelectField, FieldList, FormField
 from wtforms import Form, IntegerField, RadioField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
 from wtforms.validators import Length
-from app.models import User, TempOligo, TempPlasmid
+from app.models import User, TempOligo, TempPlasmid, TempStrain
+from app.models import TempStrainGenotype
 from app.helpers import MultiCheckboxField
 from flask_login import current_user
 from datetime import date
@@ -503,6 +504,7 @@ class SearchStrainsForm(FlaskForm):
     end_date = DateField('Date range end, format YYYY-MM-DD')
     origin = StringField('Lab of Origin')
     creator = StringField('Creator')
+    parent = StringField('Parent Strain')
     strain_background = StringField('Strain Background and/or Mating Type')
     notebook_ref = StringField('Notebook Reference')
     marker = StringField('Selectable Marker')
@@ -510,6 +512,10 @@ class SearchStrainsForm(FlaskForm):
     plasmid_selexn = StringField('Plasmid Selection')
     notes = TextAreaField('Notes')
     genotype_list = FieldList(FormField(StrainGenotype), min_entries=10)
+    genotype_gate = RadioField('', choices=[
+        ('OR', 'ANY of the following loci'),
+        ('AND', 'ALL of the following loci')],
+                      default='OR', validators=[DataRequired()])
     submit = SubmitField('Search')
     show_all = SubmitField('Show All Strains')
     all_by_me = SubmitField('Show All Strains I Entered')
@@ -518,13 +524,14 @@ class SearchStrainsForm(FlaskForm):
 class NewStrainForm(FlaskForm):
     new_other_names = StringField('Other name(s)')
     new_origin = StringField('Lab of Origin')
-    new_new_creator = StringField('Creator')
+    new_creator = StringField('Creator')
     new_strain_background = StringField('Strain Background and/or Mating Type')
     new_notebook_ref = StringField('Notebook Reference')
     new_marker = StringField('Selectable Marker')
     new_plasmid = StringField('Replicating Plasmid')
     new_plasmid_selexn = StringField('Plasmid Selection')
     new_notes = TextAreaField('Notes')
+    parent_strain = StringField('Parent Strain')
     new_genotype_list = FieldList(FormField(StrainGenotype), min_entries=10)
     validation = MultiCheckboxField(
         'Validation Method(s)',
@@ -534,6 +541,35 @@ class NewStrainForm(FlaskForm):
         default=[0])
     data_file = FileField('Upload image with relevant data')
     new_submit = SubmitField('Search')
+
+    def to_temp_record(self, data_fname):
+        """Create entry in TempStrain table and return id."""
+        # handle empty creator string
+        if not self.new_creator.data:
+            self.new_creator.data = current_user.username
+        # create temp record in temp strain table
+        new_record = TempStrain(
+            creator_id=current_user.id,
+            creator_str=self.new_creator.data,
+            other_names=self.new_other_names.data,
+            strain_background=self.new_strain_background.data,
+            notebook_ref=self.new_notebook_ref.data,
+            marker=self.new_marker.data,
+            plasmid=self.new_plasmid.data,
+            plasmid_selexn=self.new_plasmid_selexn.data,
+            validation=self.validation.data,
+            image_filename=data_fname,
+            notes=self.new_notes.data,
+            parent=self.parent_strain.data)
+        db.session.add(new_record)
+        db.session.commit()
+        # add locus details from genotype fields to temp genotype table
+        for locus_ref, locus_data in self.genotype_list.data:
+            temp_gt = TempStrainGenotype(temp_strain_id=new_record.temp_id,
+                                         locus_info=locus_data)
+            db.session.add(temp_gt)
+            db.session.commit()
+        return new_record.temp_id
 
 
 class DownloadRecords(FlaskForm):

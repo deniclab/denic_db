@@ -40,53 +40,83 @@
                     <div class="form-group col-sm-2">
                         {{ search_form.VDY_range_end(size=18, class="form-control", placeholder="VDY range end")}}
                     </div>
-                    <div class="form-group col-sm-1">
-                        <!-- placeholder -->
-                    </div>
-                    <div class="form-group col-sm-3">
+                    <div class="form-group col-sm-2">
                         {{ search_form.creator(size=18, class="form-control", placeholder="Added By") }}
                     </div>
-                    <div class="form-group col-sm-3">
-                        {{ search_form.relative(class="form-control", size=18, placeholder="Relative VDY number(s), comma-separated") }}
+                    <div class="form-group col-sm-5">
+                        {{ search_form.parent(class="form-control", size=18, placeholder="Parent VDY number") }}
                     </div>
                 </div>
                 <div class="row">
                     <div class="form-group col-sm-4">
                         {{ search_form.other_names(size=18, class="form-control", placeholder="Other Name(s)") }}
                     </div>
-                    <div class="form-group col-sm-4">
+                    <div class="form-group col-sm-3">
                         {{ search_form.origin(size=18, class="form-control", placeholder="Lab of Origin") }}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="form-group col-sm-3">
-                        {{ search_form.start_date(size=18, class="form-control", placeholder="Start date (YYYY-MM-DD)") }}
-                    </div>
-                    <div class="form-group col-sm-3">
-                        {{ search_form.end_date(size=18, class="form-control", placeholder="End date (YYYY-MM-DD)") }}
-                    </div>
-                    <div class="form-group col-sm-3">
-                        {{ search_form.strain_background(size=18, class="form-control", placeholder="Strain Background and/or Mating Type") }}
                     </div>
                     <div class="form-group col-sm-3">
                         {{ search_form.notebook_ref(size=18, class="form-control", placeholder="Notebook Reference") }}
                     </div>
                 </div>
                 <div class="row">
-                    <div class="form-group col-sm-2">
+                    <div class="form-group col-sm-4">
+                        {{ search_form.strain_background(size=18, class="form-control", placeholder="Strain Background and/or Mating Type") }}
+                    </div>
+                    <div class="form-group col-sm-3">
+                        {{ search_form.start_date(size=18, class="form-control", placeholder="Start date (YYYY-MM-DD)") }}
+                    </div>
+                    <div class="form-group col-sm-3">
+                        {{ search_form.end_date(size=18, class="form-control", placeholder="End date (YYYY-MM-DD)") }}
+                    </div>
+                </div>
+                <div class="row" style="margin-bottom: 20px;">
+                    <div class="form-group col-sm-3">
                         {{ search_form.marker(size=18, class="form-control",
                         placeholder="Selectable Marker(s)") }}
                     </div>
-                    <div class="form-group col-sm-2">
-                        <label for="genotype_list">Genotype information</label>
-                        {{ search_form.genotype_list(size=18, class="form-control") }}
-
-                    </div>
-                    <div class="form-group col-sm-2">
+                    <div class="form-group col-sm-3">
                         {{ search_form.plasmid(size=18, class="form-control", placeholder="Replicating Plasmid") }}
                     </div>
-                    <div class="form-group col-sm-2">
+                    <div class="form-group col-sm-3">
                         {{ search_form.plasmid_selexn(size=18, class="form-control", placeholder="Plasmid Selection") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-12" style='text-align: center; vertical-align: bottom;'>
+                        <label for="genotype_list">Genotype (one locus per field)</label>
+                        <tr>
+                            {% for subfield in search_form.genotype_gate %}
+                            <td>{{ subfield(style="margin: 0 0 0 10px;") }}</td>
+                            <td>{{ subfield.label(style="font-weight: normal;")}}</td>
+                        {% endfor %}
+                        </tr>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-12">
+                        <table class="table" cellspacing="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <th class='col-xs-1'>Locus 1</th>
+                                    <th class='col-xs-1'>Locus 2</th>
+                                    <th class='col-xs-1'>Locus 3</th>
+                                    <th class='col-xs-1'>Locus 4</th>
+                                    <th class='col-xs-1'>Locus 5</th>
+                                    <th class='col-xs-1'>Locus 6</th>
+                                    <th class='col-xs-1'>Locus 7</th>
+                                    <th class='col-xs-1'>Locus 8</th>
+                                    <th class='col-xs-1'>Locus 9</th>
+                                    <th class='col-xs-1'>Locus 10</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    {% for locus in search_form.genotype_list.entries %}
+                                    <td>{{ locus.genotype(class="form-control") }}</td>
+                                    {% endfor %}
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 <div class="row">
@@ -117,46 +147,83 @@
                         <div class="form-group col-sm-3">
                             {{ new_strain_form.new_creator(size=18, class="form-control", placeholder="Added By") }}
                         </div>
-                        <div class="form-group col-sm-2">
+                        <div class="form-group col-sm-4">
                             {{ new_strain_form.parent_strain(class="form-control", size=18, placeholder="Parent VDY number(s), comma-separated") }}
                         </div>
-                        <div class="form-group col-sm-3">
-                            {{ new_strain_form.new_other_names(size=18, class="form-control", placeholder="Other Names") }}
-                        </div>
-                        <div class="form-group col-sm-2">
-                            {{ new_strain_form.origin(size=18, class="form-control", placeholder="Lab of Origin") }}
+                        <div class="form-group col-sm-4">
+                            {{ new_strain_form.new_other_names(size=18, class="form-control", placeholder="Other Name(s)") }}
                         </div>
                     </div>
                     <div class="row">
                         <div class="form-group col-sm-3">
-                            {{ new_strain_form.new_strain_background(size=18, class="form-control", placeholder="Strain Background or Mating Type") }}
+                            {{ new_strain_form.new_origin(size=18, class="form-control", placeholder="Lab of Origin") }}
                         </div>
-                        <div class="form-group col-sm-2">
+                        <div class="form-group col-sm-3">
                             {{ new_strain_form.new_notebook_ref(size=18, class="form-control", placeholder="Notebook Reference") }}
                         </div>
-                        <div class="form-group col-sm-2">
+                        <div class="form-group col-sm-4">
+                            {{ new_strain_form.new_strain_background(size=18, class="form-control", placeholder="Strain Background and/or Mating Type") }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-3">
                             {{ new_strain_form.new_marker(size=18, class="form-control",
                             placeholder="Selectable marker(s)") }}
                         </div>
-                        <div class="form-group col-sm-2">
+                        <div class="form-group col-sm-4">
                             {{ new_strain_form.new_plasmid(size=18, class="form-control", placeholder="Replicating Plasmid") }}
                         </div>
-                        <div class="form-group col-sm-2">
+                        <div class="form-group col-sm-3">
                             {{ new_strain_form.new_plasmid_selexn(size=18, class="form-control", placeholder="Plasmid Selection") }}
                         </div>
                     </div>
-                    <div class="row">
-                        <p><span style="font-weight: bold; color: #236ca1">Genotype information:</span> Enter genotype information in the fields below, <strong>one locus per field.</strong></p>
+                    <div class="row" style='text-align: center;'>
+                        <p><span style="font-weight: bold; color: #236ca1">Genotype information:</span> Enter chromosomal genotype information in the fields below, <strong>one locus per field.</strong></p>
                     </div>
                     <div class="row">
-                        <div class="form-group col-sm-6">
-                            new_strain_form.genotype_list(class="form-control", size=18)
+                        <div class="form-group col-sm-12">
+                            <table class="table" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th class='col-xs-1'>Locus 1</th>
+                                        <th class='col-xs-1'>Locus 2</th>
+                                        <th class='col-xs-1'>Locus 3</th>
+                                        <th class='col-xs-1'>Locus 4</th>
+                                        <th class='col-xs-1'>Locus 5</th>
+                                        <th class='col-xs-1'>Locus 6</th>
+                                        <th class='col-xs-1'>Locus 7</th>
+                                        <th class='col-xs-1'>Locus 8</th>
+                                        <th class='col-xs-1'>Locus 9</th>
+                                        <th class='col-xs-1'>Locus 10</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        {% for locus in new_strain_form.new_genotype_list.entries %}
+                                        <td>{{ locus.genotype(class="form-control") }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="form-group col-sm-4">
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-3" style="text-align: right;">
                             {{ new_strain_form.validation.label }}
-                            {{ new_strain_form.validation(size=18) }}
+                        </div>
+                        <div class="form-group col-sm-9">
+                            <tr>
+                                {% for subfield in new_strain_form.validation %}
+                                <td>{{ subfield(style="margin: 0 0 0 10px;") }}</td>
+                                <td>{{ subfield.label(style="font-weight: normal;")}}</td>
+                                {% endfor %}
+                            </tr>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="form-group col-sm-12">
+                            {{ new_strain_form.new_notes(size=18, class="form-control", placeholder="Notes") }}
+                        </div>
                     <div class="row">
                         <div class="form-group col-sm-3">
                             {{ new_strain_form.data_file.label }}

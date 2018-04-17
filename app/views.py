@@ -8,8 +8,9 @@ from app.forms import InitializeNewRecordsForm, DownloadRecords, EditOligoForm
 from app.forms import ConfirmOligoEditsForm, AddNewOligoTable, ConfirmNewOligos
 from app.forms import SearchPlasmidsForm, NewPlasmidForm, EditPlasmidForm
 from app.forms import AdminPrivilegesForm, AdminDeleteUserForm
+from app.forms import SearchStrainsForm, NewStrainForm
 from app.email import send_password_reset_email, send_validation_request_email
-from app.models import User, Oligos, TempOligo
+from app.models import User, Oligos, TempOligo, Strain, StrainGenotype
 from app.models import Plasmid, TempPlasmid, PlasmidRelative
 from app.models import record_to_dict
 from app.helpers import upload_file_to_s3, download_file_from_s3
@@ -785,9 +786,11 @@ def strain_search_or_add():
                     strain_background=search_form.strain_background.data,
                     notebook_ref=search_form.notebook_ref.data,
                     marker=search_form.marker.data,
-                    genotype=search_form.genotype.data,  # TODO: FIX THIS
+                    genotype=[entry.genotype.data for entry in
+                              search_form.genotype_list.entries if
+                              entry.genotype.data],
                     notes=search_form.notes.data,
-                    relative=search_form.relative.data,
+                    parent_strain=search_form.parent.data,
                     plasmid=search_form.plasmid.data,
                     plasmid_selexn=search_form.plasmid_selexn.data
                     )))
@@ -795,13 +798,16 @@ def strain_search_or_add():
         if not new_strain_form.validate():  # checks if plasmid name is there
             flash_errors(new_strain_form)
             return redirect(url_for('strain_search_or_add'))
+        # save data file
         if 'data_file' in request.files:
             data_file = request.files['data_file']
             data_fname = secure_filename(data_file.filename)
+            # use AWS S3 storage for deployment version
             if app.config['USE_S3']:
                 data_file.filename = data_fname
                 upload_file_to_s3(data_file, app.config['S3_BUCKET'],
                                   folder=app.config['UPLOAD_FOLDER'])
+            # use preset upload folder for dev version
             else:
                 data_file.save(os.path.join(app.config['UPLOAD_FOLDER'],
                                             data_fname))
@@ -812,6 +818,35 @@ def strain_search_or_add():
                         temp_id=new_record))
     return render_template('strains/begin.html', search_form=search_form,
                            new_strain_form=new_strain_form)
+
+
+@app.route('/strains/search_results', methods=['GET', 'POST'])
+@login_required
+@verify_required
+def strain_search_results():
+    form = DownloadRecords()
+    search_terms = request.args.get('filter_by')
+    search_terms = jwt.decode(search_terms, app.config['SECRET_KEY'],
+                              algorithms=['HS256'])
+    output_records = Strain.filter_dict_to_records(search_terms)
+    if len(output_records) == 0:  # if the search didn't return any items
+        flash("Your search did not return any results.")
+        return redirect(url_for('strain_search_or_add'))
+    record_list = []
+    for r in output_records:
+        record = record_to_dict(r)
+        genotypes = [gt.locus_info for gt in StrainGenotype.filter_by(
+            VDY_number=r.VDY_number).all()]
+        record_list.append({'record': record, 'genotypes': genotypes})
+
+    n_records = str(len(record_list))
+    if form.validate_on_submit():
+        return csv_response(record_list, 'strains')
+    return render_template('strains/search_results.html',
+                           title='Strain search results',
+                           record_list=record_list,
+                           form=form,
+                           n_records=n_records)
 
 
 @app.before_request

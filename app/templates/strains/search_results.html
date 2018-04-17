@@ -15,7 +15,7 @@
         } );
     </script>
     <!--<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='oligo_search.css') }}">-->
-    <h1 style="text-align: center; color: #236ca1">Plasmid Search Results</h1>
+    <h1 style="text-align: center; color: #236ca1">Strain Search Results</h1>
     <div class="row">
         <p style="color: #b40000; font-weight: bold; text-align: center;">{{ n_records }} records retrieved.</p>
     </div>
@@ -29,43 +29,39 @@
             <thead>
                 <tr>
                     <th></th>
-                    <th>pVD Number</th>
-                    <th>Plasmid Name</th>
-                    <th>Plasmid Type</th>
-                    <th>Creator</th>
-                    <th>Bacterial Selection</th>
-                    <th>Yeast/Mammalian Selection</th>
-                    <th>Map file</th>
+                    <th>VDY Number</th>
+                    <th>Added By</th>
+                    <th>Other Names</th>
+                    <th>Locus 1</th>
+                    <th>Locus 2</th>
+                    <th>Locus 3</th>
+                    <th>Notes</th>
                     <th>Data file</th>
                 </tr>
             </thead>
             <tbody>
-                {% for record in record_list %}
+                {% for r in record_list %}
                     <tr>
-                        <td class="col-sm-1"><a href="{{ url_for('edit_plasmid', pVD_number=record['pVD_number']) }}">Details/Edit</a></td>
-                        <td class="col-sm-1">{{ record['pVD_number'] }}</td>
-                        <td class="col-sm-3" style="word-break: break-all; word-wrap:break-word;">{% if record['plasmid_name'] is not none %}
-                                {{ record['plasmid_name'] }}
+                        <td class="col-sm-1"><a href="{{ url_for('edit_strain', VDY_number=r['record']['VDY_number']) }}">Details/Edit</a></td>
+                        <td class="col-sm-1">{{ r['record']['VDY_number'] }}</td>
+                        <td class="col-sm-1" style="word-break: break-all; word-wrap:break-word;">{% if r['record']['creator_str'] is not none %}
+                                {{ r['record']['creator_str'] }}
                             {% endif %}</td>
-                        <td class="col-sm-2" style="word-break: break-all; word-wrap:break-word;">{% if record['plasmid_type'] is not none %}
-                                {{ record['plasmid_type'] }}
+                        <td class="col-sm-2" style="word-break: break-all; word-wrap:break-word;">{% if r['record']['other_names'] is not none %}
+                                {{ r['record']['other_names'] }}
                             {% endif %}</td>
-                        <td class="col-sm-1">{% if record['creator_str'] is not none %}
-                                {{ record['creator_str'] }}
+                        <td class="col-sm-2">{% if len(r['genotypes']) >= 1
+                                {{ r['genotypes'][0] }}
                             {% endif %}</td>
-                        <td class="col-sm-1">{% if record['bac_selection'] is not none %}
-                                {{ record['bac_selection'] }}
+                        <td class="col-sm-2">{% if len(r['genotypes']) >= 2
+                                {{ r['genotypes'][1] }}
                             {% endif %}</td>
-                        <td class="col-sm-2"><p>{% if record['yeast_mamm_selection'] is not none %}
-                                {{ record['yeast_mamm_selection'] }}
+                        <td class="col-sm-2"><p>{% if len(r['genotypes']) >= 3
+                                {{ r['genotypes'][2] }}
                             {% endif %}</p></td>
                         <td class="col-sm-1">
-                            {% if record['map_filename'] is not none %}
-                            <a href="{{ url_for('download_plasmid_file', pVD_number=record['pVD_number'], type='map') }}">Map</a>
-                            {% endif %}</td>
-                        <td class="col-sm-1">
-                            {% if record['image_filename'] is not none %}
-                            <a href="{{ url_for('download_plasmid_file', pVD_number=record['pVD_number'], type='data') }}">Data File</a>
+                            {% if r['record']['image_filename'] is not none %}
+                            <a href="{{ url_for('download_strain_file', VDY_number=r['record']['VDY_number'], type='data') }}">Data File</a>
                             {% endif %}</td>
                     </tr>
                 {% endfor %}

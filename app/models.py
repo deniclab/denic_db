@@ -382,6 +382,7 @@ class Strain(db.Model):
     plasmid_selexn = db.Column(db.String(50))
     validation = db.Column(db.String(25))
     notes = db.Column(db.String(2000))
+    parent = db.Column(db.String(10))
     image_filename = db.Column(db.String(100))
 
     def __repr__(self):
@@ -393,6 +394,74 @@ class Strain(db.Model):
                 if getattr(self, key) != value:
                     setattr(self, key, value)
         db.session.commit()
+
+    @staticmethod
+    def filter_dict_to_records(filter_dict):
+        """Take a dictionary of column:search_term pairs and get records.
+
+        `filter_dict` must contain two keys:
+            gate : str
+                should the filter utilize and AND or an OR gate across
+                the arguments. Note that if a tube range is used, it is
+                always used in an AND gate fashion.
+            use_range : bool
+                should a range of plasmid tubes be searched. If true,
+                all other filters are applied first, and then the
+                results are filtered by the tube range.
+        """
+        gate = filter_dict.pop('gate')
+        genotype_gate = filter_dict.pop('genotype_gate')
+        gate = gate.strip('%')  # see views.mk_query and views._enc_value
+        VDY_number = filter_dict.pop('VDY_number', None)
+        # remove characters
+        if VDY_number not in (None, '%'):
+            VDY_number = re.findall('[0-9]+', VDY_number)[0]
+        VDY_range_end = filter_dict.pop('VDY_range_end', None)
+        if VDY_range_end is not None:
+            VDY_range_end = re.findall('[0-9]+', VDY_range_end)[0]
+        genotypes = filter_dict.pop('genotype', [])
+        date_range_start = filter_dict.pop('start_date', None)
+        date_range_end = filter_dict.pop('end_date', date.today())
+        # generate initial query which does not include VDY number filtering
+        if gate == 'OR':
+            query_result = Strain.query.filter(or_(
+                *(getattr(Strain, key).ilike(value) for (key, value)
+                  in filter_dict.items())))
+        else:
+            query_result = Strain.query.filter(
+                *(getattr(Strain, key).ilike(value) for (key, value)
+                  in filter_dict.items()))
+        # add date range filtering to the query
+        if date_range_start is not None:
+            query_result = query_result.filter(
+                (Strain.date_added >= date_range_start) &
+                (Strain.date_added <= date_range_end))
+        # add oligo tube filtering to the query
+        if VDY_number is not None:
+            if VDY_range_end:
+                query_result = query_result.filter(
+                    (Strain.VDY_number >= VDY_number.strip("%")) &
+                    (Strain.VDY_number <= VDY_range_end.strip("%")))
+            else:
+                query_result = query_result.filter(
+                    Strain.VDY_number.ilike(VDY_number))
+        if genotypes:
+            VDY_sets = []
+            for locus in genotypes:
+                VDY_sets.append(
+                    set(gt.VDY_number for gt in StrainGenotype.filter_by(
+                            StrainGenotype.locus_info.ilike(locus)).all()))
+            if genotype_gate == 'OR':
+                locus_VDYs = set.union(*VDY_sets)  # get union of the searches
+            elif genotype_gate == 'AND':
+                locus_VDYs = set.intersection(*VDY_sets)  # get intersection
+        if gate == 'OR':
+            query_result = query_result.union(Strain.query.filter(
+                Strain.VDY_number.in_(locus_VDYs)))
+        elif gate == 'AND':
+            query_result = query_result.intersect(Strain.query.filter(
+                Strain.VDY_number.in_(locus_VDYs)))
+        return query_result.all()
 
 
 class StrainGenotype(db.Model):
@@ -415,6 +484,7 @@ class TempStrain(db.Model):
     plasmid_selexn = db.Column(db.String(50))
     validation = db.Column(db.String(25))
     notes = db.Column(db.String(2000))
+    parent = db.Column(db.String(10))
     image_filename = db.Column(db.String(100))
 
 
