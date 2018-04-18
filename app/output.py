@@ -1,6 +1,7 @@
 from flask import make_response
 import csv
 from io import StringIO
+from app.models import StrainRelative, StrainGenotype
 
 
 def oligo_to_list(oligo):
@@ -23,6 +24,30 @@ def plasmid_to_list(plasmid):
             plasmid.get('sequenced', 0), plasmid.get('notes', '')]
 
 
+def strain_to_list(strain):
+    strain_val_dict = {'0': 'Not Validated', '1': 'Colony PCR',
+                       '2': 'Western Blot', '3': 'Sequencing',
+                       '4': 'Microscopy', '5': 'Other'}
+    strain_validation = strain.get('validation', '')
+    parents = '; '.join([p.parent_strain for p in
+                         StrainRelative.query.filter_by(
+                             VDY_number=strain.get('VDY_number')).all()])
+    loci = '; '.join([locus.locus_info for locus in
+                      StrainGenotype.query.filter_by(
+                          VDY_number=strain.get('VDY_number')).all()])
+    if strain_validation:
+        validation_str = '; '.join([strain_val_dict[v] for v in
+                                    strain_validation.split(',')])
+    else:
+        validation_str = ''
+    return [strain.get('VDY_number', ''), strain.get('other_names', ''),
+            strain.get('creator_str', ''), strain.get('date_added', ''),
+            strain.get('strain_background', ''),
+            strain.get('notebook_ref', ''), strain.get('marker', ''),
+            strain.get('plasmid', ''), strain.get('plasmid_selexn', ''),
+            validation_str, parents, loci, strain.get('notes', '')]
+
+
 def csv_response(data, dtype):
     lines = StringIO()
     writer = csv.writer(lines)
@@ -40,6 +65,14 @@ def csv_response(data, dtype):
                    'Promoter', 'Fusion', 'Sequenced', 'Notes']]
         for row in data:
             output.append(plasmid_to_list(row))
+    elif dtype == 'strains':
+        output = [['VDY number', 'Other Names', 'Added By', 'Date Added',
+                   'Strain Background', 'Notebook Reference', 'Marker',
+                   'Replicating Plasmid', 'Plasmid Selection',
+                   'Validation Method(s)', 'Parent Strains', 'Genotype',
+                   'Notes']]
+        for row in data:
+            output.append(strain_to_list(row))
     writer.writerows(output)
     response = make_response(lines.getvalue())
     response.headers['Content-Disposition'] = 'attachment; filename=records.csv'

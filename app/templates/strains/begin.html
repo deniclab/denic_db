@@ -34,7 +34,7 @@
                     <div class="form-group col-sm-2">
                         {{ search_form.VDY_number(size=18, class="form-control", placeholder="VDY Number") }}
                     </div>
-                    <div class="form-group col-sm-1">
+                    <div class="form-group col-sm-2">
                         <p style="text-align: center; color: #236ca1; font-weight: bold;">To (optional)</p>
                     </div>
                     <div class="form-group col-sm-2">
@@ -43,7 +43,7 @@
                     <div class="form-group col-sm-2">
                         {{ search_form.creator(size=18, class="form-control", placeholder="Added By") }}
                     </div>
-                    <div class="form-group col-sm-5">
+                    <div class="form-group col-sm-3">
                         {{ search_form.parent(class="form-control", size=18, placeholder="Parent VDY number") }}
                     </div>
                 </div>
@@ -123,6 +123,20 @@
                     <div class="form-group col-sm-12">
                         {{ search_form.notes(size=18, class="form-control", placeholder="Notes") }}
                     </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-2">
+                        {{ search_form.submit(size=32, class="form-control", style="font-weight: bold; color: #236ca1") }}
+                    </div>
+                    <div class="form-group col-sm-3">
+                        {{ search_form.show_all(size=32, class="form-control", style="font-weight: bold; color: #236ca1") }}
+                    </div>
+                    <div class="form-group col-sm-3">
+                        {{ search_form.all_by_me(size=32, class="form-control", style="font-weight: bold; color: #236ca1") }}
+                    </div>
+                </div>
+                <div class="row" style='text-align: center;'>
+                    <p><em>Search takes a moment - be patient.</em></p>
                 </div>
             </div>
         </form>

@@ -1,0 +1,153 @@
+{% extends "layout.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+{{ record_dict }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='plasmid_search.css') }}">
+<h1 style="text-align: center; color: #236ca1">Edit Strain</h1>
+<div class="row">
+    <p><strong style="color: #b40000">Edit instructions:</strong><br>
+        Change values in the fields below to edit a Strain record. Note that you cannot change the VDY number or the date it was added to the database.</p>
+</div>
+<div class="container" style="padding-top: 25px;">
+    <form action="" method="post" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="form-group col-sm-12">
+            <div class="row">
+                <div class="form-group col-sm-2">
+                    <label for="VDY_number">VDY_number</label>
+                    <input class="form-control" id="VDY_number" type="text" size=18 disabled value="{{ record_dict['VDY_number'] }}">
+                </div>
+                <div class='form-group col-sm-4'>
+                    {{ form.other_names.label }}
+                    {{ form.other_names(size=18, class="form-control", value=record_dict['other_names']) }}
+                </div>
+                <div class='form-group col-sm-2'>
+                    {{ form.creator_str.label }}
+                    {{ form.creator_str(size=18, class="form-control", value=record_dict['creator_str']) }}
+                </div>
+                <div class="form-group col-sm-2">
+                    <label for="date_added">Date Added</label>
+                    <input class="form-control" id="date_added" type="text" size=18 disabled value="{{ record_dict['date_added'] or '' }}">
+                </div>
+            </div>
+            <div class="row">
+                <div class='form-group col-sm-3'>
+                    {{ form.strain_background.label }}
+                    {{ form.strain_background(size=18, class="form-control", value=record_dict['strain_background']) }}
+                </div>
+                <div class='form-group col-sm-3'>
+                    {{ form.origin.label }}
+                    {{ form.origin(class="form-control", value=record_dict['origin']) }}
+                </div>
+                <div class='form-group col-sm-3'>
+                    {{ form.notebook_ref.label }}
+                    {{ form.notebook_ref(size=18, class="form-control", value=record_dict['notebook_ref']) }}
+                </div>
+                <div class='form-group col-sm-3'>
+                    {{ form.marker.label }}
+                    {{ form.marker(size=18, class="form-control", value=record_dict['marker']) }}
+                </div>
+            </div>
+            <div class="row">
+                <div class='form-group col-sm-3'>
+                    {{ form.plasmid.label }}
+                    {{ form.plasmid(class="form-control", value=record_dict['plasmid']) }}
+                </div>
+                <div class='form-group col-sm-2'>
+                    {{ form.plasmid_selexn.label }}
+                    {{ form.plasmid_selexn(class="form-control", value=record_dict['plasmid_selexn']) }}
+                </div>
+                <div class='form-group col-sm-2'>
+                    <span style="color: #236ca1; font-weight: bold;">Current parent(s):</span><br>
+                    {% for p in parent_strains %}<a href="{{ url_for('edit_strain', VDY_number=p) }}">VDY{{ p }}</a>  {% endfor %}
+                </div>
+                <div class='form-group col-sm-2'>
+                    {{ form.parent_strain.label }}
+                    {{ form.parent_strain(class="form-control") }}
+                </div>
+                <div class="form-group col-sm-3">
+                    <span style="color: #236ca1; font-weight: bold;">Strain descendants:</span><br>
+                    {% for d in descendants %}<a href="{{ url_for('edit_strain', VDY_number=d) }}">VDY{{ d }}</a>  {% endfor %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-sm-12">
+                    <table class="table" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th class='col-xs-1'>Locus 1</th>
+                                <th class='col-xs-1'>Locus 2</th>
+                                <th class='col-xs-1'>Locus 3</th>
+                                <th class='col-xs-1'>Locus 4</th>
+                                <th class='col-xs-1'>Locus 5</th>
+                                <th class='col-xs-1'>Locus 6</th>
+                                <th class='col-xs-1'>Locus 7</th>
+                                <th class='col-xs-1'>Locus 8</th>
+                                <th class='col-xs-1'>Locus 9</th>
+                                <th class='col-xs-1'>Locus 10</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                {% for i in range(form.genotype_list.entries|length) %}
+                                    {% if genotypes|length > i %}
+                                        <td>{{ form.genotype_list.entries[i].genotype(class="form-control", value=genotypes[i]) }}</td>
+                                    {% else %}
+                                        <td>{{ form.genotype_list.entries[i].genotype(class="form-control") }}</td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row" style="text-align: center;">
+                <div class="form-group col-sm-9">
+                    <p><span style="font-weight: bold; color: #236ca1;">Validation methods currently listed:</span> {{ validation }}. Update this list by choosing options below.</p>
+                </div>
+            </div>
+            <div class="row" style="text-align: center;">
+                <div class="form-group col-sm-9">
+                    <tr>
+                        <td>{{ form.validation.label }}</td>
+                        {% for subfield in form.validation %}
+                        <td>{{ subfield(style="margin: 0 0 0 10px;") }}</td>
+                        <td>{{ subfield.label(style="font-weight: normal;")}}</td>
+                        {% endfor %}
+                    </tr>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-sm-12">
+                    {{ form.notes.label }}
+                    {{ form.notes(class="form-control") }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-sm-3">
+                    {% if record_dict['data_filename'] %}
+                    {{ form.download_data(class="form-control", size=32, style="font-weight: bold; color: #236ca1;") }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-sm-3">
+                    {{ form.data_file.label }}
+                    {% if record_dict['data_file'] %}
+                    <span style="font-weight: bold; color: #236ca1;">A data file is already present. You can replace it with the button below.</span>
+                    {% endif %}
+                    {{ form.data_file() }}
+                </div>
+            </div>
+            <div class="row">
+                <div class='form-group col-xs-5'><strong>Note: the database is not changed until confirming on the next page.</strong>
+                </div>
+                <div class='form-group col-xs-3'>
+                        {{ form.submit(size=32, class="form-control",style="font-weight: bold; color: #236ca1;") }}
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

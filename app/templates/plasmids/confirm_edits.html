@@ -29,7 +29,7 @@
             <div class="row">
                 <div class="form-group col-sm-9">
                     <label for="simple_description">Description</label>
-                    <input class="form-control" id="date_added" type="text" size=18 disabled value="{{ record_dict['simple_description'] }}">
+                    <input class="form-control" id="simple_description" type="text" size=18 disabled value="{{ record_dict['simple_description'] }}">
                 </div>
                 <div class="form-group col-sm-3">
                     <label for="plasmid_type">Plasmid Type</label>
@@ -92,10 +92,10 @@
                 </div>
                 <div class="form-group col-sm-3">
                     <span style="font-weight: bold; color: #236ca1;">Data file: </span>
-                    {% if not record_dict['data_filename'] %}
+                    {% if not record_dict['image_filename'] %}
                         <span style="font-weight: bold; color: #236ca1;">Unchanged.</span>
                     {% else %}
-                        <span style="font-weight: bold; color: #b40000;">Updated to {{ record_dict['data_filename'] }}</span>
+                        <span style="font-weight: bold; color: #b40000;">Updated to {{ record_dict['image_filename'] }}</span>
                     {% endif %}
                 </div>
                 <div class="form-group col-sm-3">

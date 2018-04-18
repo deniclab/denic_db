@@ -258,7 +258,7 @@ class Plasmid(db.Model):
                   in filter_dict.items()))
         # get the list of relatives from the relative table
         if 'relative' in filter_dict:
-            relative_list = app.forms.NewPlasmidForm.relative_field_to_pVDs(
+            relative_list = PlasmidRelative.string_to_pVDs(
                 filter_dict.pop('relative'))
             relation_query = PlasmidRelative.query.filter(
                 or_(((PlasmidRelative.pVD_number.like(i)),
@@ -334,7 +334,7 @@ class PlasmidRelative(db.Model):
                 parent_record = PlasmidRelative(pVD_number=pVD_child,
                                                 parent_plasmid=p)
                 db.session.add(parent_record)
-                db.session.commit()
+            db.session.commit()
 
 
 class TempPlasmid(db.Model):
@@ -359,7 +359,6 @@ class TempPlasmid(db.Model):
     map_filename = db.Column(db.String(100))
     sequenced = db.Column(db.Boolean, default=False)
     notes = db.Column(db.String(2000))
-    parent = db.Column(db.String(100))
 
 
 def record_to_dict(record):
@@ -373,16 +372,16 @@ class Strain(db.Model):
     VDY_number = db.Column(db.Integer, primary_key=True, autoincrement=True)
     other_names = db.Column(db.String(150), index=True)
     date_added = db.Column(db.Date(), index=True)
+    origin = db.Column(db.String(50))
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
     creator_str = db.Column(db.String(50))
     strain_background = db.Column(db.String(50))
-    notebook_ref = db.Column(db.String(20))
+    notebook_ref = db.Column(db.String(50))
     marker = db.Column(db.String(50))
     plasmid = db.Column(db.String(100))
     plasmid_selexn = db.Column(db.String(50))
     validation = db.Column(db.String(25))
     notes = db.Column(db.String(2000))
-    parent = db.Column(db.String(10))
     image_filename = db.Column(db.String(100))
 
     def __repr__(self):
@@ -410,7 +409,7 @@ class Strain(db.Model):
                 results are filtered by the tube range.
         """
         gate = filter_dict.pop('gate')
-        genotype_gate = filter_dict.pop('genotype_gate')
+        genotype_gate = filter_dict.pop('genotype_gate', None)
         gate = gate.strip('%')  # see views.mk_query and views._enc_value
         VDY_number = filter_dict.pop('VDY_number', None)
         # remove characters
@@ -420,6 +419,14 @@ class Strain(db.Model):
         if VDY_range_end is not None:
             VDY_range_end = re.findall('[0-9]+', VDY_range_end)[0]
         genotypes = filter_dict.pop('genotype', [])
+        use_parent = False
+        if 'parent_strain' in filter_dict:
+            use_parent = True
+            parent_number = PlasmidRelative.string_to_pVDs(
+                filter_dict.pop('parent_strain'))
+            VDYs_from_relatives = [
+                i.VDY_number for i in
+                StrainRelative.query.filter_by(parent_strain=parent_number)]
         date_range_start = filter_dict.pop('start_date', None)
         date_range_end = filter_dict.pop('end_date', date.today())
         # generate initial query which does not include VDY number filtering
@@ -427,10 +434,18 @@ class Strain(db.Model):
             query_result = Strain.query.filter(or_(
                 *(getattr(Strain, key).ilike(value) for (key, value)
                   in filter_dict.items())))
+            if use_parent:
+                query_result = query_result.union(
+                    Strain.query.filter(Strain.VDY_number.in_(
+                        VDYs_from_relatives)))
         else:
             query_result = Strain.query.filter(
                 *(getattr(Strain, key).ilike(value) for (key, value)
                   in filter_dict.items()))
+            if use_parent:
+                query_result = query_result.intersect(
+                    Strain.query.filter(Strain.VDY_number.in_(
+                        VDYs_from_relatives)))
         # add date range filtering to the query
         if date_range_start is not None:
             query_result = query_result.filter(
@@ -449,32 +464,75 @@ class Strain(db.Model):
             VDY_sets = []
             for locus in genotypes:
                 VDY_sets.append(
-                    set(gt.VDY_number for gt in StrainGenotype.filter_by(
+                    set(gt.VDY_number for gt in StrainGenotype.query.filter_by(
                             StrainGenotype.locus_info.ilike(locus)).all()))
             if genotype_gate == 'OR':
                 locus_VDYs = set.union(*VDY_sets)  # get union of the searches
             elif genotype_gate == 'AND':
                 locus_VDYs = set.intersection(*VDY_sets)  # get intersection
-        if gate == 'OR':
-            query_result = query_result.union(Strain.query.filter(
-                Strain.VDY_number.in_(locus_VDYs)))
-        elif gate == 'AND':
-            query_result = query_result.intersect(Strain.query.filter(
-                Strain.VDY_number.in_(locus_VDYs)))
+            if gate == 'OR':
+                query_result = query_result.union(Strain.query.filter(
+                    Strain.VDY_number.in_(locus_VDYs)))
+            elif gate == 'AND':
+                query_result = query_result.intersect(Strain.query.filter(
+                    Strain.VDY_number.in_(locus_VDYs)))
         return query_result.all()
+
+    @staticmethod
+    def new_from_temp(temp_id):
+        """Add a record from Strain, returning its new VDY number."""
+        temp_strain = TempStrain.query.filter_by(temp_id=temp_id).first()
+        new_record = Strain(
+            other_names=temp_strain.other_names,
+            date_added=date.today(),
+            creator_id=current_user.id,
+            creator_str=temp_strain.creator_str,
+            strain_background=temp_strain.strain_background,
+            notebook_ref=temp_strain.notebook_ref,
+            marker=temp_strain.marker,
+            plasmid=temp_strain.plasmid,
+            plasmid_selexn=temp_strain.plasmid_selexn,
+            validation=temp_strain.validation,
+            image_filename=temp_strain.image_filename,
+            notes=temp_strain.notes)
+        db.session.add(new_record)
+        db.session.commit()
+        parents = PlasmidRelative.string_to_pVDs(temp_strain.parent)  # gets #s
+        for p in parents:
+            parent_record = StrainRelative(VDY_number=new_record.VDY_number,
+                                           parent_strain=p)
+            db.session.add(parent_record)
+        db.session.commit()
+        genotypes = TempStrainGenotype.query.filter_by(
+            temp_strain_id=temp_id).all()
+        for temp_gt in genotypes:
+            gt = StrainGenotype(VDY_number=new_record.VDY_number,
+                                locus_info=temp_gt.locus_info)
+            db.session.add(gt)
+        db.session.commit()
+        return new_record.VDY_number
 
 
 class StrainGenotype(db.Model):
     genotype_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     VDY_number = db.Column(db.Integer, db.ForeignKey('strain.VDY_number'),
                            index=True)
-    locus_info = db.Column(db.String(50))
+    locus_info = db.Column(db.String(200))
+
+
+class StrainRelative(db.Model):
+    """SQLAlchemy model for recording plasmid parents and descendants."""
+
+    relation_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    VDY_number = db.Column(db.Integer, db.ForeignKey('strain.VDY_number'))
+    parent_strain = db.Column(db.Integer)
 
 
 class TempStrain(db.Model):
     temp_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     other_names = db.Column(db.String(150), index=True)
     date_added = db.Column(db.Date(), index=True)
+    origin = db.Column(db.String(50))
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
     creator_str = db.Column(db.String(50))
     strain_background = db.Column(db.String(50))
@@ -484,15 +542,16 @@ class TempStrain(db.Model):
     plasmid_selexn = db.Column(db.String(50))
     validation = db.Column(db.String(25))
     notes = db.Column(db.String(2000))
-    parent = db.Column(db.String(10))
+    parent = db.Column(db.String(50))
     image_filename = db.Column(db.String(100))
 
 
 class TempStrainGenotype(db.Model):
     genotype_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    temp_strain_id = db.Column(db.Integer, db.ForeignKey('tempstrain.temp_id'),
+    temp_strain_id = db.Column(db.Integer,
+                               db.ForeignKey('temp_strain.temp_id'),
                                index=True)
-    locus_info = db.Column(db.String(50))
+    locus_info = db.Column(db.String(200))
 
 
 @login.user_loader

@@ -8,11 +8,11 @@ from app.forms import InitializeNewRecordsForm, DownloadRecords, EditOligoForm
 from app.forms import ConfirmOligoEditsForm, AddNewOligoTable, ConfirmNewOligos
 from app.forms import SearchPlasmidsForm, NewPlasmidForm, EditPlasmidForm
 from app.forms import AdminPrivilegesForm, AdminDeleteUserForm
-from app.forms import SearchStrainsForm, NewStrainForm
+from app.forms import SearchStrainsForm, NewStrainForm, EditStrainForm
 from app.email import send_password_reset_email, send_validation_request_email
 from app.models import User, Oligos, TempOligo, Strain, StrainGenotype
-from app.models import Plasmid, TempPlasmid, PlasmidRelative
-from app.models import record_to_dict
+from app.models import Plasmid, TempPlasmid, PlasmidRelative, StrainRelative
+from app.models import TempStrain, TempStrainGenotype, record_to_dict
 from app.helpers import upload_file_to_s3, download_file_from_s3
 from app.output import csv_response
 from flask import redirect, url_for, flash, render_template, request, abort
@@ -374,10 +374,13 @@ def confirm_oligo_edits():
               % new_record['oligo_tube'])
         return redirect(url_for('oligo_search_or_add'))
     if form.go_back.data:
-        return redirect(url_for('edit_oligo', oligo_tube=new_record['oligo_tube']))
+        return redirect(url_for('edit_oligo',
+                                oligo_tube=new_record['oligo_tube']))
     for_template = record_to_dict(oligo)
     # update the record dict to include the new values from edits
     for (key, value) in new_record.items():
+        if key == 'date_added':
+            continue
         for_template[key] = value
     return render_template('oligos/confirm_edits.html', form=form,
                            record_dict=for_template)
@@ -599,13 +602,14 @@ def edit_plasmid():
         Plasmid.query.filter_by(pVD_number=record_id).first())
     form = EditPlasmidForm()
     if form.download_map.data:
-        return send_from_directory(app.config['UPLOAD_FOLDER'],
-                                   record_dict['map_filename'])
+        return redirect(url_for('download_plasmid_file'),
+                        pVD_number=record_id, type='map')
     if form.download_data.data:
-        return send_from_directory(app.config['UPLOAD_FOLDER'],
-                                   record_dict['data_filename'])
+        return redirect(url_for('download_plasmid_file'),
+                        pVD_number=record_id, type='data')
     if form.submit.data and form.validate():
         output_dict = record_dict
+        output_dict.pop('date_added', '')
         if form.plasmid_type_other.data:
             form.plasmid_type.data = form.plasmid_type_other.data
             form.plasmid_type_other.data = None
@@ -623,7 +627,8 @@ def edit_plasmid():
             form.fusion_other.data = None
         for fieldname, value in form.data.items():
             if fieldname in ('plasmid_map', 'data_file', 'submit',
-                             'csrf_token', 'download_map', 'download_data'):
+                             'csrf_token', 'download_map', 'download_data',
+                             'date_added'):
                 continue  # these fields handled later (or left out)
             if value not in ('', None, 'None'):
                 output_dict[fieldname] = value
@@ -835,7 +840,7 @@ def strain_search_results():
     record_list = []
     for r in output_records:
         record = record_to_dict(r)
-        genotypes = [gt.locus_info for gt in StrainGenotype.filter_by(
+        genotypes = [gt.locus_info for gt in StrainGenotype.query.filter_by(
             VDY_number=r.VDY_number).all()]
         record_list.append({'record': record, 'genotypes': genotypes})
 
@@ -847,6 +852,213 @@ def strain_search_results():
                            record_list=record_list,
                            form=form,
                            n_records=n_records)
+
+
+@app.route('/strains/edit', methods=['GET', 'POST'])
+@login_required
+@verify_required
+def edit_strain():
+    strain_val_dict = {'0': 'Not Validated', '1': 'Colony PCR',
+                       '2': 'Western Blot', '3': 'Sequencing',
+                       '4': 'Microscopy', '5': 'Other'}
+    record_id = request.args.get('VDY_number')
+    record_dict = record_to_dict(
+        Strain.query.filter_by(VDY_number=record_id).first())
+    genotypes = [gt.locus_info for gt in StrainGenotype.query.filter_by(
+        VDY_number=record_id).all()]
+    if record_dict['validation'] is not None:
+        validation_str = ', '.join([strain_val_dict[i] for i in record_dict['validation'].split(',')])
+    else:
+        validation_str = 'None'
+    descendants = [d.VDY_number for d in
+                   StrainRelative.query.filter_by(
+                       parent_strain=record_id).all()]
+    form = EditStrainForm()
+    if form.download_data.data:
+        return redirect(url_for('download_strain_file'),
+                        VDY_number=record_id)
+    if form.submit.data and form.validate():
+        output_dict = record_dict
+        output_dict.pop('date_added')
+        for fieldname, value in form.data.items():
+            if fieldname in ('date_added', 'data_file', 'submit', 'csrf_token',
+                             'download_data', 'validation'):
+                continue  # these fields handled later (or left out)
+            if value not in ('', None, 'None'):
+                output_dict[fieldname] = value
+        if 'data_file' in request.files:
+            data_file = request.files['data_file']
+            data_fname = secure_filename(data_file.filename)
+            if app.config['USE_S3']:
+                data_file.filename = data_fname
+                upload_file_to_s3(data_file, app.config['S3_BUCKET'],
+                                  folder=app.config['UPLOAD_FOLDER'])
+            else:
+                data_file.save(os.path.join(app.config['UPLOAD_FOLDER'],
+                                            data_fname))
+            output_dict['image_filename'] = data_fname
+        else:
+            data_fname = None
+        if form.validation.data:
+            output_dict['validation'] = ','.join(form.validation.data)
+
+        new_record = Oligos.encode_oligo_dict(output_dict)  # jwt dict encoder
+        return redirect(url_for(
+            'confirm_strain_edits', new_record=new_record,
+            data_fname=data_fname))
+    else:
+        flash_errors(form)
+    parent_strains = [str(i.parent_strain) for i in
+                      StrainRelative.query.filter_by(VDY_number=record_id)]
+    parent_strains_str = ','.join(parent_strains)
+    form.notes.data = record_dict['notes']
+    form.parent_strain.data = parent_strains_str
+    # TODO: ADD LINES HERE TO PASS VALS TO RELATIVE FIELD
+    return render_template('strains/edit_strain.html', form=form,
+                           record_dict=record_dict, descendants=descendants,
+                           validation=validation_str,
+                           parent_strains=parent_strains,
+                           genotypes=genotypes)
+
+
+@app.route('/strains/confirm_edit', methods=['GET', 'POST'])
+@login_required
+@verify_required
+def confirm_strain_edits():
+    strain_val_dict = {'0': 'Not Validated', '1': 'Colony PCR',
+                       '2': 'Western Blot', '3': 'Sequencing',
+                       '4': 'Microscopy', '5': 'Other'}
+    new_record = Oligos.decode_oligo_dict(request.args.get('new_record'))
+    form = ConfirmOligoEditsForm()  # this is just 2 submit buttons
+    if new_record['validation']:
+        validation_str = ', '.join([strain_val_dict[v] for v in
+                                    new_record['validation'].split(',')])
+    else:
+        validation_str = 'None'
+    strain = Strain.query.filter_by(
+        VDY_number=new_record['VDY_number']).first()
+    if form.submit.data:
+        parent_strains = new_record.pop('parent_strain', '')
+        if parent_strains is not None:
+            parent_strains = PlasmidRelative.string_to_pVDs(parent_strains)
+            # first, check if records exist that match the listed parents, and
+            # if records exist for the same pVD that have other parents which
+            # need to be removed.
+            db_parents = StrainRelative.query.filter_by(
+                VDY_number=strain.VDY_number).all()
+            db_parent_list = [p.parent_strain for p in db_parents]
+            for d in db_parents:
+                # remove the ones that aren't in the list passed by the user
+                if d.parent_strain not in parent_strains:
+                    db.session.delete(d)
+            for p in parent_strains:
+                # add the ones that aren't already in the PlasmidRelative table
+                if p not in db_parent_list:
+                    new_parent = StrainRelative(VDY_number=strain.VDY_number,
+                                                parent_strain=p)
+                    db.session.add(new_parent)
+        db.session.commit()
+        genotypes = [g['genotype'] for g in new_record.pop('genotype_list') if
+                     g['genotype']]  # eliminates empty strings
+        db_genotypes = StrainGenotype.query.filter_by(
+            VDY_number=strain.VDY_number).all()
+        db_genotypes_list = [dg.locus_info for dg in db_genotypes]
+        for d in db_genotypes:
+            if d.locus_info not in genotypes:
+                db.session.delete(d)
+        for g in genotypes:
+            if g not in db_genotypes_list:
+                new_genotype = StrainGenotype(VDY_number=strain.VDY_number,
+                                              locus_info=g)
+                db.session.add(new_genotype)
+        db.session.commit()
+        strain.update_record(new_record)
+        flash('Your changes to VDY# %s were saved.'
+              % new_record['VDY_number'])
+        return redirect(url_for('strain_search_or_add'))
+    if form.go_back.data:
+        return redirect(url_for('edit_strain',
+                                VDY_number=new_record['VDY_number']))
+    for_template = record_to_dict(strain)
+    # update the record dict to include the new values from edits
+    for (key, value) in new_record.items():
+        for_template[key] = value
+    return render_template('strains/confirm_edits.html', form=form,
+                           record_dict=for_template, validation=validation_str
+                           )
+
+
+@app.route('/strains/confirm_new_strain', methods=['GET', 'POST'])
+@login_required
+@verify_required
+def confirm_new_strain():
+    strain_val_dict = {'0': 'Not Validated', '1': 'Colony PCR',
+                       '2': 'Western Blot', '3': 'Sequencing',
+                       '4': 'Microscopy', '5': 'Other'}
+    # convert IDs back to list
+    temp_id = int(request.args.get('temp_id'))
+    temp_genotypes = TempStrainGenotype.query.filter_by(
+        temp_strain_id=temp_id).all()
+    temp_genotype_list = [tg.locus_info for tg in temp_genotypes]
+    form = ConfirmNewOligos()  # this is just a submit button
+    record_dict = record_to_dict(
+        TempStrain.query.filter_by(temp_id=temp_id).first())
+    if record_dict['validation'] is not None:
+        validation_str = ', '.join(
+            [strain_val_dict[v] for v in
+             record_dict['validation'].split(',')])
+    if form.validate_on_submit():
+        new_strain = Strain.new_from_temp(temp_id)
+        return redirect(url_for('show_new_strain',
+                                new_strain=new_strain))
+    return render_template('strains/confirm_new_strain.html',
+                           record_dict=record_dict,
+                           validation=validation_str,
+                           genotypes=temp_genotype_list, form=form)
+
+
+@app.route('/strains/show_new_strain', methods=['GET'])
+@login_required
+@verify_required
+def show_new_strain():
+    strain_val_dict = {'0': 'Not Validated', '1': 'Colony PCR',
+                       '2': 'Western Blot', '3': 'Sequencing',
+                       '4': 'Microscopy', '5': 'Other'}
+    new_strain = request.args.get('new_strain')
+    new_record = Strain.query.filter_by(VDY_number=new_strain).first()
+    record_dict = record_to_dict(new_record)
+    if record_dict['validation'] is not None:
+        validation_str = ', '.join(
+            [strain_val_dict[v] for v in
+             record_dict['validation'].split(',')])
+    parent_strains = [p.parent_strain for p in StrainRelative.query.filter_by(
+        VDY_number=new_record.VDY_number).all()]
+    genotypes = StrainGenotype.query.filter_by(VDY_number=new_strain).all()
+    genotypes = [gt.locus_info for gt in genotypes]
+    return render_template('strains/complete.html', record_dict=record_dict,
+                           parent_strains=parent_strains, genotypes=genotypes,
+                           validation=validation_str)
+
+
+@app.route('/strains/download', methods=['GET'])
+@login_required
+@verify_required
+def download_strain_file():
+    VDY_number = request.args.get('VDY_number')
+    record = Strain.query.filter_by(VDY_number=VDY_number).first()
+    if app.config['USE_S3']:
+        f = download_file_from_s3(
+            record.image_filename, app.config['S3_BUCKET'],
+            app.config['UPLOAD_FOLDER'])
+        response = make_response(f['Body'].read())
+        response.headers['Content-Disposition'] = 'attachment;filename='+record.image_filename
+        response.headers['Content-Type'] = f['ContentType']
+        return response
+    else:
+        return send_from_directory(
+            app.config['UPLOAD_FOLDER'],
+            record.image_filename, as_attachment=True,
+            attachment_filename=record.image_filename)
 
 
 @app.before_request

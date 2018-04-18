@@ -50,18 +50,21 @@
                         <td class="col-sm-2" style="word-break: break-all; word-wrap:break-word;">{% if r['record']['other_names'] is not none %}
                                 {{ r['record']['other_names'] }}
                             {% endif %}</td>
-                        <td class="col-sm-2">{% if len(r['genotypes']) >= 1
+                        <td class="col-sm-1" style="word-break: break-all; word-wrap:break-word;">{% if r['genotypes']|length >= 1 %}
                                 {{ r['genotypes'][0] }}
                             {% endif %}</td>
-                        <td class="col-sm-2">{% if len(r['genotypes']) >= 2
+                        <td class="col-sm-1" style="word-break: break-all; word-wrap:break-word;">{% if r['genotypes']|length >= 2 %}
                                 {{ r['genotypes'][1] }}
                             {% endif %}</td>
-                        <td class="col-sm-2"><p>{% if len(r['genotypes']) >= 3
+                        <td class="col-sm-1" style="word-break: break-all; word-wrap:break-word;"><p>{% if r['genotypes']|length >= 3 %}
                                 {{ r['genotypes'][2] }}
                             {% endif %}</p></td>
-                        <td class="col-sm-1">
+                        <td class="sol-sm-2" style="word-break: break-all; word-wrap:break-word;"><p>{% if r['record']['notes'] is not none %}
+                            {{ r['record']['notes'] }}
+                            {% endif %}</td>
+                        <td class="col-sm-1" style="word-break: break-all; word-wrap:break-word;">
                             {% if r['record']['image_filename'] is not none %}
-                            <a href="{{ url_for('download_strain_file', VDY_number=r['record']['VDY_number'], type='data') }}">Data File</a>
+                            <a href="{{ url_for('download_strain_file', VDY_number=r['record']['VDY_number']) }}">Data File</a>
                             {% endif %}</td>
                     </tr>
                 {% endfor %}

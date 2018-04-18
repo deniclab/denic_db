@@ -535,9 +535,10 @@ class NewStrainForm(FlaskForm):
     new_genotype_list = FieldList(FormField(StrainGenotype), min_entries=10)
     validation = MultiCheckboxField(
         'Validation Method(s)',
-        choices=((0, 'Not Validated'), (1, 'Colony PCR'), (2, 'Western Blot'),
-                 (3, 'Sequencing'), (4, 'Microscopy'),
-                 (5, 'Other (see Notes)')),
+        choices=(('0', 'Not Validated'), ('1', 'Colony PCR'),
+                 ('2', 'Western Blot'), ('3', 'Sequencing'),
+                 ('4', 'Microscopy'),
+                 ('5', 'Other (see Notes)')),
         default=[0])
     data_file = FileField('Upload image with relevant data')
     new_submit = SubmitField('Add New Strain')
@@ -557,25 +558,26 @@ class NewStrainForm(FlaskForm):
             marker=self.new_marker.data,
             plasmid=self.new_plasmid.data,
             plasmid_selexn=self.new_plasmid_selexn.data,
-            validation=self.validation.data,
+            validation=','.join(self.validation.data),
             image_filename=data_fname,
             notes=self.new_notes.data,
             parent=self.parent_strain.data)
         db.session.add(new_record)
         db.session.commit()
         # add locus details from genotype fields to temp genotype table
-        for locus_ref, locus_data in self.genotype_list.data:
-            temp_gt = TempStrainGenotype(temp_strain_id=new_record.temp_id,
-                                         locus_info=locus_data)
-            db.session.add(temp_gt)
-            db.session.commit()
+        for locus in self.new_genotype_list.data:
+            if locus['genotype']:
+                temp_gt = TempStrainGenotype(temp_strain_id=new_record.temp_id,
+                                             locus_info=locus['genotype'])
+                db.session.add(temp_gt)
+        db.session.commit()
         return new_record.temp_id
 
 
 class EditStrainForm(FlaskForm):
     other_names = StringField('Other name(s)')
     origin = StringField('Lab of Origin')
-    creator = StringField('Creator')
+    creator_str = StringField('Creator')
     strain_background = StringField('Strain Background')
     notebook_ref = StringField('Notebook Reference')
     marker = StringField('Selectable Marker')
@@ -586,9 +588,10 @@ class EditStrainForm(FlaskForm):
     genotype_list = FieldList(FormField(StrainGenotype), min_entries=10)
     validation = MultiCheckboxField(
         'Validation Method(s)',
-        choices=((0, 'Not Validated'), (1, 'Colony PCR'), (2, 'Western Blot'),
-                 (3, 'Sequencing'), (4, 'Microscopy'),
-                 (5, 'Other (see Notes)')))
+        choices=(('0', 'Not Validated'), ('1', 'Colony PCR'),
+                 ('2', 'Western Blot'),
+                 ('3', 'Sequencing'), ('4', 'Microscopy'),
+                 ('5', 'Other (see Notes)')))
     data_file = FileField('Upload image with relevant data')
     download_data = SubmitField('Download Data File')
     submit = SubmitField('Submit')

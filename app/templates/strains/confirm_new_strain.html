@@ -3,15 +3,12 @@
 
 {% block app_content %}
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='plasmid_search.css') }}">
-<h1 style="text-align: center; color: #236ca1">New Strain Record Details</h1>
+<h1 style="text-align: center; color: #236ca1">Confirm New Strain</h1>
 <div class="container-fluid" style="padding-top: 25px;">
     <form action="" method="post">
+        {{ form.hidden_tag() }}
         <div class="form-group col-sm-12">
             <div class="row">
-                <div class="form-group col-sm-2">
-                    <label for="VDY_number">VDY Number</label>
-                    <input class="form-control" id="VDY_number" type="text" size=18 disabled value="{{ record_dict['VDY_number'] }}">
-                </div>
                 <div class="form-group col-sm-4">
                     <label for="other_names">Other Names</label>
                     <input class="form-control" id="other_names" type="text" size=18 disabled value="{{ record_dict['other_names'] }}">
@@ -19,10 +16,6 @@
                 <div class="form-group col-sm-2">
                     <label for="creator_str">Added By</label>
                     <input class="form-control" id="creator_str" type="text" size=18 disabled value="{{ record_dict['creator_str'] }}">
-                </div>
-                <div class="form-group col-sm-2">
-                    <label for="date_added">Date Added</label>
-                    <input class="form-control" id="date_added" type="text" size=18 disabled value="{{ record_dict['date_added'] }}">
                 </div>
             </div>
             <div class="row">
@@ -54,7 +47,7 @@
                 </div>
                 <div class='form-group col-sm-3'>
                     <label for="parent">Parent Strain(s)</label>
-                    <input class="form-control" id="parent" type="text" size=18 disabled value="{{ parent_strains }}">
+                    <input class="form-control" id="parent" type="text" size=18 disabled value="{{ record_dict['parent'] }}">
                 </div>
             </div>
             <div class="row">
@@ -94,6 +87,11 @@
                 <div class="form-group col-sm-12">
                     <label for="notes">Notes</label>
                     <input class="form-control" id="notes" type="text" size=18 disabled value="{{ record_dict['notes'] }}">
+                </div>
+            </div>
+            <div class="row">
+                <div class='form-group col-xs-4'>
+                    {{ form.submit(size=32, class="form-control",style="font-weight: bold; color: #236ca1;") }}
                 </div>
             </div>
         </div>
