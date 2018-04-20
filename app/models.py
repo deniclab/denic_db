@@ -348,6 +348,7 @@ class TempPlasmid(db.Model):
     vector_digest = db.Column(db.String(100))
     insert_digest = db.Column(db.String(100))
     backbone = db.Column(db.String(25))
+    parent = db.Column(db.String(100))
     insert_source = db.Column(db.String(50))
     copy_no_bacteria = db.Column(db.String(5))
     plasmid_type = db.Column(db.String(50))
