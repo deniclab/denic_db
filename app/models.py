@@ -465,7 +465,7 @@ class Strain(db.Model):
             VDY_sets = []
             for locus in genotypes:
                 VDY_sets.append(
-                    set(gt.VDY_number for gt in StrainGenotype.query.filter_by(
+                    set(gt.VDY_number for gt in StrainGenotype.query.filter(
                             StrainGenotype.locus_info.ilike(locus)).all()))
             if genotype_gate == 'OR':
                 locus_VDYs = set.union(*VDY_sets)  # get union of the searches

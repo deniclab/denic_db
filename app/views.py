@@ -794,6 +794,7 @@ def strain_search_or_add():
                     genotype=[entry.genotype.data for entry in
                               search_form.genotype_list.entries if
                               entry.genotype.data],
+                    genotype_gate=search_form.genotype_gate.data,
                     notes=search_form.notes.data,
                     parent_strain=search_form.parent.data,
                     plasmid=search_form.plasmid.data,

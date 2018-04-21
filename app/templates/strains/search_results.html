@@ -35,6 +35,8 @@
                     <th>Genotype 1</th>
                     <th>Genotype 2</th>
                     <th>Genotype 3</th>
+                    <th>Genotype 4</th>
+                    <th>Genotype 5</th>
                     <th>Notes</th>
                     <th>Data file</th>
                 </tr>
@@ -58,6 +60,12 @@
                             {% endif %}</td>
                         <td class="col-sm-1" style="word-break: break-all; word-wrap:break-word;"><p>{% if r['genotypes']|length >= 3 %}
                                 {{ r['genotypes'][2] }}
+                            {% endif %}</p></td>
+                        <td class="col-sm-1" style="word-break: break-all; word-wrap:break-word;">{% if r['genotypes']|length >= 3 %}
+                                {{ r['genotypes'][3] }}
+                            {% endif %}</td>
+                        <td class="col-sm-1" style="word-break: break-all; word-wrap:break-word;"><p>{% if r['genotypes']|length >= 4 %}
+                                {{ r['genotypes'][5] }}
                             {% endif %}</p></td>
                         <td class="sol-sm-2" style="word-break: break-all; word-wrap:break-word;"><p>{% if r['record']['notes'] is not none %}
                             {{ r['record']['notes'] }}
