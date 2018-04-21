@@ -1,5 +1,5 @@
 from app import app, db, login, forms
-from sqlalchemy import or_
+from sqlalchemy import or_, sql
 from datetime import datetime, date
 from time import time
 import jwt
@@ -412,6 +412,7 @@ class Strain(db.Model):
         gate = filter_dict.pop('gate')
         genotype_gate = filter_dict.pop('genotype_gate', None)
         gate = gate.strip('%')  # see views.mk_query and views._enc_value
+        genotype_gate = genotype_gate.strip('%')
         VDY_number = filter_dict.pop('VDY_number', None)
         # remove characters
         if VDY_number not in (None, '%'):
@@ -432,21 +433,30 @@ class Strain(db.Model):
         date_range_end = filter_dict.pop('end_date', date.today())
         # generate initial query which does not include VDY number filtering
         if gate == 'OR':
-            query_result = Strain.query.filter(or_(
-                *(getattr(Strain, key).ilike(value) for (key, value)
-                  in filter_dict.items())))
+            if filter_dict:
+                query_result = Strain.query.filter(or_(
+                    *(getattr(Strain, key).ilike(value) for (key, value)
+                      in filter_dict.items())))
+            else:
+                query_result = Strain.query.filter(sql.false())
             if use_parent:
                 query_result = query_result.union(
                     Strain.query.filter(Strain.VDY_number.in_(
                         VDYs_from_relatives)))
         else:
-            query_result = Strain.query.filter(
-                *(getattr(Strain, key).ilike(value) for (key, value)
-                  in filter_dict.items()))
-            if use_parent:
+            if filter_dict:
+                query_result = Strain.query.filter(
+                    *(getattr(Strain, key).ilike(value) for (key, value)
+                      in filter_dict.items()))
+            elif use_parent and filter_dict:
                 query_result = query_result.intersect(
                     Strain.query.filter(Strain.VDY_number.in_(
                         VDYs_from_relatives)))
+            elif use_parent and not filter_dict:
+                query_result = Strain.query.filter(Strain.VDY_number.in_(
+                    VDYs_from_relatives))
+            elif not filter_dict and not use_parent:
+                query_result = Strain.query.filter(sql.false())
         # add date range filtering to the query
         if date_range_start is not None:
             query_result = query_result.filter(
@@ -475,8 +485,12 @@ class Strain(db.Model):
                 query_result = query_result.union(Strain.query.filter(
                     Strain.VDY_number.in_(locus_VDYs)))
             elif gate == 'AND':
-                query_result = query_result.intersect(Strain.query.filter(
-                    Strain.VDY_number.in_(locus_VDYs)))
+                if use_parent or filter_dict:
+                    query_result = query_result.intersect(Strain.query.filter(
+                        Strain.VDY_number.in_(locus_VDYs)))
+                else:
+                    query_result = Strain.query.filter(
+                        Strain.VDY_number.in_(locus_VDYs))
         return query_result.all()
 
     @staticmethod

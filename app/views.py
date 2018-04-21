@@ -791,7 +791,7 @@ def strain_search_or_add():
                     strain_background=search_form.strain_background.data,
                     notebook_ref=search_form.notebook_ref.data,
                     marker=search_form.marker.data,
-                    genotype=[entry.genotype.data for entry in
+                    genotype=['%' + entry.genotype.data + '%' for entry in
                               search_form.genotype_list.entries if
                               entry.genotype.data],
                     genotype_gate=search_form.genotype_gate.data,
