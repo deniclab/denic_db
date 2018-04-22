@@ -107,7 +107,11 @@ class Oligos(db.Model):
         gate = gate.strip('%')  # see views.mk_query and views._enc_value
         oligo_tube = filter_dict.pop('oligo_tube', None)
         if oligo_tube is not None:
-            oligo_tube = re.findall('[0-9]+', oligo_tube)[0]
+            oligo_tube = re.findall('[0-9]+', oligo_tube)
+            if oligo_tube:
+                oligo_tube = oligo_tube[0]
+            else:
+                oligo_tube = None
         tube_range_end = filter_dict.pop('tube_range_end', None)
         if tube_range_end is not None:
             tube_range_end = re.findall('[0-9]+', tube_range_end)[0]

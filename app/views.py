@@ -849,7 +849,7 @@ def strain_search_results():
 
     n_records = str(len(record_list))
     if form.validate_on_submit():
-        return csv_response(record_list, 'strains')
+        return csv_response([r['record'] for r in record_list], 'strains')
     return render_template('strains/search_results.html',
                            title='Strain search results',
                            record_list=record_list,
