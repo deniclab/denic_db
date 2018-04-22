@@ -767,14 +767,15 @@ def strain_search_or_add():
             return redirect(url_for(
                 'strain_search_results',
                 filter_by=jwt.encode(
-                    {'gate': 'OR', 'VDY_number': '%'},
+                    {'gate': 'OR', 'genotype_gate': 'OR', 'VDY_number': '%'},
                     app.config['SECRET_KEY'],
                     algorithm='HS256').decode('utf-8')))
         if search_form.all_by_me.data:
             return redirect(url_for(
                 'strain_search_results',
                 filter_by=jwt.encode(
-                    {'gate': 'OR', 'creator_id': current_user.id},
+                    {'gate': 'OR', 'genotype_gate': 'OR',
+                     'creator_id': current_user.id},
                     app.config['SECRET_KEY'],
                     algorithm='HS256').decode('utf-8')))
         if search_form.submit.data:
