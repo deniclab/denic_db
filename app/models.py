@@ -494,7 +494,7 @@ class Strain(db.Model):
                 else:
                     query_result = Strain.query.filter(
                         Strain.VDY_number.in_(locus_VDYs))
-        return query_result.all()
+        return query_result.order_by(Strain.VDY_number).all()
 
     @staticmethod
     def new_from_temp(temp_id):
