@@ -409,6 +409,9 @@ class Strain(db.Model):
                 all other filters are applied first, and then the
                 results are filtered by the tube range.
         """
+        findall = filter_dict.pop('find_all', False)
+        if findall:
+            return Strain.query.filter_by().all()
         gate = filter_dict.pop('gate')
         genotype_gate = filter_dict.pop('genotype_gate', None)
         gate = gate.strip('%')  # see views.mk_query and views._enc_value
