@@ -462,18 +462,18 @@ class Strain(db.Model):
                 query_result = Strain.query.filter(sql.false())
         # add date range filtering to the query
         if date_range_start is not None:
-            query_result = query_result.filter(
+            query_result = query_result.union(Strain.query.filter(
                 (Strain.date_added >= date_range_start) &
-                (Strain.date_added <= date_range_end))
+                (Strain.date_added <= date_range_end)))
         # add oligo tube filtering to the query
         if VDY_number is not None:
             if VDY_range_end:
-                query_result = query_result.filter(
+                query_result = query_result.union(Strain.query.filter(
                     (Strain.VDY_number >= VDY_number.strip("%")) &
-                    (Strain.VDY_number <= VDY_range_end.strip("%")))
+                    (Strain.VDY_number <= VDY_range_end.strip("%"))))
             else:
-                query_result = query_result.filter(
-                    Strain.VDY_number.ilike(VDY_number))
+                query_result = query_result.union(Strain.query.filter(
+                    Strain.VDY_number.ilike(VDY_number)))
         if genotypes:
             VDY_sets = []
             for locus in genotypes:
