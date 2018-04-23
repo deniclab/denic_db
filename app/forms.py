@@ -554,6 +554,7 @@ class NewStrainForm(FlaskForm):
             creator_str=self.new_creator.data,
             other_names=self.new_other_names.data,
             strain_background=self.new_strain_background.data,
+            origin=self.new_origin.data,
             notebook_ref=self.new_notebook_ref.data,
             marker=self.new_marker.data,
             plasmid=self.new_plasmid.data,
