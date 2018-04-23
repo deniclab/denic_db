@@ -29,12 +29,12 @@ def strain_to_list(strain):
                        '2': 'Western Blot', '3': 'Sequencing',
                        '4': 'Microscopy', '5': 'Other'}
     strain_validation = strain.get('validation', '')
-    parents = '; '.join([p.parent_strain for p in
+    parents = '; '.join([str(p.parent_strain) for p in
                          StrainRelative.query.filter_by(
-                             VDY_number=str(strain.get('VDY_number'))).all()])
+                             VDY_number=strain.get('VDY_number')).all()])
     loci = '; '.join([locus.locus_info for locus in
                       StrainGenotype.query.filter_by(
-                          VDY_number=str(strain.get('VDY_number'))).all()])
+                          VDY_number=strain.get('VDY_number')).all()])
     if strain_validation:
         validation_str = '; '.join([strain_val_dict[v] for v in
                                     strain_validation.split(',')])
