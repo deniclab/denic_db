@@ -31,10 +31,10 @@ def strain_to_list(strain):
     strain_validation = strain.get('validation', '')
     parents = '; '.join([p.parent_strain for p in
                          StrainRelative.query.filter_by(
-                             VDY_number=strain.get('VDY_number')).all()])
+                             VDY_number=str(strain.get('VDY_number'))).all()])
     loci = '; '.join([locus.locus_info for locus in
                       StrainGenotype.query.filter_by(
-                          VDY_number=strain.get('VDY_number')).all()])
+                          VDY_number=str(strain.get('VDY_number'))).all()])
     if strain_validation:
         validation_str = '; '.join([strain_val_dict[v] for v in
                                     strain_validation.split(',')])
