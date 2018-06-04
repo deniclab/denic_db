@@ -266,6 +266,9 @@ def oligo_search_or_add():
     if add_init_form.submit_new.data:
         # first make sure there weren't multiple options used
         if add_init_form.input_type.data == 'table_input':
+            if add_init_form.number_oligos.data is None:
+                flash('You must indicate how many oligos you are adding.')
+                return redirect(url_for('oligo_search_or_add'))
             return redirect(url_for('oligo_add_form',
                                     n_oligos=add_init_form.number_oligos.data))
         elif add_init_form.input_type.data == 'file_input':
@@ -483,7 +486,7 @@ def plasmid_search_or_add():
                     plasmid_name=search_form.plasmid_name.data,
                     start_date=search_form.start_date.data,
                     end_date=search_form.end_date.data,
-                    description=search_form.description.data,
+                    simple_description=search_form.description.data,
                     creator_str=search_form.creator.data,
                     vector_digest=search_form.vector_digest.data,
                     insert_digest=search_form.insert_digest.data,

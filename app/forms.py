@@ -489,7 +489,7 @@ class EditPlasmidForm(FlaskForm):
 
 
 class StrainGenotype(Form):
-    genotype = StringField('Genotype', validators=[Length(max=50)])
+    genotype = StringField('Genotype', validators=[Length(max=200)])
 
 
 class SearchStrainsForm(FlaskForm):
